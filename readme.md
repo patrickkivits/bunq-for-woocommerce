@@ -1,6 +1,6 @@
-## bunq for WooCommerce
+# bunq for WooCommerce
 
-### Caution: This plugin is still under heavy development. Use it at your own risk.
+## Caution: This plugin is still under heavy development. Use it at your own risk.
 
 Contributors: patrickkivits\
 Donate link: https://bunq.me/patrickkivits \

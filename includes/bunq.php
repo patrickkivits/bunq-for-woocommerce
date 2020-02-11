@@ -84,7 +84,7 @@ function bunq_create_notification_filters($monetary_account_bank_id = null)
         new \bunq\Model\Generated\Object\NotificationFilterUrl('BUNQME_TAB', WC()->api_request_url('wc_bunq_gateway'))
     ];
 
-    \bunq\Model\Core\NotificationFilterUrlMonetaryAccountInternal::createWithListResponse($monetary_account_bank_id, $notification_filters);
-
     sleep(4); // Prevent rate-limit error with bunq API
+    
+    \bunq\Model\Core\NotificationFilterUrlMonetaryAccountInternal::createWithListResponse($monetary_account_bank_id, $notification_filters);
 }
