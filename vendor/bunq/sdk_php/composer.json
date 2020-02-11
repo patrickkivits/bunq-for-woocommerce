@@ -1,0 +1,63 @@
+{
+    "name": "bunq/sdk_php",
+    "description": "bunq PHP SDK",
+    "keywords": [
+        "open-banking",
+        "sepa",
+        "bunq",
+        "finance",
+        "api",
+        "payment"
+    ],
+    "homepage": "https://bunq.com/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "bunq",
+            "email": "sdk@bunq.com",
+            "homepage": "https://www.bunq.com",
+            "role": "Owner"
+        }
+    ],
+    "require": {
+        "php": "^7.0.13",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "~6"
+    },
+    "autoload": {
+        "psr-4": {
+            "bunq\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "bunq\\test\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "brianium/paratest": "^1.1",
+        "friendsofphp/php-cs-fixer": "^2.4",
+        "jakub-onderka/php-parallel-lint": "^0.9.2",
+        "phpro/grumphp": "^0.11.6",
+        "phpstan/phpstan": "^0.8",
+        "phpunit/phpunit": "^6.0.13",
+        "sebastian/phpcpd": "^3.0",
+        "sensiolabs/security-checker": "^5.0"
+    },
+    "bin": [
+        "bin/bunq-install"
+    ],
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "7.0.13"
+        }
+    },
+    "scripts": {
+        "phpstan": [
+            "./vendor/bin/phpstan analyse --level 2 src"
+        ]
+    }
+}

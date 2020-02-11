@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+use bunq\Util\BunqEnumApiEnvironmentType;
+use bunq\Util\InstallationUtil;
+use bunq\Exception\BunqException;
+
+$filenameAutoloadLocal = __DIR__ . '/../vendor/autoload.php';
+$filenameAutoloadVendor = __DIR__ . '/../../../autoload.php';
+
+if (file_exists($filenameAutoloadLocal)) {
+    require_once $filenameAutoloadLocal;
+} elseif (file_exists($filenameAutoloadVendor)) {
+    require_once $filenameAutoloadVendor;
+} else {
+    echo 'Missing autoload.php, run composer install.' . PHP_EOL;
+    exit(1);
+}
+
+$allOption = getopt('', ['environment:', 'config-file:', 'api-key:']);
+
+try {
+    if (empty($allOption)) {
+        InstallationUtil::interactiveInstall();
+    } else {
+        InstallationUtil::automaticInstall(
+            new BunqEnumApiEnvironmentType($allOption['environment']),
+            $allOption['config-file'],
+            $allOption['api-key'] ?? null
+        );
+    }
+} catch (BunqException $exception) {
+    echo sprintf(InstallationUtil::ERROR_BUNQ_EXCEPTION, $exception->getMessage());
+} catch (Exception $exception) {
+    echo sprintf(InstallationUtil::ERROR_EXCEPTION, $exception->getMessage());
+}

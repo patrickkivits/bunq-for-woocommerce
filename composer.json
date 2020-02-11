@@ -1,0 +1,5 @@
+{
+    "require": {
+        "bunq/sdk_php": "^1.12"
+    }
+}
