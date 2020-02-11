@@ -1,9 +1,9 @@
-#bunq for WooCommerce
+## bunq for WooCommerce
 
 ### Caution: This plugin is still under heavy development. Use it at your own risk.
 
 Contributors: patrickkivits\
-Donate link: https://bunq.me/patrickkivits\
+Donate link: https://bunq.me/patrickkivits \
 Tags: woocommerce, psp, payment gateway, bunq, ideal, credit card, sofort\
 Requires at least: 3.8\
 Tested up to: 5.3\
