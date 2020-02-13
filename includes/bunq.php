@@ -21,12 +21,15 @@ function bunq_create_api_context($apiKey, $testmode) {
 
 function bunq_load_api_context($apiContext) {
 
-    if(!$apiContext)
+    if($apiContext)
     {
-        return false;
+        try {
+            \bunq\Context\BunqContext::loadApiContext(\bunq\Context\ApiContext::fromJson($apiContext));
+        }
+        catch (Exception $exception){}
     }
 
-    \bunq\Context\BunqContext::loadApiContext(\bunq\Context\ApiContext::fromJson($apiContext));
+    return false;
 }
 
 function bunq_create_payment_request($amount, $currency, $description, $returnUrl, $monetary_account_bank_id = null)
@@ -44,23 +47,21 @@ function bunq_create_payment_request($amount, $currency, $description, $returnUr
 
 function bunq_get_bank_accounts($api_context)
 {
-    $bank_accounts = [];
+    $bank_accounts = ['' => 'API key not valid or not setup yet'];
 
     if($api_context){
-        sleep(4);
-        foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBank::listing()->getValue() as $monetaryAccountBank) {
-            foreach($monetaryAccountBank->getAlias() as $alias) {
-                if($monetaryAccountBank->getUserId() === \bunq\Context\BunqContext::getUserContext()->getUserId() && $alias->getType() === 'IBAN'){
-                    $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
+        try {
+            sleep(4);
+            $bank_accounts = ['' => 'Select a bank account'];
+            foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBank::listing()->getValue() as $monetaryAccountBank) {
+                foreach($monetaryAccountBank->getAlias() as $alias) {
+                    if($alias->getType() === 'IBAN'){
+                        $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
+                    }
                 }
             }
         }
-    }
-    else
-    {
-        $bank_accounts = [
-            '' => 'Please enter API key first'
-        ];
+        catch (Exception $exception) {}
     }
 
     return $bank_accounts;

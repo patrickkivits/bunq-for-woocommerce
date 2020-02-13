@@ -22,6 +22,10 @@ class ComposerStaticInit631b13ccd7c890d95819b40a853d06cf
         array (
             'Psr\\Http\\Message\\' => 17,
         ),
+        'L' => 
+        array (
+            'League\\OAuth2\\Client\\' => 21,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
@@ -38,6 +42,10 @@ class ComposerStaticInit631b13ccd7c890d95819b40a853d06cf
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'League\\OAuth2\\Client\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/oauth2-client/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

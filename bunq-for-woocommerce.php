@@ -14,6 +14,7 @@
  */
 
 require_once (__DIR__.'/vendor/autoload.php');
+require_once (__DIR__.'/includes/oauth2.php');
 require_once (__DIR__.'/includes/bunq.php');
 
 // Check for active WooCommerce install
@@ -40,6 +41,9 @@ function bunq_init_gateway_class() {
         var $testmode;
         var $monetary_account_bank_id;
         var $api_context;
+        var $oauth_client_id;
+        var $oauth_client_secret;
+        var $oauth_redirect_uri;
 
         public function __construct() {
             $this->id = 'bunq';
@@ -61,6 +65,9 @@ function bunq_init_gateway_class() {
             $this->enabled = $this->get_option( 'enabled' );
             $this->testmode = 'yes' === $this->get_option( 'testmode' );
             $this->api_key = $this->testmode ? $this->get_option( 'test_api_key' ) : $this->get_option( 'api_key' );
+            $this->oauth_client_id = $this->testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
+            $this->oauth_client_secret = $this->testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
+            $this->oauth_redirect_uri = $this->get_option( 'oauth_redirect_uri' );
             $this->api_context = $this->testmode ? $this->get_option( 'test_api_context' ) : $this->get_option( 'api_context' );
             $this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
 
@@ -69,33 +76,81 @@ function bunq_init_gateway_class() {
 
             // You can also register a webhook here
             add_action( 'woocommerce_api_wc_bunq_gateway', array( $this, 'bunq_callback' ) );
+
+            if(
+                isset($_GET['page']) && $_GET['page'] === 'wc-settings' &&
+                isset($_GET['tab']) && $_GET['tab'] === 'checkout' &&
+                isset($_GET['section']) && $_GET['section'] === 'bunq' &&
+                isset($_GET['code']) && $_GET['code']
+            )
+            {
+                $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $this->oauth_redirect_uri, $this->testmode);
+
+                $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
+
+                self::refresh_api_context();
+            }
         }
 
-        public function process_admin_options() {
-            parent::process_admin_options();
+        public function admin_options()
+        {
+            parent::admin_options();
+            self::init_settings();
 
+            $testmode = 'yes' === self::get_option( 'testmode' );
+            $oauth_client_id = $testmode ? self::get_option( 'test_oauth_client_id' ) : self::get_option( 'oauth_client_id' );
+            $oauth_client_secret = $testmode ? self::get_option( 'test_oauth_client_secret' ) : self::get_option( 'oauth_client_secret' );
+            $oauth_redirect_uri = self::get_option( 'oauth_redirect_uri' );
+
+            if($oauth_client_id && $oauth_client_secret)
+            {
+                $url = bunq_oauth2_get_authorization_url(
+                    $oauth_client_id,
+                    $oauth_client_secret,
+                    $oauth_redirect_uri,
+                    $testmode
+                );
+                echo '<a href="'.$url.'" class="button-secondary">OAuth Authorization Request</a>';
+            }
+        }
+
+        public function refresh_api_context()
+        {
             // Get saved testmode and api key
             $testmode = 'yes' === $this->settings['testmode'];
             $api_key = $testmode ? $this->settings['test_api_key'] : $this->settings['api_key'];
             $monetary_account_bank_id = $this->settings['monetary_account_bank_id'] > 0 ? intval($this->settings['monetary_account_bank_id']) : null;
 
             // Recreate API context after settings are saved
-            if($api_key)
-            {
-                $api_context = bunq_create_api_context($api_key, $testmode);
-                $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
-
-                // Setup callback URL for bunq (only on production)
-                if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
+            try {
+                if($api_key)
                 {
-                    bunq_create_notification_filters($monetary_account_bank_id);
+                    $api_context = bunq_create_api_context($api_key, $testmode);
+                    $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
+
+                    // Setup callback URL for bunq (only on production)
+                    if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
+                    {
+                        bunq_create_notification_filters($monetary_account_bank_id);
+                    }
                 }
-            }
+            } catch (Exception $exception) {}
+        }
+
+        public function process_admin_options() {
+            parent::process_admin_options();
+
+            self::refresh_api_context();
         }
 
         public function get_setting($key)
         {
             $this->init_settings();
+
+            if(!isset($this->settings['testmode']))
+            {
+                return null;
+            }
 
             $testmode = 'yes' === $this->settings['testmode'];
 
@@ -104,7 +159,17 @@ function bunq_init_gateway_class() {
                 $key = $testmode ? 'test_api_context' : 'api_context';
             }
 
-            return $this->settings[$key];
+            if($key === 'oauth_client_id')
+            {
+                $key = $testmode ? 'test_oauth_client_id' : 'oauth_client_id';
+            }
+
+            if($key === 'oauth_client_secret')
+            {
+                $key = $testmode ? 'test_oauth_client_secret' : 'oauth_client_secret';
+            }
+
+            return isset($this->settings[$key]) ? $this->settings[$key] : null;
         }
 
         /**
@@ -113,9 +178,13 @@ function bunq_init_gateway_class() {
         public function init_form_fields(){
 
             $api_context = $this->get_setting('api_context');
+            $default_redirect_uri = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
             // Load Bunq API context
-            bunq_load_api_context($api_context);
+            if($api_context)
+            {
+                bunq_load_api_context($api_context);
+            }
 
             $this->form_fields = array(
                 'enabled' => array(
@@ -152,7 +221,28 @@ function bunq_init_gateway_class() {
                 ),
                 'api_key' => array(
                     'title'       => 'Live API Key',
+                    'type'        => 'text',
+                ),
+                'test_oauth_client_id' => array(
+                    'title'       => 'Test OAuth Client ID',
+                    'type'        => 'text',
+                ),
+                'oauth_client_id' => array(
+                    'title'       => 'OAuth Client ID',
                     'type'        => 'text'
+                ),
+                'test_oauth_client_secret' => array(
+                    'title'       => 'Test OAuth Client Secret',
+                    'type'        => 'text',
+                ),
+                'oauth_client_secret' => array(
+                    'title'       => 'OAuth Client Secret',
+                    'type'        => 'text'
+                ),
+                'oauth_redirect_uri' => array(
+                    'title'       => 'OAuth Redirect URI',
+                    'type'        => 'text',
+                    'default'     => $default_redirect_uri,
                 ),
                 'monetary_account_bank_id' => array(
                     'title'       => 'Bank account',
@@ -162,13 +252,11 @@ function bunq_init_gateway_class() {
                 'api_context' => array(
                     'title'       => 'Live API Context',
                     'type'        => 'textarea',
-                    'disabled'    => true,
                     'css'         => 'height: 150px;'
                 ),
                 'test_api_context' => array(
                     'title'       => 'Test API Context',
                     'type'        => 'textarea',
-                    'disabled'    => true,
                     'css'         => 'height: 150px;'
                 ),
             );
