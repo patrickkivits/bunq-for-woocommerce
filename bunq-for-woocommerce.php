@@ -14,6 +14,7 @@
  */
 
 require_once (__DIR__.'/vendor/autoload.php');
+require_once (__DIR__.'/includes/helpers.php');
 require_once (__DIR__.'/includes/oauth2.php');
 require_once (__DIR__.'/includes/bunq.php');
 
@@ -43,7 +44,6 @@ function bunq_init_gateway_class() {
         var $api_context;
         var $oauth_client_id;
         var $oauth_client_secret;
-        var $oauth_redirect_uri;
 
         public function __construct() {
             $this->id = 'bunq';
@@ -67,7 +67,6 @@ function bunq_init_gateway_class() {
             $this->api_key = $this->testmode ? $this->get_option( 'test_api_key' ) : $this->get_option( 'api_key' );
             $this->oauth_client_id = $this->testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
             $this->oauth_client_secret = $this->testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
-            $this->oauth_redirect_uri = $this->get_option( 'oauth_redirect_uri' );
             $this->api_context = $this->testmode ? $this->get_option( 'test_api_context' ) : $this->get_option( 'api_context' );
             $this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
 
@@ -77,18 +76,26 @@ function bunq_init_gateway_class() {
             // You can also register a webhook here
             add_action( 'woocommerce_api_wc_bunq_gateway', array( $this, 'bunq_callback' ) );
 
-            if(
-                isset($_GET['page']) && $_GET['page'] === 'wc-settings' &&
-                isset($_GET['tab']) && $_GET['tab'] === 'checkout' &&
-                isset($_GET['section']) && $_GET['section'] === 'bunq' &&
-                isset($_GET['code']) && $_GET['code']
-            )
+            if(isset($_GET['code']) && $_GET['code'] && isset($_GET['state']) && $_GET['state'])
             {
-                $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $this->oauth_redirect_uri, $this->testmode);
+                $oauth_redirect_uri = bunq_helper_get_current_url();
+                $oauth_redirect_uri = bunq_helper_remove_url_parameter('code', $oauth_redirect_uri);
+                $oauth_redirect_uri = bunq_helper_remove_url_parameter('state', $oauth_redirect_uri);
+                $oauth_redirect_uri = substr($oauth_redirect_uri, 0, -2); // Remove double &&
+                
+                try {
+                    $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $oauth_redirect_uri, $this->testmode);
 
-                $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
+                    if($access_token)
+                    {
+                        $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
+                        self::refresh_api_context();
+                    }
+                }
+                catch (Exception $exception) {}
 
-                self::refresh_api_context();
+                header('Location: '.$oauth_redirect_uri);
+                exit;
             }
         }
 
@@ -100,7 +107,7 @@ function bunq_init_gateway_class() {
             $testmode = 'yes' === self::get_option( 'testmode' );
             $oauth_client_id = $testmode ? self::get_option( 'test_oauth_client_id' ) : self::get_option( 'oauth_client_id' );
             $oauth_client_secret = $testmode ? self::get_option( 'test_oauth_client_secret' ) : self::get_option( 'oauth_client_secret' );
-            $oauth_redirect_uri = self::get_option( 'oauth_redirect_uri' );
+            $oauth_redirect_uri = bunq_helper_get_current_url();
 
             if($oauth_client_id && $oauth_client_secret)
             {
@@ -178,7 +185,6 @@ function bunq_init_gateway_class() {
         public function init_form_fields(){
 
             $api_context = $this->get_setting('api_context');
-            $default_redirect_uri = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
             // Load Bunq API context
             if($api_context)
@@ -238,11 +244,6 @@ function bunq_init_gateway_class() {
                 'oauth_client_secret' => array(
                     'title'       => 'OAuth Client Secret',
                     'type'        => 'text'
-                ),
-                'oauth_redirect_uri' => array(
-                    'title'       => 'OAuth Redirect URI',
-                    'type'        => 'text',
-                    'default'     => $default_redirect_uri,
                 ),
                 'monetary_account_bank_id' => array(
                     'title'       => 'Bank account',
