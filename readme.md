@@ -12,7 +12,10 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Accept payments in your WooCommerce shop with just your bunq account.
 
-You only need a premium [bunq account](https://bunq.com/invite/patrickkivits) to use this plugin.
+## Requirements
+
+- [bunq premium account](https://bunq.com/invite/patrickkivits)
+- HTTPS/SSL (for callbacks/payment processing to work)
 
 ## Disclaimer
 
