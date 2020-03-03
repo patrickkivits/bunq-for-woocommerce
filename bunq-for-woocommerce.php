@@ -192,7 +192,7 @@ function bunq_init_gateway_class() {
             {
                 $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
 
-                if($new_api_context_json != $api_context_json)
+                if($new_api_context_json && $new_api_context_json != $api_context_json)
                 {
                     $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
                 }
@@ -276,7 +276,7 @@ function bunq_init_gateway_class() {
 
             $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
 
-            if($new_api_context_json != $api_context_json)
+            if($new_api_context_json && $new_api_context_json != $api_context_json)
             {
                 $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
             }
