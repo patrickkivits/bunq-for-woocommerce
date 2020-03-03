@@ -300,7 +300,7 @@ function bunq_init_gateway_class() {
 
             if(!$input)
             {
-                $input = $_REQUEST;
+                exit;
             }
 
             $obj = json_decode($input);
@@ -359,7 +359,7 @@ function bunq_init_gateway_class() {
                 }
             }
 
-            die();
+            exit;
         }
     }
 }
