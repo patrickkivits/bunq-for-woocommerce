@@ -1,6 +1,6 @@
 {
     "require": {
-        "bunq/sdk_php": "^1.12",
+        "bunq/sdk_php": "^1.13",
         "league/oauth2-client": "^2.4"
     }
 }

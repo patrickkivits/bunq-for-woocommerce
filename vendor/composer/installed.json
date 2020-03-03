@@ -1,17 +1,17 @@
 [
     {
         "name": "bunq/sdk_php",
-        "version": "1.12.1",
-        "version_normalized": "1.12.1.0",
+        "version": "1.13.0",
+        "version_normalized": "1.13.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/bunq/sdk_php.git",
-            "reference": "9f4ce9a3f1027936e2253bd75534a3e12fed55ae"
+            "reference": "7771fd0ab15402df1f06efba220847b7ee4ac861"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/bunq/sdk_php/zipball/9f4ce9a3f1027936e2253bd75534a3e12fed55ae",
-            "reference": "9f4ce9a3f1027936e2253bd75534a3e12fed55ae",
+            "url": "https://api.github.com/repos/bunq/sdk_php/zipball/7771fd0ab15402df1f06efba220847b7ee4ac861",
+            "reference": "7771fd0ab15402df1f06efba220847b7ee4ac861",
             "shasum": ""
         },
         "require": {
@@ -31,7 +31,7 @@
             "sebastian/phpcpd": "^3.0",
             "sensiolabs/security-checker": "^5.0"
         },
-        "time": "2019-09-16T07:15:00+00:00",
+        "time": "2020-02-19T10:34:14+00:00",
         "bin": [
             "bin/bunq-install"
         ],
