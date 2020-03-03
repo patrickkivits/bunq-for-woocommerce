@@ -14,17 +14,21 @@ function bunq_create_api_context($apiKey, $testmode) {
         'bunq for WooCommerce'
     );
 
-    bunq_load_api_context($apiContext->toJson());
+    bunq_load_api_context_from_json($apiContext->toJson());
 
     return $apiContext;
 }
 
-function bunq_load_api_context($apiContext) {
+function bunq_load_api_context_from_json($json) {
 
-    if($apiContext)
+    if($json)
     {
         try {
-            \bunq\Context\BunqContext::loadApiContext(\bunq\Context\ApiContext::fromJson($apiContext));
+            $apiContext = \bunq\Context\ApiContext::fromJson($json);
+            $apiContext->ensureSessionActive();
+            \bunq\Context\BunqContext::loadApiContext($apiContext);
+
+            return $apiContext->toJson();
         }
         catch (Exception $exception){}
     }

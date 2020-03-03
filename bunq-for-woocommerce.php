@@ -184,12 +184,18 @@ function bunq_init_gateway_class() {
          */
         public function init_form_fields(){
 
-            $api_context = $this->get_setting('api_context');
+            $testmode = $this->get_setting('test_mode');
+            $api_context_json = $this->get_setting('api_context');
 
             // Load Bunq API context
-            if($api_context)
+            if($api_context_json)
             {
-                bunq_load_api_context($api_context);
+                $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
+
+                if($new_api_context_json != $api_context_json)
+                {
+                    $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
+                }
             }
 
             $this->form_fields = array(
@@ -248,7 +254,7 @@ function bunq_init_gateway_class() {
                 'monetary_account_bank_id' => array(
                     'title'       => 'Bank account',
                     'type'        => 'select',
-                    'options'     => bunq_get_bank_accounts($api_context)
+                    'options'     => bunq_get_bank_accounts($api_context_json)
                 ),
                 'api_context' => array(
                     'title'       => 'Live API Context',
@@ -265,8 +271,15 @@ function bunq_init_gateway_class() {
 
         public function process_payment( $order_id ) {
 
-            $api_context = $this->get_setting('api_context');
-            bunq_load_api_context($api_context);
+            $testmode = $this->get_setting('test_mode');
+            $api_context_json = $this->get_setting('api_context');
+
+            $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
+
+            if($new_api_context_json != $api_context_json)
+            {
+                $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
+            }
 
             $order = wc_get_order( $order_id );
             $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
