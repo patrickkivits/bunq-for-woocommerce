@@ -334,6 +334,11 @@ function bunq_init_gateway_class() {
             // Set order
             $order = $orders[0];
 
+            if(!$order->needs_payment())
+            {
+                exit;
+            }
+
             // Check payment
             $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
             $payment_request = bunq_get_payment_request($payment_request_id, $monetary_account_bank_id);
