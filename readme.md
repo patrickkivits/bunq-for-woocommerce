@@ -37,7 +37,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 
 <img width="629" src="https://user-images.githubusercontent.com/727174/92740458-0d224500-f37e-11ea-8e6a-cb896762f0fc.png">
 
-6. Scan the QR code with the bunq app to select the bank accounts to want to access.
+6. Scan the QR code with the bunq app to select the bank accounts you want to access.
 
 <img width="100%" src="https://user-images.githubusercontent.com/727174/92741238-afdac380-f37e-11ea-95bd-9d5f93fabbf9.jpg">
 
