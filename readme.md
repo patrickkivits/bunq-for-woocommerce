@@ -20,8 +20,8 @@ Accept payments in your WooCommerce shop with just your bunq account.
 ## Installation
 
 1. Download the [latest zip](https://github.com/patrickkivits/bunq-for-woocommerce/archive/master.zip) of this repository.
-2. In your WordPress admin panel, navigate to **Plugins** > **Add New**
-3. Click Upload Plugin
+2. In your WordPress admin panel, navigate to **Plugins** > **Add New**.
+3. Click Upload Plugin.
 4. Upload the zip file that you downloaded.
 
 ## Configuration
