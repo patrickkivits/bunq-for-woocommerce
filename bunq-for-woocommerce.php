@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 0.0.2
+ * Version: 0.0.3
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -89,7 +89,7 @@ function bunq_init_gateway_class() {
                     if($access_token)
                     {
                         $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
-                        self::refresh_api_context();
+                        $this->refresh_api_context();
                     }
                 }
                 catch (Exception $exception) {}
@@ -102,11 +102,11 @@ function bunq_init_gateway_class() {
         public function admin_options()
         {
             parent::admin_options();
-            self::init_settings();
+            $this->init_settings();
 
-            $testmode = 'yes' === self::get_option( 'testmode' );
-            $oauth_client_id = $testmode ? self::get_option( 'test_oauth_client_id' ) : self::get_option( 'oauth_client_id' );
-            $oauth_client_secret = $testmode ? self::get_option( 'test_oauth_client_secret' ) : self::get_option( 'oauth_client_secret' );
+            $testmode = 'yes' === $this->get_option( 'testmode' );
+            $oauth_client_id = $testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
+            $oauth_client_secret = $testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
             $oauth_redirect_uri = bunq_helper_get_current_url();
 
             if($oauth_client_id && $oauth_client_secret)
@@ -135,7 +135,7 @@ function bunq_init_gateway_class() {
                     $api_context = bunq_create_api_context($api_key, $testmode);
                     $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
 
-                    // Setup callback URL for bunq (only on production)
+                    // Setup callback URL for bunq (not for local environment)
                     if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
                     {
                         bunq_create_notification_filters($monetary_account_bank_id);
@@ -147,7 +147,14 @@ function bunq_init_gateway_class() {
         public function process_admin_options() {
             parent::process_admin_options();
 
-            self::refresh_api_context();
+            // Reset readonly options based on OAuth Client ID and OAuth Client Secret
+            $testmode = 'yes' === $this->settings['testmode'];
+            if(!$this->get_setting('oauth_client_id') || !$this->get_setting('oauth_client_secret')) {
+                $this->update_option(($testmode ? 'test_api_context' : 'api_context'), '');
+                $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), '');
+            }
+
+            $this->refresh_api_context();
         }
 
         public function get_setting($key)
@@ -179,9 +186,6 @@ function bunq_init_gateway_class() {
             return isset($this->settings[$key]) ? $this->settings[$key] : null;
         }
 
-        /**
-         * Plugin options, we deal with it in Step 3 too
-         */
         public function init_form_fields(){
 
             $testmode = $this->get_setting('test_mode');
@@ -219,6 +223,30 @@ function bunq_init_gateway_class() {
                     'description' => 'This controls the description which the user sees during checkout.',
                     'default'     => 'Pay with iDEAL, Credit Card or Sofort',
                 ),
+                'monetary_account_bank_id' => array(
+                    'title'       => 'Bank account',
+                    'type'        => 'select',
+                    'options'     => bunq_get_bank_accounts($api_context_json)
+                ),
+                'oauth_client_id' => array(
+                    'title'       => 'OAuth Client ID',
+                    'type'        => 'text'
+                ),
+                'oauth_client_secret' => array(
+                    'title'       => 'OAuth Client Secret',
+                    'type'        => 'text'
+                ),
+                'api_key' => array(
+                    'title'       => 'Live API Key',
+                    'type'        => 'text',
+                    'custom_attributes' => array('readonly' => 'readonly')
+                ),
+                'api_context' => array(
+                    'title'       => 'Live API Context',
+                    'type'        => 'textarea',
+                    'css'         => 'height: 150px;',
+                    'custom_attributes' => array('readonly' => 'readonly')
+                ),
                 'testmode' => array(
                     'title'       => 'Test mode',
                     'label'       => 'Enable Test Mode',
@@ -227,44 +255,24 @@ function bunq_init_gateway_class() {
                     'default'     => 'yes',
                     'desc_tip'    => true,
                 ),
-                'test_api_key' => array(
-                    'title'       => 'Test API Key',
-                    'type'        => 'text',
-                ),
-                'api_key' => array(
-                    'title'       => 'Live API Key',
-                    'type'        => 'text',
-                ),
                 'test_oauth_client_id' => array(
                     'title'       => 'Test OAuth Client ID',
                     'type'        => 'text',
-                ),
-                'oauth_client_id' => array(
-                    'title'       => 'OAuth Client ID',
-                    'type'        => 'text'
                 ),
                 'test_oauth_client_secret' => array(
                     'title'       => 'Test OAuth Client Secret',
                     'type'        => 'text',
                 ),
-                'oauth_client_secret' => array(
-                    'title'       => 'OAuth Client Secret',
-                    'type'        => 'text'
-                ),
-                'monetary_account_bank_id' => array(
-                    'title'       => 'Bank account',
-                    'type'        => 'select',
-                    'options'     => bunq_get_bank_accounts($api_context_json)
-                ),
-                'api_context' => array(
-                    'title'       => 'Live API Context',
-                    'type'        => 'textarea',
-                    'css'         => 'height: 150px;'
+                'test_api_key' => array(
+                    'title'       => 'Test API Key',
+                    'type'        => 'text',
+                    'custom_attributes' => array('readonly' => 'readonly')
                 ),
                 'test_api_context' => array(
                     'title'       => 'Test API Context',
                     'type'        => 'textarea',
-                    'css'         => 'height: 150px;'
+                    'css'         => 'height: 150px;',
+                    'custom_attributes' => array('readonly' => 'readonly')
                 ),
             );
         }

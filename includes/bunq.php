@@ -1,6 +1,6 @@
 <?php
 
-function bunq_enviroment($testmode) {
+function bunq_environment($testmode) {
     return $testmode ? \bunq\Util\BunqEnumApiEnvironmentType::SANDBOX() : \bunq\Util\BunqEnumApiEnvironmentType::PRODUCTION();
 }
 
@@ -9,7 +9,7 @@ function bunq_create_api_context($apiKey, $testmode) {
     sleep(4); // Prevent rate-limit error with bunq API
 
     $apiContext = \bunq\Context\ApiContext::create(
-        bunq_enviroment($testmode),
+        bunq_environment($testmode),
         $apiKey,
         'bunq for WooCommerce'
     );

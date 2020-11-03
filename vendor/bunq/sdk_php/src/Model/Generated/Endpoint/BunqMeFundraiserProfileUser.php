@@ -44,6 +44,13 @@ class BunqMeFundraiserProfileUser extends BunqModel
     protected $monetaryAccountId;
 
     /**
+     * Id of the user owning the profile.
+     *
+     * @var int
+     */
+    protected $ownerUserId;
+
+    /**
      * The color chosen for the bunq.me fundraiser profile in hexadecimal
      * format.
      *
@@ -252,11 +259,31 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMonetaryAccountId($monetaryAccountId)
     {
         $this->monetaryAccountId = $monetaryAccountId;
+    }
+
+    /**
+     * Id of the user owning the profile.
+     *
+     * @return int
+     */
+    public function getOwnerUserId()
+    {
+        return $this->ownerUserId;
+    }
+
+    /**
+     * @param int $ownerUserId
+     *
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     */
+    public function setOwnerUserId($ownerUserId)
+    {
+        $this->ownerUserId = $ownerUserId;
     }
 
     /**
@@ -275,7 +302,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setColor($color)
     {
@@ -298,7 +324,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAlias($alias)
     {
@@ -320,7 +345,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setDescription($description)
     {
@@ -342,7 +366,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAttachment($attachment)
     {
@@ -365,7 +388,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setPointer($pointer)
     {
@@ -387,7 +409,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setRedirectUrl($redirectUrl)
     {
@@ -410,7 +431,6 @@ class BunqMeFundraiserProfileUser extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setStatus($status)
     {
@@ -423,6 +443,10 @@ class BunqMeFundraiserProfileUser extends BunqModel
     public function isAllFieldNull()
     {
         if (!is_null($this->monetaryAccountId)) {
+            return false;
+        }
+
+        if (!is_null($this->ownerUserId)) {
             return false;
         }
 

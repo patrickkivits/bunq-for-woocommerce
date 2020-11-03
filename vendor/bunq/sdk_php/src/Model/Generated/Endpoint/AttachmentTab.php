@@ -69,12 +69,16 @@ class AttachmentTab extends BunqModel
      * X-Bunq-Attachment-Description header.
      *
      * @param string $requestBytes
+     * @param int|null $monetaryAccountId
      * @param string[] $customHeaders
      *
      * @return BunqResponseInt
      */
-    public static function create(string $requestBytes, array $customHeaders = []): BunqResponseInt
-    {
+    public static function create(
+        string $requestBytes,
+        int $monetaryAccountId = null,
+        array $customHeaders = []
+    ): BunqResponseInt {
         $apiClient = new ApiClient(static::getApiContext());
         $apiClient->enableBinary();
         $responseRaw = $apiClient->post(
@@ -136,7 +140,6 @@ class AttachmentTab extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setId($id)
     {
@@ -158,7 +161,6 @@ class AttachmentTab extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setCreated($created)
     {
@@ -180,7 +182,6 @@ class AttachmentTab extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setUpdated($updated)
     {
@@ -202,7 +203,6 @@ class AttachmentTab extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAttachment($attachment)
     {

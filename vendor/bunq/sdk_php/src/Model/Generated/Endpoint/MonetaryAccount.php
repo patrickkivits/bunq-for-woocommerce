@@ -1,7 +1,7 @@
 <?php
 namespace bunq\Model\Generated\Endpoint;
 
-use bunq\exception\BunqException;
+use bunq\Exception\BunqException;
 use bunq\Http\ApiClient;
 use bunq\Model\Core\AnchorObjectInterface;
 use bunq\Model\Core\BunqModel;
@@ -80,7 +80,6 @@ class MonetaryAccount extends BunqModel implements AnchorObjectInterface
 
     /**
      * Get a collection of all your MonetaryAccounts.
-     *
      * This method is called "listing" because "list" is a restricted PHP word
      * and cannot be used as constants, class names, function or method names.
      *
@@ -119,7 +118,6 @@ class MonetaryAccount extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMonetaryAccountBank($monetaryAccountBank)
     {
@@ -139,7 +137,6 @@ class MonetaryAccount extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMonetaryAccountJoint($monetaryAccountJoint)
     {
@@ -159,7 +156,6 @@ class MonetaryAccount extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMonetaryAccountLight($monetaryAccountLight)
     {
@@ -179,7 +175,6 @@ class MonetaryAccount extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMonetaryAccountSavings($monetaryAccountSavings)
     {

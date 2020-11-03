@@ -3,6 +3,7 @@ namespace bunq\Model\Generated\Endpoint;
 
 use bunq\Http\ApiClient;
 use bunq\Model\Core\BunqModel;
+use bunq\Model\Generated\Object\LabelUser;
 
 /**
  * See how many trees this user has planted.
@@ -34,6 +35,13 @@ class TreeProgress extends BunqModel
      * @var float
      */
     protected $progressTreeNext;
+
+    /**
+     * The label of the user the progress belongs to.
+     *
+     * @var LabelUser
+     */
+    protected $labelUser;
 
     /**
      * This method is called "listing" because "list" is a restricted PHP word
@@ -76,7 +84,6 @@ class TreeProgress extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setNumberOfTree($numberOfTree)
     {
@@ -98,11 +105,31 @@ class TreeProgress extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setProgressTreeNext($progressTreeNext)
     {
         $this->progressTreeNext = $progressTreeNext;
+    }
+
+    /**
+     * The label of the user the progress belongs to.
+     *
+     * @return LabelUser
+     */
+    public function getLabelUser()
+    {
+        return $this->labelUser;
+    }
+
+    /**
+     * @param LabelUser $labelUser
+     *
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     */
+    public function setLabelUser($labelUser)
+    {
+        $this->labelUser = $labelUser;
     }
 
     /**
@@ -115,6 +142,10 @@ class TreeProgress extends BunqModel
         }
 
         if (!is_null($this->progressTreeNext)) {
+            return false;
+        }
+
+        if (!is_null($this->labelUser)) {
             return false;
         }
 

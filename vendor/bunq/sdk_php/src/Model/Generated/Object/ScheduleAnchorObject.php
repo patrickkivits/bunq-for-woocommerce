@@ -1,7 +1,7 @@
 <?php
 namespace bunq\Model\Generated\Object;
 
-use bunq\exception\BunqException;
+use bunq\Exception\BunqException;
 use bunq\Model\Core\AnchorObjectInterface;
 use bunq\Model\Core\BunqModel;
 use bunq\Model\Generated\Endpoint\Payment;
@@ -40,7 +40,6 @@ class ScheduleAnchorObject extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setPayment($payment)
     {
@@ -60,7 +59,6 @@ class ScheduleAnchorObject extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setPaymentBatch($paymentBatch)
     {

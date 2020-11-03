@@ -210,13 +210,6 @@ class Payment extends BunqModel
     protected $geolocation;
 
     /**
-     * Whether or not chat messages are allowed.
-     *
-     * @var bool
-     */
-    protected $allowChat;
-
-    /**
      * The reference to the object used for split the bill. Can be
      * RequestInquiry or RequestInquiryBatch
      *
@@ -400,7 +393,6 @@ class Payment extends BunqModel
     /**
      * Get a listing of all Payments performed on a given MonetaryAccount
      * (incoming and outgoing).
-     *
      * This method is called "listing" because "list" is a restricted PHP word
      * and cannot be used as constants, class names, function or method names.
      *
@@ -445,7 +437,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setId($id)
     {
@@ -467,7 +458,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setCreated($created)
     {
@@ -490,7 +480,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setUpdated($updated)
     {
@@ -513,7 +502,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMonetaryAccountId($monetaryAccountId)
     {
@@ -537,7 +525,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAmount($amount)
     {
@@ -560,7 +547,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAlias($alias)
     {
@@ -583,7 +569,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setCounterpartyAlias($counterpartyAlias)
     {
@@ -607,7 +592,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setDescription($description)
     {
@@ -630,7 +614,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setType($type)
     {
@@ -653,7 +636,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setSubType($subType)
     {
@@ -675,7 +657,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBunqtoStatus($bunqtoStatus)
     {
@@ -697,7 +678,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBunqtoSubStatus($bunqtoSubStatus)
     {
@@ -719,7 +699,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBunqtoShareUrl($bunqtoShareUrl)
     {
@@ -741,7 +720,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBunqtoExpiry($bunqtoExpiry)
     {
@@ -763,7 +741,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBunqtoTimeResponded($bunqtoTimeResponded)
     {
@@ -785,7 +762,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAttachment($attachment)
     {
@@ -807,7 +783,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setMerchantReference($merchantReference)
     {
@@ -829,7 +804,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBatchId($batchId)
     {
@@ -851,7 +825,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setScheduledId($scheduledId)
     {
@@ -873,7 +846,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAddressShipping($addressShipping)
     {
@@ -895,7 +867,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setAddressBilling($addressBilling)
     {
@@ -917,33 +888,10 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setGeolocation($geolocation)
     {
         $this->geolocation = $geolocation;
-    }
-
-    /**
-     * Whether or not chat messages are allowed.
-     *
-     * @return bool
-     */
-    public function getAllowChat()
-    {
-        return $this->allowChat;
-    }
-
-    /**
-     * @param bool $allowChat
-     *
-     * @deprecated User should not be able to set values via setters, use
-     * constructor.
-     *
-     */
-    public function setAllowChat($allowChat)
-    {
-        $this->allowChat = $allowChat;
     }
 
     /**
@@ -962,7 +910,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setRequestReferenceSplitTheBill($requestReferenceSplitTheBill)
     {
@@ -984,7 +931,6 @@ class Payment extends BunqModel
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setBalanceAfterMutation($balanceAfterMutation)
     {
@@ -1081,10 +1027,6 @@ class Payment extends BunqModel
         }
 
         if (!is_null($this->geolocation)) {
-            return false;
-        }
-
-        if (!is_null($this->allowChat)) {
             return false;
         }
 

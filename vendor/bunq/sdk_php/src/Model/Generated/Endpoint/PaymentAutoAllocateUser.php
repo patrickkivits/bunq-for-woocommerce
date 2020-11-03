@@ -1,7 +1,7 @@
 <?php
 namespace bunq\Model\Generated\Endpoint;
 
-use bunq\exception\BunqException;
+use bunq\Exception\BunqException;
 use bunq\Http\ApiClient;
 use bunq\Model\Core\AnchorObjectInterface;
 use bunq\Model\Core\BunqModel;
@@ -74,7 +74,6 @@ class PaymentAutoAllocateUser extends BunqModel implements AnchorObjectInterface
      *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
-     *
      */
     public function setPaymentAutoAllocate($paymentAutoAllocate)
     {
