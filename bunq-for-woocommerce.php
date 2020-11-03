@@ -148,10 +148,16 @@ function bunq_init_gateway_class() {
             parent::process_admin_options();
 
             // Reset readonly options based on OAuth Client ID and OAuth Client Secret
-            $testmode = 'yes' === $this->settings['testmode'];
-            if(!$this->get_setting('oauth_client_id') || !$this->get_setting('oauth_client_secret')) {
-                $this->update_option(($testmode ? 'test_api_context' : 'api_context'), '');
-                $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), '');
+            if(!$this->settings['test_oauth_client_id'] || !$this->settings['test_oauth_client_secret'])
+            {
+                $this->update_option('test_api_context', '');
+                $this->update_option('test_api_key', '');
+            }
+
+            if(!$this->settings['oauth_client_id'] || !$this->settings['oauth_client_secret'])
+            {
+                $this->update_option('api_context', '');
+                $this->update_option('api_key', '');
             }
 
             $this->refresh_api_context();
