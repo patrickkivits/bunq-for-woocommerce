@@ -6,11 +6,11 @@
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
- * Tested up to: 5.3
+ * Tested up to: 5.5
  * Text Domain: bunq-for-woocommerce
  * License: GPLv2 or later
  * WC requires at least: 2.2.0
- * WC tested up to: 3.8
+ * WC tested up to: 4.6
  */
 
 require_once (__DIR__.'/vendor/autoload.php');
