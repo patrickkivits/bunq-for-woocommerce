@@ -160,6 +160,8 @@ function bunq_init_gateway_class() {
                 $this->update_option('api_key', '');
             }
 
+            delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
+
             $this->refresh_api_context();
         }
 

@@ -55,17 +55,23 @@ function bunq_get_bank_accounts($api_context)
 
     if($api_context){
         try {
-            sleep(4);
-            $bank_accounts = ['' => 'Select a bank account'];
-            foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBank::listing()->getValue() as $monetaryAccountBank) {
-                foreach($monetaryAccountBank->getAlias() as $alias) {
-                    if($alias->getType() === 'IBAN'){
-                        $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
+            $transient = 'wc_bunq_gateway.bunq_get_bank_accounts';
+            if ( false === ($bank_accounts = get_transient($transient))) {
+                $bank_accounts = ['' => 'Select a bank account'];
+                sleep(4);
+                foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBank::listing()->getValue() as $monetaryAccountBank) {
+                    foreach($monetaryAccountBank->getAlias() as $alias) {
+                        if($alias->getType() === 'IBAN'){
+                            $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
+                        }
                     }
                 }
+                set_transient($transient, $bank_accounts);
             }
         }
-        catch (Exception $exception) {}
+        catch (Exception $exception) {
+            $bank_accounts = ['' => 'Error: '.$exception->getMessage()];
+        }
     }
 
     return $bank_accounts;
