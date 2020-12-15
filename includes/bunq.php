@@ -32,7 +32,9 @@ function bunq_load_api_context_from_json($json) {
             return $apiContext->toJson();
         }
         catch (Exception $exception){
-            error_log($exception->getMessage());
+            if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
+                error_log($exception->getMessage());
+            }
         }
     }
 
@@ -73,7 +75,9 @@ function bunq_get_bank_accounts($api_context)
             }
         }
         catch (Exception $exception) {
-            error_log($exception->getMessage());
+            if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
+                error_log($exception->getMessage());
+            }
             $bank_accounts = ['' => 'Error: '.$exception->getMessage()];
         }
     }

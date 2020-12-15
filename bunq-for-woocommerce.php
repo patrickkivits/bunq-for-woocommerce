@@ -95,7 +95,9 @@ function bunq_init_gateway_class() {
                     }
                 }
                 catch (Exception $exception) {
-                    error_log($exception->getMessage());
+                    if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
+                        error_log($exception->getMessage());
+                    }
                 }
 
                 header('Location: '.$oauth_redirect_uri);
@@ -147,7 +149,9 @@ function bunq_init_gateway_class() {
                     }
                 }
             } catch (Exception $exception) {
-                error_log($exception->getMessage());
+                if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
+                    error_log($exception->getMessage());
+                }
             }
         }
 
