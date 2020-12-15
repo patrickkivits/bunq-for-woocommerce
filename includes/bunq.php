@@ -31,7 +31,9 @@ function bunq_load_api_context_from_json($json) {
 
             return $apiContext->toJson();
         }
-        catch (Exception $exception){}
+        catch (Exception $exception){
+            error_log($exception->getMessage());
+        }
     }
 
     return false;
@@ -71,6 +73,7 @@ function bunq_get_bank_accounts($api_context)
             }
         }
         catch (Exception $exception) {
+            error_log($exception->getMessage());
             $bank_accounts = ['' => 'Error: '.$exception->getMessage()];
         }
     }

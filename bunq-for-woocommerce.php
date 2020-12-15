@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 0.0.6
+ * Version: 0.0.7
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -94,7 +94,9 @@ function bunq_init_gateway_class() {
                         $this->refresh_api_context();
                     }
                 }
-                catch (Exception $exception) {}
+                catch (Exception $exception) {
+                    error_log($exception->getMessage());
+                }
 
                 header('Location: '.$oauth_redirect_uri);
                 exit;
@@ -144,7 +146,9 @@ function bunq_init_gateway_class() {
                         bunq_create_notification_filters($monetary_account_bank_id);
                     }
                 }
-            } catch (Exception $exception) {}
+            } catch (Exception $exception) {
+                error_log($exception->getMessage());
+            }
         }
 
         public function process_admin_options() {
