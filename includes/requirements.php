@@ -27,6 +27,13 @@ function bunq_requirements_check() {
         }
     }
 
+    // Test bunq creating key pair
+    try {
+        \bunq\Security\KeyPair::generate();
+    } catch (Exception $exception) {
+        return false;
+    }
+
     return true;
 }
 
