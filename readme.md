@@ -18,7 +18,7 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 - [bunq premium account](https://bunq.com/invite/patrickkivits)
 - HTTPS/SSL certificate (for callbacks/payment processing to work)
-- [OpenSSL](https://www.php.net/manual/en/ref.openssl.php)
+- [OpenSSL](https://www.php.net/manual/en/book.openssl.php)
 - PHP extensions: ext-curl, ext-json, ext-mbstring
 
 ## Installation
