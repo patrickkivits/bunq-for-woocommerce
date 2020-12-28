@@ -13,6 +13,10 @@
  * WC tested up to: 4.6
  */
 
+require_once (__DIR__.'/vendor/autoload.php');
+require_once (__DIR__.'/includes/helpers.php');
+require_once (__DIR__.'/includes/oauth2.php');
+require_once (__DIR__.'/includes/bunq.php');
 require_once (__DIR__.'/includes/requirements.php');
 
 if ( ! bunq_requirements_check() ) {
@@ -20,11 +24,6 @@ if ( ! bunq_requirements_check() ) {
     add_action( 'admin_notices', 'bunq_requirements_show_notice' );
     return;
 }
-
-require_once (__DIR__.'/vendor/autoload.php');
-require_once (__DIR__.'/includes/helpers.php');
-require_once (__DIR__.'/includes/oauth2.php');
-require_once (__DIR__.'/includes/bunq.php');
 
 /*
  * This action hook registers our PHP class as a WooCommerce payment gateway
