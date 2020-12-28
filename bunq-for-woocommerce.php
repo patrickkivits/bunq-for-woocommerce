@@ -40,7 +40,6 @@ function bunq_init_gateway_class() {
 
         var $api_key;
         var $testmode;
-        var $wildcard_ip;
         var $monetary_account_bank_id;
         var $api_context;
         var $oauth_client_id;
@@ -65,7 +64,6 @@ function bunq_init_gateway_class() {
             $this->description = $this->get_option( 'description' );
             $this->enabled = $this->get_option( 'enabled' );
             $this->testmode = 'yes' === $this->get_option( 'testmode' );
-            $this->wildcard_ip = 'yes' === $this->get_option( 'wildcard_ip' );
             $this->api_key = $this->testmode ? $this->get_option( 'test_api_key' ) : $this->get_option( 'api_key' );
             $this->oauth_client_id = $this->testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
             $this->oauth_client_secret = $this->testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
@@ -131,7 +129,6 @@ function bunq_init_gateway_class() {
         {
             // Get saved testmode and api key
             $testmode = 'yes' === $this->settings['testmode'];
-            $wildcard_ip = 'yes' === $this->settings['wildcard_ip'];
             $api_key = $testmode ? $this->settings['test_api_key'] : $this->settings['api_key'];
             $monetary_account_bank_id = $this->settings['monetary_account_bank_id'] > 0 ? intval($this->settings['monetary_account_bank_id']) : null;
 
@@ -139,7 +136,7 @@ function bunq_init_gateway_class() {
             try {
                 if($api_key)
                 {
-                    $api_context = bunq_create_api_context($api_key, $testmode, $wildcard_ip);
+                    $api_context = bunq_create_api_context($api_key, $testmode);
                     $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
 
                     // Setup callback URL for bunq (not for local environment)
@@ -254,14 +251,6 @@ function bunq_init_gateway_class() {
                 'oauth_client_secret' => array(
                     'title'       => 'OAuth Client Secret',
                     'type'        => 'text'
-                ),
-                'wildcard_ip' => array(
-                    'title'       => 'Allow wildcard IP access',
-                    'label'       => 'Enable Wildcard IP',
-                    'type'        => 'checkbox',
-                    'description' => 'This will allow you to use the same bunq OAuth app on multiple IP addresses',
-                    'default'     => 'yes',
-                    'desc_tip'    => true,
                 ),
                 'api_key' => array(
                     'title'       => 'Live API Key',
