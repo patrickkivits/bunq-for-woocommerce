@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -209,19 +209,8 @@ function bunq_init_gateway_class() {
         public function init_form_fields()
         {
 	        if(is_admin()) {
-		        $testmode = $this->get_setting('test_mode');
-		        $api_context_json = $this->get_setting('api_context');
-
 		        // Load Bunq API context
-		        if($api_context_json)
-		        {
-			        $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
-
-			        if($new_api_context_json && $new_api_context_json != $api_context_json)
-			        {
-				        $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
-			        }
-		        }
+		        $api_context = $this->load_api_context();
 
 		        $this->form_fields = array(
 			        'enabled' => array(
@@ -247,7 +236,7 @@ function bunq_init_gateway_class() {
 			        'monetary_account_bank_id' => array(
 				        'title'       => 'Bank account',
 				        'type'        => 'select',
-				        'options'     => bunq_get_bank_accounts($api_context_json)
+				        'options'     => bunq_get_bank_accounts($api_context)
 			        ),
 			        'oauth_client_id' => array(
 				        'title'       => 'OAuth Client ID',
@@ -301,15 +290,7 @@ function bunq_init_gateway_class() {
 
         public function process_payment( $order_id ) {
 
-            $testmode = $this->get_setting('test_mode');
-            $api_context_json = $this->get_setting('api_context');
-
-            $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
-
-            if($new_api_context_json && $new_api_context_json != $api_context_json)
-            {
-                $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
-            }
+            $this->load_api_context();
 
             $order = wc_get_order( $order_id );
             $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
@@ -337,6 +318,8 @@ function bunq_init_gateway_class() {
         }
 
         public function bunq_callback() {
+
+	        $this->load_api_context();
 
             // Get input and save raw as text file
             $input = file_get_contents('php://input');
@@ -408,6 +391,26 @@ function bunq_init_gateway_class() {
             }
 
             exit;
+        }
+
+        function load_api_context() {
+	        $api_context_json = $this->get_setting('api_context');
+	        $testmode = $this->get_setting('test_mode');
+
+	        // Load Bunq API context from JSON
+	        if($api_context_json)
+	        {
+		        $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
+
+		        if($new_api_context_json && $new_api_context_json != $api_context_json)
+		        {
+			        $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
+		        }
+
+		        return true;
+	        }
+
+	        return false;
         }
     }
 }
