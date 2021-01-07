@@ -206,95 +206,97 @@ function bunq_init_gateway_class() {
             return isset($this->settings[$key]) ? $this->settings[$key] : null;
         }
 
-        public function init_form_fields(){
+        public function init_form_fields()
+        {
+	        if(is_admin()) {
+		        $testmode = $this->get_setting('test_mode');
+		        $api_context_json = $this->get_setting('api_context');
 
-            $testmode = $this->get_setting('test_mode');
-            $api_context_json = $this->get_setting('api_context');
+		        // Load Bunq API context
+		        if($api_context_json)
+		        {
+			        $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
 
-            // Load Bunq API context
-            if($api_context_json)
-            {
-                $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
+			        if($new_api_context_json && $new_api_context_json != $api_context_json)
+			        {
+				        $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
+			        }
+		        }
 
-                if($new_api_context_json && $new_api_context_json != $api_context_json)
-                {
-                    $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
-                }
-            }
-
-            $this->form_fields = array(
-                'enabled' => array(
-                    'title'       => 'Enable/Disable',
-                    'label'       => 'Enable bunq Gateway',
-                    'type'        => 'checkbox',
-                    'description' => '',
-                    'default'     => 'no'
-                ),
-                'title' => array(
-                    'title'       => 'Title',
-                    'type'        => 'text',
-                    'description' => 'This controls the title which the user sees during checkout.',
-                    'default'     => 'iDEAL, Credit Card or Sofort',
-                    'desc_tip'    => true,
-                ),
-                'description' => array(
-                    'title'       => 'Description',
-                    'type'        => 'textarea',
-                    'description' => 'This controls the description which the user sees during checkout.',
-                    'default'     => 'Pay with iDEAL, Credit Card or Sofort',
-                ),
-                'monetary_account_bank_id' => array(
-                    'title'       => 'Bank account',
-                    'type'        => 'select',
-                    'options'     => bunq_get_bank_accounts($api_context_json)
-                ),
-                'oauth_client_id' => array(
-                    'title'       => 'OAuth Client ID',
-                    'type'        => 'text'
-                ),
-                'oauth_client_secret' => array(
-                    'title'       => 'OAuth Client Secret',
-                    'type'        => 'text'
-                ),
-                'api_key' => array(
-                    'title'       => 'Live API Key',
-                    'type'        => 'text',
-                    'custom_attributes' => array('readonly' => 'readonly')
-                ),
-                'api_context' => array(
-                    'title'       => 'Live API Context',
-                    'type'        => 'textarea',
-                    'css'         => 'height: 150px;',
-                    'custom_attributes' => array('readonly' => 'readonly')
-                ),
-                'testmode' => array(
-                    'title'       => 'Test mode',
-                    'label'       => 'Enable Test Mode',
-                    'type'        => 'checkbox',
-                    'description' => 'Place the payment gateway in test mode using test API keys.',
-                    'default'     => 'yes',
-                    'desc_tip'    => true,
-                ),
-                'test_oauth_client_id' => array(
-                    'title'       => 'Test OAuth Client ID',
-                    'type'        => 'text',
-                ),
-                'test_oauth_client_secret' => array(
-                    'title'       => 'Test OAuth Client Secret',
-                    'type'        => 'text',
-                ),
-                'test_api_key' => array(
-                    'title'       => 'Test API Key',
-                    'type'        => 'text',
-                    'custom_attributes' => array('readonly' => 'readonly')
-                ),
-                'test_api_context' => array(
-                    'title'       => 'Test API Context',
-                    'type'        => 'textarea',
-                    'css'         => 'height: 150px;',
-                    'custom_attributes' => array('readonly' => 'readonly')
-                ),
-            );
+		        $this->form_fields = array(
+			        'enabled' => array(
+				        'title'       => 'Enable/Disable',
+				        'label'       => 'Enable bunq Gateway',
+				        'type'        => 'checkbox',
+				        'description' => '',
+				        'default'     => 'no'
+			        ),
+			        'title' => array(
+				        'title'       => 'Title',
+				        'type'        => 'text',
+				        'description' => 'This controls the title which the user sees during checkout.',
+				        'default'     => 'iDEAL, Credit Card or Sofort',
+				        'desc_tip'    => true,
+			        ),
+			        'description' => array(
+				        'title'       => 'Description',
+				        'type'        => 'textarea',
+				        'description' => 'This controls the description which the user sees during checkout.',
+				        'default'     => 'Pay with iDEAL, Credit Card or Sofort',
+			        ),
+			        'monetary_account_bank_id' => array(
+				        'title'       => 'Bank account',
+				        'type'        => 'select',
+				        'options'     => bunq_get_bank_accounts($api_context_json)
+			        ),
+			        'oauth_client_id' => array(
+				        'title'       => 'OAuth Client ID',
+				        'type'        => 'text'
+			        ),
+			        'oauth_client_secret' => array(
+				        'title'       => 'OAuth Client Secret',
+				        'type'        => 'text'
+			        ),
+			        'api_key' => array(
+				        'title'       => 'Live API Key',
+				        'type'        => 'text',
+				        'custom_attributes' => array('readonly' => 'readonly')
+			        ),
+			        'api_context' => array(
+				        'title'       => 'Live API Context',
+				        'type'        => 'textarea',
+				        'css'         => 'height: 150px;',
+				        'custom_attributes' => array('readonly' => 'readonly')
+			        ),
+			        'testmode' => array(
+				        'title'       => 'Test mode',
+				        'label'       => 'Enable Test Mode',
+				        'type'        => 'checkbox',
+				        'description' => 'Place the payment gateway in test mode using test API keys.',
+				        'default'     => 'yes',
+				        'desc_tip'    => true,
+			        ),
+			        'test_oauth_client_id' => array(
+				        'title'       => 'Test OAuth Client ID',
+				        'type'        => 'text',
+			        ),
+			        'test_oauth_client_secret' => array(
+				        'title'       => 'Test OAuth Client Secret',
+				        'type'        => 'text',
+			        ),
+			        'test_api_key' => array(
+				        'title'       => 'Test API Key',
+				        'type'        => 'text',
+				        'custom_attributes' => array('readonly' => 'readonly')
+			        ),
+			        'test_api_context' => array(
+				        'title'       => 'Test API Context',
+				        'type'        => 'textarea',
+				        'css'         => 'height: 150px;',
+				        'custom_attributes' => array('readonly' => 'readonly')
+			        ),
+		        );
+	        }
         }
 
         public function process_payment( $order_id ) {
