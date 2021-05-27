@@ -82,6 +82,14 @@ function bunq_get_bank_accounts($api_context)
                         }
                     }
                 }
+                $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountJoint::ENDPOINT_URL_LISTING, 'GET');
+                foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountJoint::listing()->getValue() as $monetaryAccountJoint) {
+                    foreach($monetaryAccountJoint->getAlias() as $alias) {
+                        if($alias->getType() === 'IBAN'){
+                            $bank_accounts[$monetaryAccountJoint->getId()] = $alias->getValue().' - '.$monetaryAccountJoint->getDescription().' (Joint)';
+                        }
+                    }
+                }
                 set_transient($transient, $bank_accounts);
             }
         }
