@@ -31,7 +31,9 @@ function bunq_requirements_check() {
     try {
         \bunq\Security\KeyPair::generate();
     } catch (Exception $exception) {
-	    error_log($exception->getMessage());
+	    if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
+		    error_log($exception->getMessage());
+	    }
         return false;
     }
 
