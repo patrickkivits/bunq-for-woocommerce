@@ -51,6 +51,12 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 10. Select your **Bank account** and **Enable** the plugin and **Save changes**.
 
+## Optional configuration
+
+By default WooCommerce will **hold stock** for unpaid orders for **60 minutes**. When this limit is reached, the pending order will be **cancelled**.
+
+Some payment methods (like SOFORT) provided by bunq.me may take more than 60 minutes to complete. To avoid premature cancellation this setting can be increased or disabled in the WooCommerce configuration here: **WooCommerce** > **Settings** > **Products** > **Inventory** > **Hold stock (minutes)**
+
 ## Disclaimer
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
