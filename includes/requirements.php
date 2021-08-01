@@ -31,6 +31,7 @@ function bunq_requirements_check() {
     try {
         \bunq\Security\KeyPair::generate();
     } catch (Exception $exception) {
+	    error_log($exception->getMessage());
         return false;
     }
 
