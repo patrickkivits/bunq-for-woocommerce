@@ -1,7 +1,9 @@
 <?php
 namespace bunq\Model\Generated\Endpoint;
 
+use bunq\Context\ApiContext;
 use bunq\Http\ApiClient;
+use bunq\Http\BunqResponse;
 use bunq\Model\Core\BunqModel;
 use bunq\Model\Generated\Object\Amount;
 use bunq\Model\Generated\Object\CardCountryPermission;
@@ -29,6 +31,7 @@ class Card extends BunqModel
     const FIELD_PIN_CODE = 'pin_code';
     const FIELD_ACTIVATION_CODE = 'activation_code';
     const FIELD_STATUS = 'status';
+    const FIELD_ORDER_STATUS = 'order_status';
     const FIELD_CARD_LIMIT = 'card_limit';
     const FIELD_CARD_LIMIT_ATM = 'card_limit_atm';
     const FIELD_COUNTRY_PERMISSION = 'country_permission';
@@ -147,6 +150,13 @@ class Card extends BunqModel
     protected $primaryAccountNumbers;
 
     /**
+     * The payment account reference number associated with the card.
+     *
+     * @var string
+     */
+    protected $paymentAccountReference;
+
+    /**
      * The spending limit for the card.
      *
      * @var Amount
@@ -251,6 +261,14 @@ class Card extends BunqModel
     protected $statusFieldForRequest;
 
     /**
+     * The order status to set for the card. Set to CARD_REQUEST_PENDING to get
+     * a virtual card produced.
+     *
+     * @var string|null
+     */
+    protected $orderStatusFieldForRequest;
+
+    /**
      * The spending limit for the card.
      *
      * @var Amount|null
@@ -307,6 +325,8 @@ class Card extends BunqModel
      * DELIVERED_TO_CUSTOMER/CARD_UPDATE_REQUESTED/CARD_UPDATE_SENT/CARD_UPDATE_ACCEPTED.
      * Mind that all the possible choices (apart from ACTIVE and DEACTIVATED)
      * are permanent and cannot be changed after.
+     * @param string|null $orderStatus The order status to set for the card. Set
+     * to CARD_REQUEST_PENDING to get a virtual card produced.
      * @param Amount|null $cardLimit The spending limit for the card.
      * @param Amount|null $cardLimitAtm The ATM spending limit for the card.
      * @param CardCountryPermission[]|null $countryPermission The countries for
@@ -319,20 +339,12 @@ class Card extends BunqModel
      * fallback for this card if insufficient balance. Fallback account is
      * removed if not supplied.
      */
-    public function __construct(
-        string $pinCode = null,
-        string $activationCode = null,
-        string $status = null,
-        Amount $cardLimit = null,
-        Amount $cardLimitAtm = null,
-        array $countryPermission = null,
-        array $pinCodeAssignment = null,
-        array $primaryAccountNumbers = null,
-        int $monetaryAccountIdFallback = null
-    ) {
+    public function __construct(string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null)
+    {
         $this->pinCodeFieldForRequest = $pinCode;
         $this->activationCodeFieldForRequest = $activationCode;
         $this->statusFieldForRequest = $status;
+        $this->orderStatusFieldForRequest = $orderStatus;
         $this->cardLimitFieldForRequest = $cardLimit;
         $this->cardLimitAtmFieldForRequest = $cardLimitAtm;
         $this->countryPermissionFieldForRequest = $countryPermission;
@@ -361,6 +373,8 @@ class Card extends BunqModel
      * DELIVERED_TO_CUSTOMER/CARD_UPDATE_REQUESTED/CARD_UPDATE_SENT/CARD_UPDATE_ACCEPTED.
      * Mind that all the possible choices (apart from ACTIVE and DEACTIVATED)
      * are permanent and cannot be changed after.
+     * @param string|null $orderStatus The order status to set for the card. Set
+     * to CARD_REQUEST_PENDING to get a virtual card produced.
      * @param Amount|null $cardLimit The spending limit for the card.
      * @param Amount|null $cardLimitAtm The ATM spending limit for the card.
      * @param CardCountryPermission[]|null $countryPermission The countries for
@@ -376,36 +390,24 @@ class Card extends BunqModel
      *
      * @return BunqResponseCard
      */
-    public static function update(
-        int $cardId,
-        string $pinCode = null,
-        string $activationCode = null,
-        string $status = null,
-        Amount $cardLimit = null,
-        Amount $cardLimitAtm = null,
-        array $countryPermission = null,
-        array $pinCodeAssignment = null,
-        array $primaryAccountNumbers = null,
-        int $monetaryAccountIdFallback = null,
-        array $customHeaders = []
-    ): BunqResponseCard {
+    public static function update(int $cardId, string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, array $customHeaders = []): BunqResponseCard
+    {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->put(
             vsprintf(
                 self::ENDPOINT_URL_UPDATE,
                 [static::determineUserId(), $cardId]
             ),
-            [
-                self::FIELD_PIN_CODE => $pinCode,
-                self::FIELD_ACTIVATION_CODE => $activationCode,
-                self::FIELD_STATUS => $status,
-                self::FIELD_CARD_LIMIT => $cardLimit,
-                self::FIELD_CARD_LIMIT_ATM => $cardLimitAtm,
-                self::FIELD_COUNTRY_PERMISSION => $countryPermission,
-                self::FIELD_PIN_CODE_ASSIGNMENT => $pinCodeAssignment,
-                self::FIELD_PRIMARY_ACCOUNT_NUMBERS => $primaryAccountNumbers,
-                self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback,
-            ],
+            [self::FIELD_PIN_CODE => $pinCode,
+self::FIELD_ACTIVATION_CODE => $activationCode,
+self::FIELD_STATUS => $status,
+self::FIELD_ORDER_STATUS => $orderStatus,
+self::FIELD_CARD_LIMIT => $cardLimit,
+self::FIELD_CARD_LIMIT_ATM => $cardLimitAtm,
+self::FIELD_COUNTRY_PERMISSION => $countryPermission,
+self::FIELD_PIN_CODE_ASSIGNMENT => $pinCodeAssignment,
+self::FIELD_PRIMARY_ACCOUNT_NUMBERS => $primaryAccountNumbers,
+self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback],
             $customHeaders
         );
 
@@ -441,6 +443,7 @@ class Card extends BunqModel
 
     /**
      * Return all the cards available to the user.
+     *
      * This method is called "listing" because "list" is a restricted PHP word
      * and cannot be used as constants, class names, function or method names.
      *
@@ -449,7 +452,7 @@ class Card extends BunqModel
      *
      * @return BunqResponseCardList
      */
-    public static function listing(array $params = [], array $customHeaders = []): BunqResponseCardList
+    public static function listing( array $params = [], array $customHeaders = []): BunqResponseCardList
     {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->get(
@@ -477,10 +480,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param int $id
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param int $id
      */
     public function setId($id)
     {
@@ -498,10 +501,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $created
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $created
      */
     public function setCreated($created)
     {
@@ -519,10 +522,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $updated
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $updated
      */
     public function setUpdated($updated)
     {
@@ -540,10 +543,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $publicUuid
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $publicUuid
      */
     public function setPublicUuid($publicUuid)
     {
@@ -561,10 +564,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $type
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $type
      */
     public function setType($type)
     {
@@ -582,10 +585,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $subType
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $subType
      */
     public function setSubType($subType)
     {
@@ -603,10 +606,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $secondLine
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $secondLine
      */
     public function setSecondLine($secondLine)
     {
@@ -624,10 +627,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param int $userId
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param int $userId
      */
     public function setUserId($userId)
     {
@@ -646,10 +649,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $status
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $status
      */
     public function setStatus($status)
     {
@@ -667,10 +670,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $subStatus
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $subStatus
      */
     public function setSubStatus($subStatus)
     {
@@ -693,10 +696,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $orderStatus
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $orderStatus
      */
     public function setOrderStatus($orderStatus)
     {
@@ -714,10 +717,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $expiryDate
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $expiryDate
      */
     public function setExpiryDate($expiryDate)
     {
@@ -735,10 +738,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $nameOnCard
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $nameOnCard
      */
     public function setNameOnCard($nameOnCard)
     {
@@ -756,14 +759,35 @@ class Card extends BunqModel
     }
 
     /**
-     * @param CardPrimaryAccountNumber[] $primaryAccountNumbers
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param CardPrimaryAccountNumber[] $primaryAccountNumbers
      */
     public function setPrimaryAccountNumbers($primaryAccountNumbers)
     {
         $this->primaryAccountNumbers = $primaryAccountNumbers;
+    }
+
+    /**
+     * The payment account reference number associated with the card.
+     *
+     * @return string
+     */
+    public function getPaymentAccountReference()
+    {
+        return $this->paymentAccountReference;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param string $paymentAccountReference
+     */
+    public function setPaymentAccountReference($paymentAccountReference)
+    {
+        $this->paymentAccountReference = $paymentAccountReference;
     }
 
     /**
@@ -777,10 +801,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param Amount $cardLimit
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $cardLimit
      */
     public function setCardLimit($cardLimit)
     {
@@ -798,10 +822,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param Amount $cardLimitAtm
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $cardLimitAtm
      */
     public function setCardLimitAtm($cardLimitAtm)
     {
@@ -819,10 +843,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param CardCountryPermission[] $countryPermission
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param CardCountryPermission[] $countryPermission
      */
     public function setCountryPermission($countryPermission)
     {
@@ -841,10 +865,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param LabelMonetaryAccount $labelMonetaryAccountOrdered
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param LabelMonetaryAccount $labelMonetaryAccountOrdered
      */
     public function setLabelMonetaryAccountOrdered($labelMonetaryAccountOrdered)
     {
@@ -863,10 +887,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param LabelMonetaryAccount $labelMonetaryAccountCurrent
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param LabelMonetaryAccount $labelMonetaryAccountCurrent
      */
     public function setLabelMonetaryAccountCurrent($labelMonetaryAccountCurrent)
     {
@@ -884,10 +908,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param CardPinAssignment[] $pinCodeAssignment
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param CardPinAssignment[] $pinCodeAssignment
      */
     public function setPinCodeAssignment($pinCodeAssignment)
     {
@@ -906,10 +930,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param int $monetaryAccountIdFallback
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param int $monetaryAccountIdFallback
      */
     public function setMonetaryAccountIdFallback($monetaryAccountIdFallback)
     {
@@ -928,10 +952,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $country
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $country
      */
     public function setCountry($country)
     {
@@ -949,10 +973,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param string $cardShipmentTrackingUrl
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $cardShipmentTrackingUrl
      */
     public function setCardShipmentTrackingUrl($cardShipmentTrackingUrl)
     {
@@ -970,10 +994,10 @@ class Card extends BunqModel
     }
 
     /**
-     * @param Amount $amountSavedZeroFx
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $amountSavedZeroFx
      */
     public function setAmountSavedZeroFx($amountSavedZeroFx)
     {
@@ -1038,6 +1062,10 @@ class Card extends BunqModel
         }
 
         if (!is_null($this->primaryAccountNumbers)) {
+            return false;
+        }
+
+        if (!is_null($this->paymentAccountReference)) {
             return false;
         }
 

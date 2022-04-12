@@ -9,6 +9,13 @@ use bunq\Model\Core\BunqModel;
 class InvoiceItem extends BunqModel
 {
     /**
+     * The id of the invoice item.
+     *
+     * @var int
+     */
+    protected $id;
+
+    /**
      * The billing date of the item.
      *
      * @var string
@@ -72,6 +79,27 @@ class InvoiceItem extends BunqModel
     protected $totalVatInclusive;
 
     /**
+     * The id of the invoice item.
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
      * The billing date of the item.
      *
      * @return string
@@ -82,10 +110,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param string $billingDate
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $billingDate
      */
     public function setBillingDate($billingDate)
     {
@@ -103,10 +131,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param string $typeDescription
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $typeDescription
      */
     public function setTypeDescription($typeDescription)
     {
@@ -124,10 +152,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param string $typeDescriptionTranslated
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $typeDescriptionTranslated
      */
     public function setTypeDescriptionTranslated($typeDescriptionTranslated)
     {
@@ -145,10 +173,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param Amount $unitVatExclusive
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $unitVatExclusive
      */
     public function setUnitVatExclusive($unitVatExclusive)
     {
@@ -166,10 +194,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param Amount $unitVatInclusive
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $unitVatInclusive
      */
     public function setUnitVatInclusive($unitVatInclusive)
     {
@@ -187,10 +215,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param float $vat
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param float $vat
      */
     public function setVat($vat)
     {
@@ -208,10 +236,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param float $quantity
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param float $quantity
      */
     public function setQuantity($quantity)
     {
@@ -229,10 +257,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param Amount $totalVatExclusive
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $totalVatExclusive
      */
     public function setTotalVatExclusive($totalVatExclusive)
     {
@@ -250,10 +278,10 @@ class InvoiceItem extends BunqModel
     }
 
     /**
-     * @param Amount $totalVatInclusive
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $totalVatInclusive
      */
     public function setTotalVatInclusive($totalVatInclusive)
     {
@@ -265,6 +293,10 @@ class InvoiceItem extends BunqModel
      */
     public function isAllFieldNull()
     {
+        if (!is_null($this->id)) {
+            return false;
+        }
+
         if (!is_null($this->billingDate)) {
             return false;
         }

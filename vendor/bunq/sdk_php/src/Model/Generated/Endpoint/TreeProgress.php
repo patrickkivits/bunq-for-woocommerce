@@ -1,7 +1,9 @@
 <?php
 namespace bunq\Model\Generated\Endpoint;
 
+use bunq\Context\ApiContext;
 use bunq\Http\ApiClient;
+use bunq\Http\BunqResponse;
 use bunq\Model\Core\BunqModel;
 use bunq\Model\Generated\Object\LabelUser;
 
@@ -37,6 +39,13 @@ class TreeProgress extends BunqModel
     protected $progressTreeNext;
 
     /**
+     * URL of the invite profile.
+     *
+     * @var string
+     */
+    protected $urlInviteProfile;
+
+    /**
      * The label of the user the progress belongs to.
      *
      * @var LabelUser
@@ -52,7 +61,7 @@ class TreeProgress extends BunqModel
      *
      * @return BunqResponseTreeProgressList
      */
-    public static function listing(array $params = [], array $customHeaders = []): BunqResponseTreeProgressList
+    public static function listing( array $params = [], array $customHeaders = []): BunqResponseTreeProgressList
     {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->get(
@@ -80,10 +89,10 @@ class TreeProgress extends BunqModel
     }
 
     /**
-     * @param float $numberOfTree
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param float $numberOfTree
      */
     public function setNumberOfTree($numberOfTree)
     {
@@ -101,14 +110,35 @@ class TreeProgress extends BunqModel
     }
 
     /**
-     * @param float $progressTreeNext
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param float $progressTreeNext
      */
     public function setProgressTreeNext($progressTreeNext)
     {
         $this->progressTreeNext = $progressTreeNext;
+    }
+
+    /**
+     * URL of the invite profile.
+     *
+     * @return string
+     */
+    public function getUrlInviteProfile()
+    {
+        return $this->urlInviteProfile;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param string $urlInviteProfile
+     */
+    public function setUrlInviteProfile($urlInviteProfile)
+    {
+        $this->urlInviteProfile = $urlInviteProfile;
     }
 
     /**
@@ -122,10 +152,10 @@ class TreeProgress extends BunqModel
     }
 
     /**
-     * @param LabelUser $labelUser
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param LabelUser $labelUser
      */
     public function setLabelUser($labelUser)
     {
@@ -142,6 +172,10 @@ class TreeProgress extends BunqModel
         }
 
         if (!is_null($this->progressTreeNext)) {
+            return false;
+        }
+
+        if (!is_null($this->urlInviteProfile)) {
             return false;
         }
 

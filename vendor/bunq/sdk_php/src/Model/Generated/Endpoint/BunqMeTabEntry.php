@@ -74,6 +74,13 @@ class BunqMeTabEntry extends BunqModel
     protected $merchantAvailable;
 
     /**
+     * Provided if the user has enabled their invite link.
+     *
+     * @var string
+     */
+    protected $inviteProfileName;
+
+    /**
      * The Amount requested to be paid. Can be optional.
      *
      * @var Amount
@@ -103,7 +110,7 @@ class BunqMeTabEntry extends BunqModel
      * @param string|null $redirectUrl The URL which the user is sent to after
      * making a payment.
      */
-    public function __construct(Amount $amountInquired, string $description, string $redirectUrl = null)
+    public function __construct(Amount  $amountInquired, string  $description, string  $redirectUrl = null)
     {
         $this->amountInquiredFieldForRequest = $amountInquired;
         $this->descriptionFieldForRequest = $description;
@@ -121,10 +128,10 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param string $uuid
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $uuid
      */
     public function setUuid($uuid)
     {
@@ -142,10 +149,10 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param Amount $amountInquired
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param Amount $amountInquired
      */
     public function setAmountInquired($amountInquired)
     {
@@ -164,10 +171,10 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param LabelMonetaryAccount $alias
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param LabelMonetaryAccount $alias
      */
     public function setAlias($alias)
     {
@@ -185,10 +192,10 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param string $description
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $description
      */
     public function setDescription($description)
     {
@@ -207,10 +214,10 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param string $status
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $status
      */
     public function setStatus($status)
     {
@@ -228,10 +235,10 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param string $redirectUrl
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $redirectUrl
      */
     public function setRedirectUrl($redirectUrl)
     {
@@ -249,14 +256,35 @@ class BunqMeTabEntry extends BunqModel
     }
 
     /**
-     * @param BunqMeMerchantAvailable[] $merchantAvailable
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param BunqMeMerchantAvailable[] $merchantAvailable
      */
     public function setMerchantAvailable($merchantAvailable)
     {
         $this->merchantAvailable = $merchantAvailable;
+    }
+
+    /**
+     * Provided if the user has enabled their invite link.
+     *
+     * @return string
+     */
+    public function getInviteProfileName()
+    {
+        return $this->inviteProfileName;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param string $inviteProfileName
+     */
+    public function setInviteProfileName($inviteProfileName)
+    {
+        $this->inviteProfileName = $inviteProfileName;
     }
 
     /**
@@ -289,6 +317,10 @@ class BunqMeTabEntry extends BunqModel
         }
 
         if (!is_null($this->merchantAvailable)) {
+            return false;
+        }
+
+        if (!is_null($this->inviteProfileName)) {
             return false;
         }
 

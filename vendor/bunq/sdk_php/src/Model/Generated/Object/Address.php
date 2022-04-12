@@ -72,6 +72,14 @@ class Address extends BunqModel
     protected $mailboxName;
 
     /**
+     * To show whether user created or updated her address for app event
+     * listing.
+     *
+     * @var bool
+     */
+    protected $isUserAddressUpdated;
+
+    /**
      * The street.
      *
      * @var string
@@ -139,16 +147,8 @@ class Address extends BunqModel
      * @param string|null $mailboxName The name on the mailbox (only used for
      * Postal addresses).
      */
-    public function __construct(
-        string $street,
-        string $houseNumber,
-        string $postalCode,
-        string $city,
-        string $country,
-        string $poBox = null,
-        string $extra = null,
-        string $mailboxName = null
-    ) {
+    public function __construct(string  $street, string  $houseNumber, string  $postalCode, string  $city, string  $country, string  $poBox = null, string  $extra = null, string  $mailboxName = null)
+    {
         $this->streetFieldForRequest = $street;
         $this->houseNumberFieldForRequest = $houseNumber;
         $this->poBoxFieldForRequest = $poBox;
@@ -170,10 +170,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $street
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $street
      */
     public function setStreet($street)
     {
@@ -191,10 +191,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $houseNumber
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $houseNumber
      */
     public function setHouseNumber($houseNumber)
     {
@@ -212,10 +212,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $poBox
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $poBox
      */
     public function setPoBox($poBox)
     {
@@ -233,10 +233,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $postalCode
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $postalCode
      */
     public function setPostalCode($postalCode)
     {
@@ -254,10 +254,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $city
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $city
      */
     public function setCity($city)
     {
@@ -275,10 +275,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $country
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $country
      */
     public function setCountry($country)
     {
@@ -296,10 +296,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $province
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $province
      */
     public function setProvince($province)
     {
@@ -317,10 +317,10 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $extra
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $extra
      */
     public function setExtra($extra)
     {
@@ -338,14 +338,36 @@ class Address extends BunqModel
     }
 
     /**
-     * @param string $mailboxName
-     *
      * @deprecated User should not be able to set values via setters, use
      * constructor.
+     *
+     * @param string $mailboxName
      */
     public function setMailboxName($mailboxName)
     {
         $this->mailboxName = $mailboxName;
+    }
+
+    /**
+     * To show whether user created or updated her address for app event
+     * listing.
+     *
+     * @return bool
+     */
+    public function getIsUserAddressUpdated()
+    {
+        return $this->isUserAddressUpdated;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param bool $isUserAddressUpdated
+     */
+    public function setIsUserAddressUpdated($isUserAddressUpdated)
+    {
+        $this->isUserAddressUpdated = $isUserAddressUpdated;
     }
 
     /**
@@ -386,6 +408,10 @@ class Address extends BunqModel
         }
 
         if (!is_null($this->mailboxName)) {
+            return false;
+        }
+
+        if (!is_null($this->isUserAddressUpdated)) {
             return false;
         }
 
