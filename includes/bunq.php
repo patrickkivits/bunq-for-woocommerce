@@ -1,7 +1,10 @@
 <?php
 
 require_once (__DIR__.'/RequestThrottler.php');
-$requestThrottler = new RequestThrottler(new RequestThrottlerConfiguration());
+
+if (empty($GLOBALS['requestThrottler'])) {
+    $GLOBALS['requestThrottler'] = new RequestThrottler(new RequestThrottlerConfiguration());
+}
 
 function bunq_environment($testmode) {
     return $testmode ? \bunq\Util\BunqEnumApiEnvironmentType::SANDBOX() : \bunq\Util\BunqEnumApiEnvironmentType::PRODUCTION();
