@@ -6,7 +6,7 @@ use bunq\Model\Core\BunqModel;
 /**
  * @generated
  */
-class NotificationFilterPush extends BunqModel
+class NotificationFilterEmail extends BunqModel
 {
     /**
      * The notification category that will match this notification filter.

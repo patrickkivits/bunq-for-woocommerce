@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "bunq/sdk_php",
-            "version": "1.20.20.9",
+            "version": "1.21.5.66",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bunq/sdk_php.git",
-                "reference": "6091950d2c73c23ea88b3ce3face542d12bcb49c"
+                "reference": "12969060e1626fdaa75cd1864f5732003fce1915"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bunq/sdk_php/zipball/6091950d2c73c23ea88b3ce3face542d12bcb49c",
-                "reference": "6091950d2c73c23ea88b3ce3face542d12bcb49c",
+                "url": "https://api.github.com/repos/bunq/sdk_php/zipball/12969060e1626fdaa75cd1864f5732003fce1915",
+                "reference": "12969060e1626fdaa75cd1864f5732003fce1915",
                 "shasum": ""
             },
             "require": {
@@ -69,9 +69,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bunq/sdk_php/issues",
-                "source": "https://github.com/bunq/sdk_php/tree/1.20.20.9"
+                "source": "https://github.com/bunq/sdk_php/tree/1.21.5.66"
             },
-            "time": "2022-09-20T08:45:52+00:00"
+            "time": "2022-11-19T14:14:37+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -287,16 +287,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "2.4.1",
+            "version": "2.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "69568e4293f4fa993f3b0e51c9723e1e17c41379"
+                "reference": "67c26b443f348a51926030c83481b85718457d3d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/69568e4293f4fa993f3b0e51c9723e1e17c41379",
-                "reference": "69568e4293f4fa993f3b0e51c9723e1e17c41379",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/67c26b443f348a51926030c83481b85718457d3d",
+                "reference": "67c26b443f348a51926030c83481b85718457d3d",
                 "shasum": ""
             },
             "require": {
@@ -386,7 +386,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/2.4.1"
+                "source": "https://github.com/guzzle/psr7/tree/2.4.3"
             },
             "funding": [
                 {
@@ -402,7 +402,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-08-28T14:45:39+00:00"
+            "time": "2022-10-26T14:07:24+00:00"
         },
         {
             "name": "league/oauth2-client",
