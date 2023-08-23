@@ -2,7 +2,7 @@
     "require": {
         "bunq/sdk_php": "^1.15",
         "league/oauth2-client": "^2.6",
-        "php": "^7.0.13",
+        "php": "^7.3 || ^8.0",
         "ext-openssl": "*",
         "ext-curl": "*",
         "ext-json": "*",

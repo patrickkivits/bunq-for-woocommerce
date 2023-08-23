@@ -38,6 +38,7 @@ class Card extends BunqModel
     const FIELD_PIN_CODE_ASSIGNMENT = 'pin_code_assignment';
     const FIELD_PRIMARY_ACCOUNT_NUMBERS = 'primary_account_numbers';
     const FIELD_MONETARY_ACCOUNT_ID_FALLBACK = 'monetary_account_id_fallback';
+    const FIELD_CANCELLATION_REASON = 'cancellation_reason';
 
     /**
      * Object type.
@@ -224,13 +225,6 @@ class Card extends BunqModel
     protected $cardShipmentTrackingUrl;
 
     /**
-     * The amount saved through ZeroFX on this card.
-     *
-     * @var Amount
-     */
-    protected $amountSavedZeroFx;
-
-    /**
      * The plaintext pin code. Requests require encryption to be enabled.
      *
      * @var string|null
@@ -312,6 +306,13 @@ class Card extends BunqModel
     protected $monetaryAccountIdFallbackFieldForRequest;
 
     /**
+     * The reason for card cancellation.
+     *
+     * @var string|null
+     */
+    protected $cancellationReasonFieldForRequest;
+
+    /**
      * @param string|null $pinCode The plaintext pin code. Requests require
      * encryption to be enabled.
      * @param string|null $activationCode DEPRECATED: Activate a card by setting
@@ -338,8 +339,9 @@ class Card extends BunqModel
      * @param int|null $monetaryAccountIdFallback ID of the MA to be used as
      * fallback for this card if insufficient balance. Fallback account is
      * removed if not supplied.
+     * @param string|null $cancellationReason The reason for card cancellation.
      */
-    public function __construct(string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null)
+    public function __construct(string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, string  $cancellationReason = null)
     {
         $this->pinCodeFieldForRequest = $pinCode;
         $this->activationCodeFieldForRequest = $activationCode;
@@ -351,6 +353,7 @@ class Card extends BunqModel
         $this->pinCodeAssignmentFieldForRequest = $pinCodeAssignment;
         $this->primaryAccountNumbersFieldForRequest = $primaryAccountNumbers;
         $this->monetaryAccountIdFallbackFieldForRequest = $monetaryAccountIdFallback;
+        $this->cancellationReasonFieldForRequest = $cancellationReason;
     }
 
     /**
@@ -386,11 +389,12 @@ class Card extends BunqModel
      * @param int|null $monetaryAccountIdFallback ID of the MA to be used as
      * fallback for this card if insufficient balance. Fallback account is
      * removed if not supplied.
+     * @param string|null $cancellationReason The reason for card cancellation.
      * @param string[] $customHeaders
      *
      * @return BunqResponseCard
      */
-    public static function update(int $cardId, string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, array $customHeaders = []): BunqResponseCard
+    public static function update(int $cardId, string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, string  $cancellationReason = null, array $customHeaders = []): BunqResponseCard
     {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->put(
@@ -407,7 +411,8 @@ self::FIELD_CARD_LIMIT_ATM => $cardLimitAtm,
 self::FIELD_COUNTRY_PERMISSION => $countryPermission,
 self::FIELD_PIN_CODE_ASSIGNMENT => $pinCodeAssignment,
 self::FIELD_PRIMARY_ACCOUNT_NUMBERS => $primaryAccountNumbers,
-self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback],
+self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback,
+self::FIELD_CANCELLATION_REASON => $cancellationReason],
             $customHeaders
         );
 
@@ -984,27 +989,6 @@ self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback],
     }
 
     /**
-     * The amount saved through ZeroFX on this card.
-     *
-     * @return Amount
-     */
-    public function getAmountSavedZeroFx()
-    {
-        return $this->amountSavedZeroFx;
-    }
-
-    /**
-     * @deprecated User should not be able to set values via setters, use
-     * constructor.
-     *
-     * @param Amount $amountSavedZeroFx
-     */
-    public function setAmountSavedZeroFx($amountSavedZeroFx)
-    {
-        $this->amountSavedZeroFx = $amountSavedZeroFx;
-    }
-
-    /**
      * @return bool
      */
     public function isAllFieldNull()
@@ -1102,10 +1086,6 @@ self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback],
         }
 
         if (!is_null($this->cardShipmentTrackingUrl)) {
-            return false;
-        }
-
-        if (!is_null($this->amountSavedZeroFx)) {
             return false;
         }
 

@@ -5,10 +5,10 @@ use bunq\Http\BunqResponse;
 
 /**
  */
-class BunqResponseInsightBudgetList extends BunqResponse
+class BunqResponseMonetaryAccountExternalList extends BunqResponse
 {
     /**
-     * @return InsightBudget[]
+     * @return MonetaryAccountExternal[]
      */
     public function getValue(): array
     {

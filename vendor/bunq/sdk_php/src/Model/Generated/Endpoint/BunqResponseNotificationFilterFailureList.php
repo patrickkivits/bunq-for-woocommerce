@@ -5,12 +5,12 @@ use bunq\Http\BunqResponse;
 
 /**
  */
-class BunqResponseDraftShareInviteBank extends BunqResponse
+class BunqResponseNotificationFilterFailureList extends BunqResponse
 {
     /**
-     * @return DraftShareInviteBank
+     * @return NotificationFilterFailure[]
      */
-    public function getValue(): DraftShareInviteBank
+    public function getValue(): array
     {
         return parent::getValue();
     }
