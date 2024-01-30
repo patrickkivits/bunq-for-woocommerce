@@ -19,6 +19,13 @@ require_once (__DIR__.'/includes/oauth2.php');
 require_once (__DIR__.'/includes/bunq.php');
 require_once (__DIR__.'/includes/requirements.php');
 
+// Declare compatibility with High-Performance Order Storage (HPOS)
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+} );
+
 if ( ! bunq_requirements_check() ) {
     add_action( 'admin_init', 'bunq_requirements_disable_plugin' );
     add_action( 'admin_notices', 'bunq_requirements_show_notice' );
