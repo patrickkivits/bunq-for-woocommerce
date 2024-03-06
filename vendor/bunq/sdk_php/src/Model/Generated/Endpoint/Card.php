@@ -38,6 +38,8 @@ class Card extends BunqModel
     const FIELD_PIN_CODE_ASSIGNMENT = 'pin_code_assignment';
     const FIELD_PRIMARY_ACCOUNT_NUMBERS = 'primary_account_numbers';
     const FIELD_MONETARY_ACCOUNT_ID_FALLBACK = 'monetary_account_id_fallback';
+    const FIELD_PREFERRED_NAME_ON_CARD = 'preferred_name_on_card';
+    const FIELD_SECOND_LINE = 'second_line';
     const FIELD_CANCELLATION_REASON = 'cancellation_reason';
 
     /**
@@ -144,6 +146,13 @@ class Card extends BunqModel
     protected $nameOnCard;
 
     /**
+     * The user's preferred name on the card.
+     *
+     * @var string
+     */
+    protected $preferredNameOnCard;
+
+    /**
      * Array of PANs and their attributes.
      *
      * @var CardPrimaryAccountNumber[]
@@ -195,6 +204,13 @@ class Card extends BunqModel
     protected $labelMonetaryAccountCurrent;
 
     /**
+     * Current monetary account (only for prepaid credit cards).
+     *
+     * @var MonetaryAccount
+     */
+    protected $monetaryAccount;
+
+    /**
      * Array of Types, PINs, account IDs assigned to the card.
      *
      * @var CardPinAssignment[]
@@ -223,6 +239,20 @@ class Card extends BunqModel
      * @var string
      */
     protected $cardShipmentTrackingUrl;
+
+    /**
+     * Whether this card is eligible for a free replacement.
+     *
+     * @var bool
+     */
+    protected $isEligibleForFreeReplacement;
+
+    /**
+     * The card replacement for this card.
+     *
+     * @var CardReplacement
+     */
+    protected $cardReplacement;
 
     /**
      * The plaintext pin code. Requests require encryption to be enabled.
@@ -306,6 +336,20 @@ class Card extends BunqModel
     protected $monetaryAccountIdFallbackFieldForRequest;
 
     /**
+     * The user's preferred name as it will be on the card.
+     *
+     * @var string|null
+     */
+    protected $preferredNameOnCardFieldForRequest;
+
+    /**
+     * The second line of text on the card
+     *
+     * @var string|null
+     */
+    protected $secondLineFieldForRequest;
+
+    /**
      * The reason for card cancellation.
      *
      * @var string|null
@@ -339,9 +383,12 @@ class Card extends BunqModel
      * @param int|null $monetaryAccountIdFallback ID of the MA to be used as
      * fallback for this card if insufficient balance. Fallback account is
      * removed if not supplied.
+     * @param string|null $preferredNameOnCard The user's preferred name as it
+     * will be on the card.
+     * @param string|null $secondLine The second line of text on the card
      * @param string|null $cancellationReason The reason for card cancellation.
      */
-    public function __construct(string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, string  $cancellationReason = null)
+    public function __construct(string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, string  $preferredNameOnCard = null, string  $secondLine = null, string  $cancellationReason = null)
     {
         $this->pinCodeFieldForRequest = $pinCode;
         $this->activationCodeFieldForRequest = $activationCode;
@@ -353,6 +400,8 @@ class Card extends BunqModel
         $this->pinCodeAssignmentFieldForRequest = $pinCodeAssignment;
         $this->primaryAccountNumbersFieldForRequest = $primaryAccountNumbers;
         $this->monetaryAccountIdFallbackFieldForRequest = $monetaryAccountIdFallback;
+        $this->preferredNameOnCardFieldForRequest = $preferredNameOnCard;
+        $this->secondLineFieldForRequest = $secondLine;
         $this->cancellationReasonFieldForRequest = $cancellationReason;
     }
 
@@ -389,12 +438,15 @@ class Card extends BunqModel
      * @param int|null $monetaryAccountIdFallback ID of the MA to be used as
      * fallback for this card if insufficient balance. Fallback account is
      * removed if not supplied.
+     * @param string|null $preferredNameOnCard The user's preferred name as it
+     * will be on the card.
+     * @param string|null $secondLine The second line of text on the card
      * @param string|null $cancellationReason The reason for card cancellation.
      * @param string[] $customHeaders
      *
      * @return BunqResponseCard
      */
-    public static function update(int $cardId, string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, string  $cancellationReason = null, array $customHeaders = []): BunqResponseCard
+    public static function update(int $cardId, string  $pinCode = null, string  $activationCode = null, string  $status = null, string  $orderStatus = null, Amount  $cardLimit = null, Amount  $cardLimitAtm = null, array  $countryPermission = null, array  $pinCodeAssignment = null, array  $primaryAccountNumbers = null, int  $monetaryAccountIdFallback = null, string  $preferredNameOnCard = null, string  $secondLine = null, string  $cancellationReason = null, array $customHeaders = []): BunqResponseCard
     {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->put(
@@ -412,6 +464,8 @@ self::FIELD_COUNTRY_PERMISSION => $countryPermission,
 self::FIELD_PIN_CODE_ASSIGNMENT => $pinCodeAssignment,
 self::FIELD_PRIMARY_ACCOUNT_NUMBERS => $primaryAccountNumbers,
 self::FIELD_MONETARY_ACCOUNT_ID_FALLBACK => $monetaryAccountIdFallback,
+self::FIELD_PREFERRED_NAME_ON_CARD => $preferredNameOnCard,
+self::FIELD_SECOND_LINE => $secondLine,
 self::FIELD_CANCELLATION_REASON => $cancellationReason],
             $customHeaders
         );
@@ -754,6 +808,27 @@ self::FIELD_CANCELLATION_REASON => $cancellationReason],
     }
 
     /**
+     * The user's preferred name on the card.
+     *
+     * @return string
+     */
+    public function getPreferredNameOnCard()
+    {
+        return $this->preferredNameOnCard;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param string $preferredNameOnCard
+     */
+    public function setPreferredNameOnCard($preferredNameOnCard)
+    {
+        $this->preferredNameOnCard = $preferredNameOnCard;
+    }
+
+    /**
      * Array of PANs and their attributes.
      *
      * @return CardPrimaryAccountNumber[]
@@ -903,6 +978,27 @@ self::FIELD_CANCELLATION_REASON => $cancellationReason],
     }
 
     /**
+     * Current monetary account (only for prepaid credit cards).
+     *
+     * @return MonetaryAccount
+     */
+    public function getMonetaryAccount()
+    {
+        return $this->monetaryAccount;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param MonetaryAccount $monetaryAccount
+     */
+    public function setMonetaryAccount($monetaryAccount)
+    {
+        $this->monetaryAccount = $monetaryAccount;
+    }
+
+    /**
      * Array of Types, PINs, account IDs assigned to the card.
      *
      * @return CardPinAssignment[]
@@ -989,6 +1085,48 @@ self::FIELD_CANCELLATION_REASON => $cancellationReason],
     }
 
     /**
+     * Whether this card is eligible for a free replacement.
+     *
+     * @return bool
+     */
+    public function getIsEligibleForFreeReplacement()
+    {
+        return $this->isEligibleForFreeReplacement;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param bool $isEligibleForFreeReplacement
+     */
+    public function setIsEligibleForFreeReplacement($isEligibleForFreeReplacement)
+    {
+        $this->isEligibleForFreeReplacement = $isEligibleForFreeReplacement;
+    }
+
+    /**
+     * The card replacement for this card.
+     *
+     * @return CardReplacement
+     */
+    public function getCardReplacement()
+    {
+        return $this->cardReplacement;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param CardReplacement $cardReplacement
+     */
+    public function setCardReplacement($cardReplacement)
+    {
+        $this->cardReplacement = $cardReplacement;
+    }
+
+    /**
      * @return bool
      */
     public function isAllFieldNull()
@@ -1045,6 +1183,10 @@ self::FIELD_CANCELLATION_REASON => $cancellationReason],
             return false;
         }
 
+        if (!is_null($this->preferredNameOnCard)) {
+            return false;
+        }
+
         if (!is_null($this->primaryAccountNumbers)) {
             return false;
         }
@@ -1073,6 +1215,10 @@ self::FIELD_CANCELLATION_REASON => $cancellationReason],
             return false;
         }
 
+        if (!is_null($this->monetaryAccount)) {
+            return false;
+        }
+
         if (!is_null($this->pinCodeAssignment)) {
             return false;
         }
@@ -1086,6 +1232,14 @@ self::FIELD_CANCELLATION_REASON => $cancellationReason],
         }
 
         if (!is_null($this->cardShipmentTrackingUrl)) {
+            return false;
+        }
+
+        if (!is_null($this->isEligibleForFreeReplacement)) {
+            return false;
+        }
+
+        if (!is_null($this->cardReplacement)) {
             return false;
         }
 

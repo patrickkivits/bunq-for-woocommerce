@@ -5,10 +5,10 @@ use bunq\Http\BunqResponse;
 
 /**
  */
-class BunqResponseRewardSenderList extends BunqResponse
+class BunqResponseNoteAttachmentAdyenCardTransactionList extends BunqResponse
 {
     /**
-     * @return RewardSender[]
+     * @return NoteAttachmentAdyenCardTransaction[]
      */
     public function getValue(): array
     {
