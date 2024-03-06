@@ -1,4 +1,7 @@
 {
+    "config": {
+        "platform-check": false
+    },
     "require": {
         "bunq/sdk_php": "^1.15",
         "league/oauth2-client": "^2.6",
