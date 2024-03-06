@@ -99,6 +99,7 @@ function bunq_init_gateway_class() {
 
                     if($access_token)
                     {
+                        delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
                         $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
                         $this->refresh_api_context();
                     }
@@ -178,8 +179,6 @@ function bunq_init_gateway_class() {
                 $this->update_option('api_context', '');
                 $this->update_option('api_key', '');
             }
-
-            delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
 
             $this->refresh_api_context();
         }
