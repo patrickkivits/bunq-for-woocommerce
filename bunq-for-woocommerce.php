@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.2.13
+ * Version: 1.3.0
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -248,53 +248,63 @@ function bunq_init_gateway_class() {
 				        'type'        => 'select',
 				        'options'     =>  $bank_accounts
 			        ),
-			        'oauth_client_id' => array(
-				        'title'       => 'OAuth Client ID',
-				        'type'        => 'text'
-			        ),
-			        'oauth_client_secret' => array(
-				        'title'       => 'OAuth Client Secret',
-				        'type'        => 'text'
-			        ),
-			        'api_key' => array(
-				        'title'       => 'Live API Key',
-				        'type'        => 'text',
-				        'custom_attributes' => array('readonly' => 'readonly')
-			        ),
-			        'api_context' => array(
-				        'title'       => 'Live API Context',
-				        'type'        => 'textarea',
-				        'css'         => 'height: 150px;',
-				        'custom_attributes' => array('readonly' => 'readonly')
-			        ),
 			        'testmode' => array(
 				        'title'       => 'Test mode',
 				        'label'       => 'Enable Test Mode',
 				        'type'        => 'checkbox',
 				        'description' => 'Place the payment gateway in test mode using test API keys.',
-				        'default'     => 'yes',
+				        'default'     => 'no',
 				        'desc_tip'    => true,
 			        ),
-			        'test_oauth_client_id' => array(
-				        'title'       => 'Test OAuth Client ID',
-				        'type'        => 'text',
-			        ),
-			        'test_oauth_client_secret' => array(
-				        'title'       => 'Test OAuth Client Secret',
-				        'type'        => 'text',
-			        ),
-			        'test_api_key' => array(
-				        'title'       => 'Test API Key',
-				        'type'        => 'text',
-				        'custom_attributes' => array('readonly' => 'readonly')
-			        ),
-			        'test_api_context' => array(
-				        'title'       => 'Test API Context',
-				        'type'        => 'textarea',
-				        'css'         => 'height: 150px;',
-				        'custom_attributes' => array('readonly' => 'readonly')
-			        ),
 		        );
+
+                $testmode = 'yes' === $this->get_option( 'testmode' );
+
+                if($testmode) {
+                    $this->form_fields = array_merge($this->form_fields, array(
+                        'test_oauth_client_id' => array(
+                            'title'       => 'Test OAuth Client ID',
+                            'type'        => 'text',
+                        ),
+                        'test_oauth_client_secret' => array(
+                            'title'       => 'Test OAuth Client Secret',
+                            'type'        => 'text',
+                        ),
+                        'test_api_key' => array(
+                            'title'       => 'Test API Key',
+                            'type'        => 'text',
+                            'custom_attributes' => array('readonly' => 'readonly')
+                        ),
+                        'test_api_context' => array(
+                            'title'       => 'Test API Context',
+                            'type'        => 'textarea',
+                            'css'         => 'height: 150px;',
+                            'custom_attributes' => array('readonly' => 'readonly')
+                        ),
+                    ));
+                } else {
+                    $this->form_fields = array_merge($this->form_fields, array(
+                        'oauth_client_id' => array(
+                            'title'       => 'OAuth Client ID',
+                            'type'        => 'text'
+                        ),
+                        'oauth_client_secret' => array(
+                            'title'       => 'OAuth Client Secret',
+                            'type'        => 'text'
+                        ),
+                        'api_key' => array(
+                            'title'       => 'Live API Key',
+                            'type'        => 'text',
+                            'custom_attributes' => array('readonly' => 'readonly')
+                        ),
+                        'api_context' => array(
+                            'title'       => 'Live API Context',
+                            'type'        => 'textarea',
+                            'css'         => 'height: 150px;',
+                            'custom_attributes' => array('readonly' => 'readonly')
+                        ),
+                    ));
+                }
 	        }
         }
 
