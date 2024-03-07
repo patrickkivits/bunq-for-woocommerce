@@ -73,27 +73,23 @@ function bunq_get_bank_accounts($api_context)
 
     if($api_context){
         try {
-            $transient = 'wc_bunq_gateway.bunq_get_bank_accounts';
-            if ( false === ($bank_accounts = get_transient($transient))) {
-                $bank_accounts = ['' => 'Select a bank account'];
-	            global $requestThrottler;
-	            $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountBank::ENDPOINT_URL_LISTING, 'GET');
-                foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBank::listing()->getValue() as $monetaryAccountBank) {
-                    foreach($monetaryAccountBank->getAlias() as $alias) {
-                        if($alias->getType() === 'IBAN'){
-                            $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
-                        }
+            $bank_accounts = ['' => 'Select a bank account'];
+            global $requestThrottler;
+            $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountBank::ENDPOINT_URL_LISTING, 'GET');
+            foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBank::listing()->getValue() as $monetaryAccountBank) {
+                foreach($monetaryAccountBank->getAlias() as $alias) {
+                    if($alias->getType() === 'IBAN'){
+                        $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
                     }
                 }
-                $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountJoint::ENDPOINT_URL_LISTING, 'GET');
-                foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountJoint::listing()->getValue() as $monetaryAccountJoint) {
-                    foreach($monetaryAccountJoint->getAlias() as $alias) {
-                        if($alias->getType() === 'IBAN'){
-                            $bank_accounts[$monetaryAccountJoint->getId()] = $alias->getValue().' - '.$monetaryAccountJoint->getDescription().' (Joint)';
-                        }
+            }
+            $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountJoint::ENDPOINT_URL_LISTING, 'GET');
+            foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountJoint::listing()->getValue() as $monetaryAccountJoint) {
+                foreach($monetaryAccountJoint->getAlias() as $alias) {
+                    if($alias->getType() === 'IBAN'){
+                        $bank_accounts[$monetaryAccountJoint->getId()] = $alias->getValue().' - '.$monetaryAccountJoint->getDescription().' (Joint)';
                     }
                 }
-                set_transient($transient, $bank_accounts);
             }
         }
         catch (Exception $exception) {

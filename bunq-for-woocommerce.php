@@ -123,10 +123,10 @@ function bunq_init_gateway_class() {
             $testmode = 'yes' === $this->get_option( 'testmode' );
             $oauth_client_id = $testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
             $oauth_client_secret = $testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
-            $oauth_redirect_uri = bunq_helper_get_current_url();
 
             if($oauth_client_id && $oauth_client_secret)
             {
+                $oauth_redirect_uri = bunq_helper_get_current_url();
                 $url = bunq_oauth2_get_authorization_url(
                     $oauth_client_id,
                     $oauth_client_secret,
@@ -179,8 +179,6 @@ function bunq_init_gateway_class() {
                 $this->update_option('api_context', '');
                 $this->update_option('api_key', '');
             }
-
-            $this->refresh_api_context();
         }
 
         public function get_setting($key)
@@ -215,8 +213,14 @@ function bunq_init_gateway_class() {
         public function init_form_fields()
         {
 	        if(is_admin()) {
-		        // Load Bunq API context
-		        $api_context = $this->load_api_context();
+                $transient = 'wc_bunq_gateway.bunq_get_bank_accounts';
+                $bank_accounts = get_transient($transient);
+
+                if(! $bank_accounts) {
+                    $api_context = $this->load_api_context();
+                    $bank_accounts = bunq_get_bank_accounts($api_context);
+                    set_transient($transient, $bank_accounts);
+                }
 
 		        $this->form_fields = array(
 			        'enabled' => array(
@@ -242,7 +246,7 @@ function bunq_init_gateway_class() {
 			        'monetary_account_bank_id' => array(
 				        'title'       => 'Bank account',
 				        'type'        => 'select',
-				        'options'     => bunq_get_bank_accounts($api_context)
+				        'options'     =>  $bank_accounts
 			        ),
 			        'oauth_client_id' => array(
 				        'title'       => 'OAuth Client ID',
