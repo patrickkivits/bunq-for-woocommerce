@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "bunq/sdk_php",
-            "version": "1.24.11.29",
+            "version": "1.24.16.36",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bunq/sdk_php.git",
-                "reference": "b6b7a5a1476b5bbeb95abd1331ad074ff8f23c4e"
+                "reference": "a308ab122e6c602019f3f31fe26507dc691bb980"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bunq/sdk_php/zipball/b6b7a5a1476b5bbeb95abd1331ad074ff8f23c4e",
-                "reference": "b6b7a5a1476b5bbeb95abd1331ad074ff8f23c4e",
+                "url": "https://api.github.com/repos/bunq/sdk_php/zipball/a308ab122e6c602019f3f31fe26507dc691bb980",
+                "reference": "a308ab122e6c602019f3f31fe26507dc691bb980",
                 "shasum": ""
             },
             "require": {
@@ -69,9 +69,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bunq/sdk_php/issues",
-                "source": "https://github.com/bunq/sdk_php/tree/1.24.11.29"
+                "source": "https://github.com/bunq/sdk_php/tree/1.24.16.36"
             },
-            "time": "2024-03-06T10:07:19+00:00"
+            "time": "2024-04-10T15:52:58+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
