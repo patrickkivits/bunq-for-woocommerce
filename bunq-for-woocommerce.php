@@ -2,15 +2,15 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
- * Tested up to: 6.4
+ * Tested up to: 6.5
  * Text Domain: bunq-for-woocommerce
  * License: GPLv2 or later
  * WC requires at least: 2.2.0
- * WC tested up to: 8.3
+ * WC tested up to: 8.6
  */
 
 require_once (__DIR__.'/vendor/autoload.php');
@@ -21,10 +21,42 @@ require_once (__DIR__.'/includes/requirements.php');
 
 // Declare compatibility with High-Performance Order Storage (HPOS)
 add_action( 'before_woocommerce_init', function() {
-    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+    if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
     }
 } );
+
+// Declare compatibility for 'cart_checkout_blocks'
+function declare_cart_checkout_blocks_compatibility() {
+    if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+    }
+}
+
+// Hook the custom function to the 'woocommerce_blocks_loaded' action
+add_action( 'woocommerce_blocks_loaded', 'bunq_register_blocks_payment_method_type' );
+
+function bunq_register_blocks_payment_method_type() {
+    // Check if the required class exists
+    if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+        return;
+    }
+
+    // Include the custom Blocks Checkout class
+    require_once plugin_dir_path(__FILE__) . 'includes/class-wc-bunq-woocommerce-block-checkout.php';
+
+    // Hook the registration function to the 'woocommerce_blocks_payment_method_type_registration' action
+    add_action(
+        'woocommerce_blocks_payment_method_type_registration',
+        function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+            // Register an instance of WC_Bunq_WooCommerce_Block_Checkout
+            $payment_method_registry->register( new WC_Bunq_WooCommerce_Block_Checkout );
+        }
+    );
+}
+
+// Hook the custom function to the 'before_woocommerce_init' action
+add_action('before_woocommerce_init', 'declare_cart_checkout_blocks_compatibility');
 
 if ( ! bunq_requirements_check() ) {
     add_action( 'admin_init', 'bunq_requirements_disable_plugin' );
