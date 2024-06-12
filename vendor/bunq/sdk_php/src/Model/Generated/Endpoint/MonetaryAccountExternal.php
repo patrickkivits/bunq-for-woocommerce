@@ -198,6 +198,20 @@ class MonetaryAccountExternal extends BunqModel
     protected $allAutoSaveId;
 
     /**
+     * The external service the Monetary Account is connected with.
+     *
+     * @var string
+     */
+    protected $service;
+
+    /**
+     * The open banking account for information about the external account.
+     *
+     * @var OpenBankingAccount
+     */
+    protected $openBankingAccount;
+
+    /**
      * The currency of the MonetaryAccountExternal as an ISO 4217 formatted
      * currency code.
      *
@@ -949,6 +963,48 @@ self::FIELD_SETTING => $setting],
     }
 
     /**
+     * The external service the Monetary Account is connected with.
+     *
+     * @return string
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param string $service
+     */
+    public function setService($service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * The open banking account for information about the external account.
+     *
+     * @return OpenBankingAccount
+     */
+    public function getOpenBankingAccount()
+    {
+        return $this->openBankingAccount;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param OpenBankingAccount $openBankingAccount
+     */
+    public function setOpenBankingAccount($openBankingAccount)
+    {
+        $this->openBankingAccount = $openBankingAccount;
+    }
+
+    /**
      * @return bool
      */
     public function isAllFieldNull()
@@ -1030,6 +1086,14 @@ self::FIELD_SETTING => $setting],
         }
 
         if (!is_null($this->allAutoSaveId)) {
+            return false;
+        }
+
+        if (!is_null($this->service)) {
+            return false;
+        }
+
+        if (!is_null($this->openBankingAccount)) {
             return false;
         }
 
