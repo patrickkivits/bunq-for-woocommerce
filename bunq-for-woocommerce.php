@@ -384,15 +384,14 @@ function bunq_init_gateway_class() {
             $obj = json_decode($input);
 
             $category = $obj->NotificationUrl->category;
-            $eventType = $obj->NotificationUrl->event_type;
 
-            if($category !== 'BUNQME_TAB' || $eventType !== 'BUNQME_TAB_RESULT_INQUIRY_CREATED')
+            if($category !== 'BUNQME_TAB')
             {
                 exit;
             }
 
             // Retrieve payment request id (bunqmetab)
-            $payment_request_id = $obj->NotificationUrl->object->BunqMeTabResultInquiry->bunq_me_tab_id;
+            $payment_request_id = $obj->NotificationUrl->object->BunqMeTab->id;
 
             // Retrieve order by bunq payment request id
             $orders = wc_get_orders( array(
