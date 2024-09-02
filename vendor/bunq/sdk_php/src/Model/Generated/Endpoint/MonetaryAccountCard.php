@@ -70,11 +70,25 @@ class MonetaryAccountCard extends BunqModel
     protected $dailyLimit;
 
     /**
+     * The maximum Amount the MonetaryAccountCard can be 'in the red'.
+     *
+     * @var Amount
+     */
+    protected $overdraftLimit;
+
+    /**
      * The current available balance Amount of the MonetaryAccountCard.
      *
      * @var Amount
      */
     protected $balance;
+
+    /**
+     * The current real balance Amount of the MonetaryAccountCard.
+     *
+     * @var Amount
+     */
+    protected $balanceReal;
 
     /**
      * The Aliases for the MonetaryAccountCard.
@@ -319,6 +333,27 @@ class MonetaryAccountCard extends BunqModel
     }
 
     /**
+     * The maximum Amount the MonetaryAccountCard can be 'in the red'.
+     *
+     * @return Amount
+     */
+    public function getOverdraftLimit()
+    {
+        return $this->overdraftLimit;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param Amount $overdraftLimit
+     */
+    public function setOverdraftLimit($overdraftLimit)
+    {
+        $this->overdraftLimit = $overdraftLimit;
+    }
+
+    /**
      * The current available balance Amount of the MonetaryAccountCard.
      *
      * @return Amount
@@ -337,6 +372,27 @@ class MonetaryAccountCard extends BunqModel
     public function setBalance($balance)
     {
         $this->balance = $balance;
+    }
+
+    /**
+     * The current real balance Amount of the MonetaryAccountCard.
+     *
+     * @return Amount
+     */
+    public function getBalanceReal()
+    {
+        return $this->balanceReal;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param Amount $balanceReal
+     */
+    public function setBalanceReal($balanceReal)
+    {
+        $this->balanceReal = $balanceReal;
     }
 
     /**
@@ -474,7 +530,15 @@ class MonetaryAccountCard extends BunqModel
             return false;
         }
 
+        if (!is_null($this->overdraftLimit)) {
+            return false;
+        }
+
         if (!is_null($this->balance)) {
+            return false;
+        }
+
+        if (!is_null($this->balanceReal)) {
             return false;
         }
 
