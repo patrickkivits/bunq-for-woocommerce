@@ -5,12 +5,12 @@ use bunq\Http\BunqResponse;
 
 /**
  */
-class BunqResponseRegistrySettlementList extends BunqResponse
+class BunqResponseInvoiceExportPdf extends BunqResponse
 {
     /**
-     * @return RegistrySettlement[]
+     * @return InvoiceExportPdf
      */
-    public function getValue(): array
+    public function getValue(): InvoiceExportPdf
     {
         return parent::getValue();
     }

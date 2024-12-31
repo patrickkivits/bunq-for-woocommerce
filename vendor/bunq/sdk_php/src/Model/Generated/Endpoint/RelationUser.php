@@ -68,6 +68,20 @@ class RelationUser extends BunqModel
     protected $counterUserStatus;
 
     /**
+     * Tap to Pay settings for the company employee.
+     *
+     * @var CompanyEmployeeSettingAdyenCardTransaction
+     */
+    protected $companyEmployeeSettingAdyenCardTransaction;
+
+    /**
+     * Cards accessible by the company employee
+     *
+     * @var CompanyEmployeeCard[]
+     */
+    protected $allCompanyEmployeeCard;
+
+    /**
      * The user's ID.
      *
      * @return string
@@ -236,6 +250,49 @@ class RelationUser extends BunqModel
     }
 
     /**
+     * Tap to Pay settings for the company employee.
+     *
+     * @return CompanyEmployeeSettingAdyenCardTransaction
+     */
+    public function getCompanyEmployeeSettingAdyenCardTransaction()
+    {
+        return $this->companyEmployeeSettingAdyenCardTransaction;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param CompanyEmployeeSettingAdyenCardTransaction
+     * $companyEmployeeSettingAdyenCardTransaction
+     */
+    public function setCompanyEmployeeSettingAdyenCardTransaction($companyEmployeeSettingAdyenCardTransaction)
+    {
+        $this->companyEmployeeSettingAdyenCardTransaction = $companyEmployeeSettingAdyenCardTransaction;
+    }
+
+    /**
+     * Cards accessible by the company employee
+     *
+     * @return CompanyEmployeeCard[]
+     */
+    public function getAllCompanyEmployeeCard()
+    {
+        return $this->allCompanyEmployeeCard;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param CompanyEmployeeCard[] $allCompanyEmployeeCard
+     */
+    public function setAllCompanyEmployeeCard($allCompanyEmployeeCard)
+    {
+        $this->allCompanyEmployeeCard = $allCompanyEmployeeCard;
+    }
+
+    /**
      * @return bool
      */
     public function isAllFieldNull()
@@ -269,6 +326,14 @@ class RelationUser extends BunqModel
         }
 
         if (!is_null($this->counterUserStatus)) {
+            return false;
+        }
+
+        if (!is_null($this->companyEmployeeSettingAdyenCardTransaction)) {
+            return false;
+        }
+
+        if (!is_null($this->allCompanyEmployeeCard)) {
             return false;
         }
 

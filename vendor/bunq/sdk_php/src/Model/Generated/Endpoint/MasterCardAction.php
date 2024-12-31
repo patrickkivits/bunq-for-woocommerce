@@ -282,7 +282,7 @@ class MasterCardAction extends BunqModel
     /**
      * The cardTokenization event awaiting acceptance by the user
      *
-     * @var string[]
+     * @var Event
      */
     protected $cardTokenizationEvent;
 
@@ -320,6 +320,13 @@ class MasterCardAction extends BunqModel
      * @var CashbackPayoutItem
      */
     protected $cashbackPayoutItem;
+
+    /**
+     * The point mutation for this action or null
+     *
+     * @var PointMutation
+     */
+    protected $pointMutation;
 
     /**
      * DEPRECATED. The blacklist enabled for the merchant of this transaction
@@ -363,6 +370,13 @@ class MasterCardAction extends BunqModel
      * @var string
      */
     protected $merchantCategoryCode;
+
+    /**
+     * The receipt the company employee has to provide for this transaction.
+     *
+     * @var CompanyEmployeeCardReceipt
+     */
+    protected $companyEmployeeCardReceipt;
 
     /**
      * @param int $masterCardActionId
@@ -1145,7 +1159,7 @@ class MasterCardAction extends BunqModel
     /**
      * The cardTokenization event awaiting acceptance by the user
      *
-     * @return string[]
+     * @return Event
      */
     public function getCardTokenizationEvent()
     {
@@ -1156,7 +1170,7 @@ class MasterCardAction extends BunqModel
      * @deprecated User should not be able to set values via setters, use
      * constructor.
      *
-     * @param string[] $cardTokenizationEvent
+     * @param Event $cardTokenizationEvent
      */
     public function setCardTokenizationEvent($cardTokenizationEvent)
     {
@@ -1266,6 +1280,27 @@ class MasterCardAction extends BunqModel
     public function setCashbackPayoutItem($cashbackPayoutItem)
     {
         $this->cashbackPayoutItem = $cashbackPayoutItem;
+    }
+
+    /**
+     * The point mutation for this action or null
+     *
+     * @return PointMutation
+     */
+    public function getPointMutation()
+    {
+        return $this->pointMutation;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param PointMutation $pointMutation
+     */
+    public function setPointMutation($pointMutation)
+    {
+        $this->pointMutation = $pointMutation;
     }
 
     /**
@@ -1393,6 +1428,27 @@ class MasterCardAction extends BunqModel
     public function setMerchantCategoryCode($merchantCategoryCode)
     {
         $this->merchantCategoryCode = $merchantCategoryCode;
+    }
+
+    /**
+     * The receipt the company employee has to provide for this transaction.
+     *
+     * @return CompanyEmployeeCardReceipt
+     */
+    public function getCompanyEmployeeCardReceipt()
+    {
+        return $this->companyEmployeeCardReceipt;
+    }
+
+    /**
+     * @deprecated User should not be able to set values via setters, use
+     * constructor.
+     *
+     * @param CompanyEmployeeCardReceipt $companyEmployeeCardReceipt
+     */
+    public function setCompanyEmployeeCardReceipt($companyEmployeeCardReceipt)
+    {
+        $this->companyEmployeeCardReceipt = $companyEmployeeCardReceipt;
     }
 
     /**
@@ -1560,6 +1616,10 @@ class MasterCardAction extends BunqModel
             return false;
         }
 
+        if (!is_null($this->pointMutation)) {
+            return false;
+        }
+
         if (!is_null($this->blacklist)) {
             return false;
         }
@@ -1581,6 +1641,10 @@ class MasterCardAction extends BunqModel
         }
 
         if (!is_null($this->merchantCategoryCode)) {
+            return false;
+        }
+
+        if (!is_null($this->companyEmployeeCardReceipt)) {
             return false;
         }
 
