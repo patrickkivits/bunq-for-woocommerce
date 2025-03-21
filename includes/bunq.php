@@ -32,7 +32,22 @@ function bunq_load_api_context_from_json($json) {
     {
         try {
             $apiContext = \bunq\Context\ApiContext::fromJson($json);
+
+            try {
+                $currentContext = \bunq\Context\BunqContext::getApiContext();
+                if($currentContext->getApiKey() === $apiContext->getApiKey() && $currentContext->isSessionActive()) {
+                    // Re-use current context, return early
+                    return $json;
+                }
+            } catch (Exception $exception) {
+                if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
+                    error_log($exception->getMessage());
+                }
+            }
+
+            // current context expired, ensure active session and load api context with new session
             $apiContext->ensureSessionActive();
+
 	        global $requestThrottler;
 	        $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountBank::ENDPOINT_URL_LISTING, 'GET');
             \bunq\Context\BunqContext::loadApiContext($apiContext);
