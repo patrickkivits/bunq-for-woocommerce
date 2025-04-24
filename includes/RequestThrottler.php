@@ -2,8 +2,8 @@
 
 // Based on: https://gist.github.com/holtkamp/bae00c495f80eace6aa49d12b46f5bca
 
-class RequestThrottler
-{
+class RequestThrottler {
+
 	/**
 	 * @var RequestThrottlerConfiguration
 	 */
@@ -16,30 +16,28 @@ class RequestThrottler
 	 *
 	 * @var []
 	 */
-	private $submittedRequestTimestamps = [];
+	private $submittedRequestTimestamps = array();
 
-	public function __construct(RequestThrottlerConfiguration $requestThrottlerConfiguration)
-	{
+	public function __construct( RequestThrottlerConfiguration $requestThrottlerConfiguration ) {
 		$this->requestThrottlerConfiguration = $requestThrottlerConfiguration;
 	}
 
-	public function ensureApiLimitsAreRespected(string $endpoint, string $requestMethod)
-	{
-		$endpointKey = $this->getEndpointKey($endpoint);
-		$this->submittedRequestTimestamps[$endpointKey] = $this->submittedRequestTimestamps[$endpointKey] ?? [];
-		$this->submittedRequestTimestamps[$endpointKey][$requestMethod] = $this->submittedRequestTimestamps[$endpointKey][$requestMethod] ?? [];
+	public function ensureApiLimitsAreRespected( string $endpoint, string $requestMethod ) {
+		$endpointKey                                      = $this->getEndpointKey( $endpoint );
+		$this->submittedRequestTimestamps[ $endpointKey ] = $this->submittedRequestTimestamps[ $endpointKey ] ?? array();
+		$this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ] = $this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ] ?? array();
 
-		if ($limitation = $this->requestThrottlerConfiguration->getAllowedNumberOfSubmittedRequests($endpointKey, $requestMethod)) {
-			$numberOfSubmittedRequests = $this->getNumberOfSubmittedRequests($endpointKey, $requestMethod, $limitation->sampleSize);
+		if ( $limitation = $this->requestThrottlerConfiguration->getAllowedNumberOfSubmittedRequests( $endpointKey, $requestMethod ) ) {
+			$numberOfSubmittedRequests = $this->getNumberOfSubmittedRequests( $endpointKey, $requestMethod, $limitation->sampleSize );
 
-			if ($numberOfSubmittedRequests >= $limitation->numberOfAllowedRequests) {
-				$numberOfSecondsToSleep = $this->getNumberOfSecondsToSleep($endpointKey, $requestMethod, $limitation->sampleSize);
-				\sleep($numberOfSecondsToSleep);
-				$this->ensureApiLimitsAreRespected($endpointKey, $requestMethod); //Recursively invoke this function to ensure API limits are (eventually) respected
+			if ( $numberOfSubmittedRequests >= $limitation->numberOfAllowedRequests ) {
+				$numberOfSecondsToSleep = $this->getNumberOfSecondsToSleep( $endpointKey, $requestMethod, $limitation->sampleSize );
+				\sleep( $numberOfSecondsToSleep );
+				$this->ensureApiLimitsAreRespected( $endpointKey, $requestMethod ); // Recursively invoke this function to ensure API limits are (eventually) respected
 				return;
 			}
 
-			$this->registerRequest($requestMethod, $endpointKey);
+			$this->registerRequest( $requestMethod, $endpointKey );
 		}
 	}
 
@@ -50,47 +48,43 @@ class RequestThrottler
 	 *
 	 * @return string
 	 */
-	private function getEndpointKey(string $endpoint): string
-	{
-		return \current(\explode('/', $endpoint));
+	private function getEndpointKey( string $endpoint ): string {
+		return \current( \explode( '/', $endpoint ) );
 	}
 
-	private function getNumberOfSubmittedRequests(string $endpointKey, string $requestMethod, int $numberOfConsideredSeconds): int
-	{
-		$now = \microtime(true);
+	private function getNumberOfSubmittedRequests( string $endpointKey, string $requestMethod, int $numberOfConsideredSeconds ): int {
+		$now                = \microtime( true );
 		$thresholdTimestamp = $now - $numberOfConsideredSeconds;
 
-		//Reject all requests that were issued before the threshold
-		$leftOverRequests = [];
-		foreach ($this->submittedRequestTimestamps[$endpointKey][$requestMethod] as $requestTimestamp) {
-			if($requestTimestamp >= $thresholdTimestamp) {
+		// Reject all requests that were issued before the threshold
+		$leftOverRequests = array();
+		foreach ( $this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ] as $requestTimestamp ) {
+			if ( $requestTimestamp >= $thresholdTimestamp ) {
 				$leftOverRequests[] = $requestTimestamp;
 			}
 		}
 
-		$this->submittedRequestTimestamps[$endpointKey][$requestMethod] = $leftOverRequests;
+		$this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ] = $leftOverRequests;
 
-		return count($this->submittedRequestTimestamps[$endpointKey][$requestMethod]);
+		return count( $this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ] );
 	}
 
-	private function getNumberOfSecondsToSleep(string $endpointKey, string $requestMethod, int $sampleSizeInSeconds): int
-	{
-		$earliestRequestTimestamp = min($this->submittedRequestTimestamps[$endpointKey][$requestMethod]);
-		$availableAgain = $earliestRequestTimestamp + $sampleSizeInSeconds;
-		$now = \microtime(true);
+	private function getNumberOfSecondsToSleep( string $endpointKey, string $requestMethod, int $sampleSizeInSeconds ): int {
+		$earliestRequestTimestamp = min( $this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ] );
+		$availableAgain           = $earliestRequestTimestamp + $sampleSizeInSeconds;
+		$now                      = \microtime( true );
 
-		return $availableAgain > $now ? (int) \ceil($availableAgain - $now) : 1;
+		return $availableAgain > $now ? (int) \ceil( $availableAgain - $now ) : 1;
 	}
 
-	private function registerRequest(string $requestMethod, string $endpointKey)
-	{
-		$this->submittedRequestTimestamps[$endpointKey][$requestMethod][] = \microtime(true);
+	private function registerRequest( string $requestMethod, string $endpointKey ) {
+		$this->submittedRequestTimestamps[ $endpointKey ][ $requestMethod ][] = \microtime( true );
 	}
 }
 
 
-class RequestThrottlerConfiguration
-{
+class RequestThrottlerConfiguration {
+
 	/**
 	 * @var string
 	 */
@@ -134,31 +128,29 @@ class RequestThrottlerConfiguration
 	 */
 	private $limitationConfiguration;
 
-	public function __construct(int $additionalBuffer = 1)
-	{
-		$this->limitationConfiguration = [
-			self::END_POINT_DEVICE_SERVER => [
-				self::REQUEST_METHOD_GET => new Limitation(9, 9 - $additionalBuffer),
-			],
-			self::END_POINT_USER => [
-				self::REQUEST_METHOD_POST => new Limitation(5, 5 - $additionalBuffer),
-			],
-			self::REQUEST_METHOD_GET => new Limitation(3, 3 - $additionalBuffer),
-			self::REQUEST_METHOD_POST => new Limitation(3, 3 - $additionalBuffer),
-			self::REQUEST_METHOD_PUT => new Limitation(3, 2 - $additionalBuffer),
-		];
+	public function __construct( int $additionalBuffer = 1 ) {
+		$this->limitationConfiguration = array(
+			self::END_POINT_DEVICE_SERVER => array(
+				self::REQUEST_METHOD_GET => new Limitation( 9, 9 - $additionalBuffer ),
+			),
+			self::END_POINT_USER          => array(
+				self::REQUEST_METHOD_POST => new Limitation( 5, 5 - $additionalBuffer ),
+			),
+			self::REQUEST_METHOD_GET      => new Limitation( 3, 3 - $additionalBuffer ),
+			self::REQUEST_METHOD_POST     => new Limitation( 3, 3 - $additionalBuffer ),
+			self::REQUEST_METHOD_PUT      => new Limitation( 3, 2 - $additionalBuffer ),
+		);
 	}
 
-	public function getAllowedNumberOfSubmittedRequests(string $endpointKey, string $requestMethod)
-	{
-		return $this->limitationConfiguration[$endpointKey][$requestMethod]
-		       ?? $this->limitationConfiguration[$requestMethod]
-		          ?? null;
+	public function getAllowedNumberOfSubmittedRequests( string $endpointKey, string $requestMethod ) {
+		return $this->limitationConfiguration[ $endpointKey ][ $requestMethod ]
+				?? $this->limitationConfiguration[ $requestMethod ]
+					?? null;
 	}
 }
 
-class Limitation
-{
+class Limitation {
+
 	/**
 	 * @var int
 	 */
@@ -171,9 +163,8 @@ class Limitation
 	 */
 	public $sampleSize;
 
-	public function __construct(int $sampleSize, int $numberOfAllowedRequests)
-	{
-		$this->sampleSize = $sampleSize;
+	public function __construct( int $sampleSize, int $numberOfAllowedRequests ) {
+		$this->sampleSize              = $sampleSize;
 		$this->numberOfAllowedRequests = $numberOfAllowedRequests;
 	}
 }

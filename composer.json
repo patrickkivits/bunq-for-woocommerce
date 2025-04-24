@@ -1,6 +1,9 @@
 {
     "config": {
-        "platform-check": false
+        "platform-check": false,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "require": {
         "bunq/sdk_php": "^1.15",
@@ -10,5 +13,8 @@
         "ext-curl": "*",
         "ext-json": "*",
         "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.0"
     }
 }

@@ -13,55 +13,58 @@
  * WC tested up to: 9.8
  */
 
-require_once (__DIR__.'/vendor/autoload.php');
-require_once (__DIR__.'/includes/helpers.php');
-require_once (__DIR__.'/includes/oauth2.php');
-require_once (__DIR__.'/includes/bunq.php');
-require_once (__DIR__.'/includes/requirements.php');
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/oauth2.php';
+require_once __DIR__ . '/includes/bunq.php';
+require_once __DIR__ . '/includes/requirements.php';
 
 // Declare compatibility with High-Performance Order Storage (HPOS)
-add_action( 'before_woocommerce_init', function() {
-    if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-    }
-} );
+add_action(
+	'before_woocommerce_init',
+	function () {
+		if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	}
+);
 
 // Declare compatibility for 'cart_checkout_blocks'
 function declare_cart_checkout_blocks_compatibility() {
-    if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
-    }
+	if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+	}
 }
 
 // Hook the custom function to the 'woocommerce_blocks_loaded' action
 add_action( 'woocommerce_blocks_loaded', 'bunq_register_blocks_payment_method_type' );
 
 function bunq_register_blocks_payment_method_type() {
-    // Check if the required class exists
-    if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-        return;
-    }
+	// Check if the required class exists
+	if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+		return;
+	}
 
-    // Include the custom Blocks Checkout class
-    require_once plugin_dir_path(__FILE__) . 'includes/class-wc-bunq-woocommerce-block-checkout.php';
+	// Include the custom Blocks Checkout class
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wc-bunq-woocommerce-block-checkout.php';
 
-    // Hook the registration function to the 'woocommerce_blocks_payment_method_type_registration' action
-    add_action(
-        'woocommerce_blocks_payment_method_type_registration',
-        function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-            // Register an instance of WC_Bunq_WooCommerce_Block_Checkout
-            $payment_method_registry->register( new WC_Bunq_WooCommerce_Block_Checkout );
-        }
-    );
+	// Hook the registration function to the 'woocommerce_blocks_payment_method_type_registration' action
+	add_action(
+		'woocommerce_blocks_payment_method_type_registration',
+		function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			// Register an instance of WC_Bunq_WooCommerce_Block_Checkout
+			$payment_method_registry->register( new WC_Bunq_WooCommerce_Block_Checkout() );
+		}
+	);
 }
 
 // Hook the custom function to the 'before_woocommerce_init' action
-add_action('before_woocommerce_init', 'declare_cart_checkout_blocks_compatibility');
+add_action( 'before_woocommerce_init', 'declare_cart_checkout_blocks_compatibility' );
 
 if ( ! bunq_requirements_check() ) {
-    add_action( 'admin_init', 'bunq_requirements_disable_plugin' );
-    add_action( 'admin_notices', 'bunq_requirements_show_notice' );
-    return;
+	add_action( 'admin_init', 'bunq_requirements_disable_plugin' );
+	add_action( 'admin_notices', 'bunq_requirements_show_notice' );
+	return;
 }
 
 /*
@@ -69,8 +72,8 @@ if ( ! bunq_requirements_check() ) {
  */
 add_filter( 'woocommerce_payment_gateways', 'bunq_add_gateway_class' );
 function bunq_add_gateway_class( $gateways ) {
-    $gateways[] = 'WC_Bunq_Gateway'; // your class name is here
-    return $gateways;
+	$gateways[] = 'WC_Bunq_Gateway'; // your class name is here
+	return $gateways;
 }
 
 /*
@@ -79,391 +82,375 @@ function bunq_add_gateway_class( $gateways ) {
 add_action( 'plugins_loaded', 'bunq_init_gateway_class' );
 function bunq_init_gateway_class() {
 
-    class WC_Bunq_Gateway extends WC_Payment_Gateway {
+	class WC_Bunq_Gateway extends WC_Payment_Gateway {
 
-        var $api_key;
-        var $testmode;
-        var $monetary_account_bank_id;
-        var $api_context;
-        var $oauth_client_id;
-        var $oauth_client_secret;
+		var $api_key;
+		var $testmode;
+		var $monetary_account_bank_id;
+		var $api_context;
+		var $oauth_client_id;
+		var $oauth_client_secret;
 
-        public function __construct() {
-            $this->id = 'bunq';
-            $this->icon = '';
-            $this->has_fields = false;
-            $this->method_title = 'bunq';
-            $this->method_description = 'bunq payment gateway for WooCommerce';
+		public function __construct() {
+			$this->id                 = 'bunq';
+			$this->icon               = '';
+			$this->has_fields         = false;
+			$this->method_title       = 'bunq';
+			$this->method_description = 'bunq payment gateway for WooCommerce';
 
-            $this->supports = array(
-                'products'
-            );
+			$this->supports = array(
+				'products',
+			);
 
-            $this->init_form_fields();
+			$this->init_form_fields();
 
-            // Load the settings.
-            $this->init_settings();
-            $this->title = $this->get_option( 'title' );
-            $this->description = $this->get_option( 'description' );
-            $this->enabled = $this->get_option( 'enabled' );
-            $this->testmode = 'yes' === $this->get_option( 'testmode' );
-            $this->api_key = $this->testmode ? $this->get_option( 'test_api_key' ) : $this->get_option( 'api_key' );
-            $this->oauth_client_id = $this->testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
-            $this->oauth_client_secret = $this->testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
-            $this->api_context = $this->testmode ? $this->get_option( 'test_api_context' ) : $this->get_option( 'api_context' );
-            $this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
+			// Load the settings.
+			$this->init_settings();
+			$this->title                    = $this->get_option( 'title' );
+			$this->description              = $this->get_option( 'description' );
+			$this->enabled                  = $this->get_option( 'enabled' );
+			$this->testmode                 = 'yes' === $this->get_option( 'testmode' );
+			$this->api_key                  = $this->testmode ? $this->get_option( 'test_api_key' ) : $this->get_option( 'api_key' );
+			$this->oauth_client_id          = $this->testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
+			$this->oauth_client_secret      = $this->testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
+			$this->api_context              = $this->testmode ? $this->get_option( 'test_api_context' ) : $this->get_option( 'api_context' );
+			$this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
 
-            // This action hook saves the settings
-            add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+			// This action hook saves the settings
+			add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
-            // You can also register a webhook here
-            add_action( 'woocommerce_api_wc_bunq_gateway', array( $this, 'bunq_callback' ) );
+			// You can also register a webhook here
+			add_action( 'woocommerce_api_wc_bunq_gateway', array( $this, 'bunq_callback' ) );
 
-            if(isset($_GET['code']) && $_GET['code'] && isset($_GET['state']) && $_GET['state'])
-            {
-                $oauth_redirect_uri = bunq_helper_get_current_url();
-                $oauth_redirect_uri = bunq_helper_remove_url_parameter('code', $oauth_redirect_uri);
-                $oauth_redirect_uri = bunq_helper_remove_url_parameter('state', $oauth_redirect_uri);
-                $oauth_redirect_uri = substr($oauth_redirect_uri, 0, -2); // Remove double &&
-                
-                try {
-                    $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $oauth_redirect_uri, $this->testmode);
+			if ( isset( $_GET['code'] ) && $_GET['code'] && isset( $_GET['state'] ) && $_GET['state'] ) {
+				$oauth_redirect_uri = bunq_helper_get_current_url();
+				$oauth_redirect_uri = bunq_helper_remove_url_parameter( 'code', $oauth_redirect_uri );
+				$oauth_redirect_uri = bunq_helper_remove_url_parameter( 'state', $oauth_redirect_uri );
+				$oauth_redirect_uri = substr( $oauth_redirect_uri, 0, -2 ); // Remove double &&
 
-                    if($access_token)
-                    {
-                        delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
-                        $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
-                        $this->refresh_api_context();
-                    }
-                }
-                catch (Exception $exception) {
-                    if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                        error_log($exception->getMessage());
-                    }
-                }
+				try {
+					$access_token = bunq_oauth2_get_access_token( $this->oauth_client_id, $this->oauth_client_secret, $oauth_redirect_uri, $this->testmode );
 
-                header('Location: '.$oauth_redirect_uri);
-                exit;
-            }
-        }
+					if ( $access_token ) {
+						delete_transient( 'wc_bunq_gateway.bunq_get_bank_accounts' );
+						$this->update_option( ( $this->testmode ? 'test_api_key' : 'api_key' ), $access_token );
+						$this->refresh_api_context();
+					}
+				} catch ( Exception $exception ) {
+					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+						error_log( $exception->getMessage() );
+					}
+				}
 
-        public function admin_options()
-        {
-            parent::admin_options();
-            $this->init_settings();
+				header( 'Location: ' . $oauth_redirect_uri );
+				exit;
+			}
+		}
 
-            $testmode = 'yes' === $this->get_option( 'testmode' );
-            $oauth_client_id = $testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
-            $oauth_client_secret = $testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
+		public function admin_options() {
+			parent::admin_options();
+			$this->init_settings();
 
-            if($oauth_client_id && $oauth_client_secret)
-            {
-                $oauth_redirect_uri = bunq_helper_get_current_url();
-                $url = bunq_oauth2_get_authorization_url(
-                    $oauth_client_id,
-                    $oauth_client_secret,
-                    $oauth_redirect_uri,
-                    $testmode
-                );
-                echo '<a href="'.$url.'" class="button-secondary">OAuth Authorization Request</a>';
-            }
-        }
+			$testmode            = 'yes' === $this->get_option( 'testmode' );
+			$oauth_client_id     = $testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
+			$oauth_client_secret = $testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
 
-        public function refresh_api_context()
-        {
-            // Get saved testmode and api key
-            $testmode = 'yes' === $this->settings['testmode'];
-            $api_key = $testmode ? $this->settings['test_api_key'] : $this->settings['api_key'];
-            $monetary_account_bank_id = $this->settings['monetary_account_bank_id'] > 0 ? intval($this->settings['monetary_account_bank_id']) : null;
+			if ( $oauth_client_id && $oauth_client_secret ) {
+				$oauth_redirect_uri = bunq_helper_get_current_url();
+				$url                = bunq_oauth2_get_authorization_url(
+					$oauth_client_id,
+					$oauth_client_secret,
+					$oauth_redirect_uri,
+					$testmode
+				);
+				echo '<a href="' . $url . '" class="button-secondary">OAuth Authorization Request</a>';
+			}
+		}
 
-            // Recreate API context after settings are saved
-            try {
-                if($api_key)
-                {
-                    $api_context = bunq_create_api_context($api_key, $testmode);
-                    $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
+		public function refresh_api_context() {
+			// Get saved testmode and api key
+			$testmode                 = 'yes' === $this->settings['testmode'];
+			$api_key                  = $testmode ? $this->settings['test_api_key'] : $this->settings['api_key'];
+			$monetary_account_bank_id = $this->settings['monetary_account_bank_id'] > 0 ? intval( $this->settings['monetary_account_bank_id'] ) : null;
 
-                    // Setup callback URL for bunq (not for local environment)
-                    if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
-                    {
-                        bunq_create_notification_filters($monetary_account_bank_id);
-                    }
-                }
-            } catch (Exception $exception) {
-                if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                    error_log($exception->getMessage());
-                }
-            }
-        }
+			// Recreate API context after settings are saved
+			try {
+				if ( $api_key ) {
+					$api_context = bunq_create_api_context( $api_key, $testmode );
+					$this->update_option( ( $testmode ? 'test_api_context' : 'api_context' ), $api_context->toJson() );
 
-        public function process_admin_options() {
-            parent::process_admin_options();
+					// Setup callback URL for bunq (not for local environment)
+					if ( ! in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ) ) ) {
+						bunq_create_notification_filters( $monetary_account_bank_id );
+					}
+				}
+			} catch ( Exception $exception ) {
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( $exception->getMessage() );
+				}
+			}
+		}
 
-            // Reset readonly options based on OAuth Client ID and OAuth Client Secret
-            if(!$this->settings['test_oauth_client_id'] || !$this->settings['test_oauth_client_secret'])
-            {
-                $this->update_option('test_api_context', '');
-                $this->update_option('test_api_key', '');
-                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
-            }
+		public function process_admin_options() {
+			parent::process_admin_options();
 
-            if(!$this->settings['oauth_client_id'] || !$this->settings['oauth_client_secret'])
-            {
-                $this->update_option('api_context', '');
-                $this->update_option('api_key', '');
-                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
-            }
-        }
+			// Reset readonly options based on OAuth Client ID and OAuth Client Secret
+			if ( ! $this->settings['test_oauth_client_id'] || ! $this->settings['test_oauth_client_secret'] ) {
+				$this->update_option( 'test_api_context', '' );
+				$this->update_option( 'test_api_key', '' );
+				delete_transient( 'wc_bunq_gateway.bunq_get_bank_accounts' );
+			}
 
-        public function get_setting($key)
-        {
-            $this->init_settings();
+			if ( ! $this->settings['oauth_client_id'] || ! $this->settings['oauth_client_secret'] ) {
+				$this->update_option( 'api_context', '' );
+				$this->update_option( 'api_key', '' );
+				delete_transient( 'wc_bunq_gateway.bunq_get_bank_accounts' );
+			}
+		}
 
-            if(!isset($this->settings['testmode']))
-            {
-                return null;
-            }
+		public function get_setting( $key ) {
+			$this->init_settings();
 
-            $testmode = 'yes' === $this->settings['testmode'];
+			if ( ! isset( $this->settings['testmode'] ) ) {
+				return null;
+			}
 
-            if($key === 'api_context')
-            {
-                $key = $testmode ? 'test_api_context' : 'api_context';
-            }
+			$testmode = 'yes' === $this->settings['testmode'];
 
-            if($key === 'oauth_client_id')
-            {
-                $key = $testmode ? 'test_oauth_client_id' : 'oauth_client_id';
-            }
+			if ( $key === 'api_context' ) {
+				$key = $testmode ? 'test_api_context' : 'api_context';
+			}
 
-            if($key === 'oauth_client_secret')
-            {
-                $key = $testmode ? 'test_oauth_client_secret' : 'oauth_client_secret';
-            }
+			if ( $key === 'oauth_client_id' ) {
+				$key = $testmode ? 'test_oauth_client_id' : 'oauth_client_id';
+			}
 
-            return isset($this->settings[$key]) ? $this->settings[$key] : null;
-        }
+			if ( $key === 'oauth_client_secret' ) {
+				$key = $testmode ? 'test_oauth_client_secret' : 'oauth_client_secret';
+			}
 
-        public function init_form_fields()
-        {
-	        if(is_admin()) {
-                $transient = 'wc_bunq_gateway.bunq_get_bank_accounts';
-                $bank_accounts = get_transient($transient);
+			return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : null;
+		}
 
-                if(! $bank_accounts) {
-                    $api_context = $this->load_api_context();
-                    $bank_accounts = bunq_get_bank_accounts($api_context);
-                    set_transient($transient, $bank_accounts);
-                }
+		public function init_form_fields() {
+			if ( is_admin() ) {
+				$transient     = 'wc_bunq_gateway.bunq_get_bank_accounts';
+				$bank_accounts = get_transient( $transient );
 
-		        $this->form_fields = array(
-			        'enabled' => array(
-				        'title'       => 'Enable/Disable',
-				        'label'       => 'Enable bunq Gateway',
-				        'type'        => 'checkbox',
-				        'description' => '',
-				        'default'     => 'no'
-			        ),
-			        'title' => array(
-				        'title'       => 'Title',
-				        'type'        => 'text',
-				        'description' => 'This controls the title which the user sees during checkout.',
-				        'default'     => 'iDEAL, Credit Card or Sofort',
-				        'desc_tip'    => true,
-			        ),
-			        'description' => array(
-				        'title'       => 'Description',
-				        'type'        => 'textarea',
-				        'description' => 'This controls the description which the user sees during checkout.',
-				        'default'     => 'Pay with iDEAL, Credit Card or Sofort',
-			        ),
-			        'monetary_account_bank_id' => array(
-				        'title'       => 'Bank account',
-				        'type'        => 'select',
-				        'options'     =>  $bank_accounts
-			        ),
-			        'testmode' => array(
-				        'title'       => 'Test mode',
-				        'label'       => 'Enable Test Mode',
-				        'type'        => 'checkbox',
-				        'description' => 'Place the payment gateway in test mode using test API keys.',
-				        'default'     => 'no',
-				        'desc_tip'    => true,
-			        ),
-		        );
+				if ( ! $bank_accounts ) {
+					$api_context   = $this->load_api_context();
+					$bank_accounts = bunq_get_bank_accounts( $api_context );
+					set_transient( $transient, $bank_accounts );
+				}
 
-                $testmode = 'yes' === $this->get_option( 'testmode' );
+				$this->form_fields = array(
+					'enabled'                  => array(
+						'title'       => 'Enable/Disable',
+						'label'       => 'Enable bunq Gateway',
+						'type'        => 'checkbox',
+						'description' => '',
+						'default'     => 'no',
+					),
+					'title'                    => array(
+						'title'       => 'Title',
+						'type'        => 'text',
+						'description' => 'This controls the title which the user sees during checkout.',
+						'default'     => 'iDEAL, Credit Card or Sofort',
+						'desc_tip'    => true,
+					),
+					'description'              => array(
+						'title'       => 'Description',
+						'type'        => 'textarea',
+						'description' => 'This controls the description which the user sees during checkout.',
+						'default'     => 'Pay with iDEAL, Credit Card or Sofort',
+					),
+					'monetary_account_bank_id' => array(
+						'title'   => 'Bank account',
+						'type'    => 'select',
+						'options' => $bank_accounts,
+					),
+					'testmode'                 => array(
+						'title'       => 'Test mode',
+						'label'       => 'Enable Test Mode',
+						'type'        => 'checkbox',
+						'description' => 'Place the payment gateway in test mode using test API keys.',
+						'default'     => 'no',
+						'desc_tip'    => true,
+					),
+				);
 
-                if($testmode) {
-                    $this->form_fields = array_merge($this->form_fields, array(
-                        'test_oauth_client_id' => array(
-                            'title'       => 'Test OAuth Client ID',
-                            'type'        => 'text',
-                        ),
-                        'test_oauth_client_secret' => array(
-                            'title'       => 'Test OAuth Client Secret',
-                            'type'        => 'text',
-                        ),
-                        'test_api_key' => array(
-                            'title'       => 'Test API Key',
-                            'type'        => 'text',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                        'test_api_context' => array(
-                            'title'       => 'Test API Context',
-                            'type'        => 'textarea',
-                            'css'         => 'height: 150px;',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                    ));
-                } else {
-                    $this->form_fields = array_merge($this->form_fields, array(
-                        'oauth_client_id' => array(
-                            'title'       => 'OAuth Client ID',
-                            'type'        => 'text'
-                        ),
-                        'oauth_client_secret' => array(
-                            'title'       => 'OAuth Client Secret',
-                            'type'        => 'text'
-                        ),
-                        'api_key' => array(
-                            'title'       => 'Live API Key',
-                            'type'        => 'text',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                        'api_context' => array(
-                            'title'       => 'Live API Context',
-                            'type'        => 'textarea',
-                            'css'         => 'height: 150px;',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                    ));
-                }
-	        }
-        }
+				$testmode = 'yes' === $this->get_option( 'testmode' );
 
-        public function process_payment( $order_id ) {
+				if ( $testmode ) {
+					$this->form_fields = array_merge(
+						$this->form_fields,
+						array(
+							'test_oauth_client_id'     => array(
+								'title' => 'Test OAuth Client ID',
+								'type'  => 'text',
+							),
+							'test_oauth_client_secret' => array(
+								'title' => 'Test OAuth Client Secret',
+								'type'  => 'text',
+							),
+							'test_api_key'             => array(
+								'title'             => 'Test API Key',
+								'type'              => 'text',
+								'custom_attributes' => array( 'readonly' => 'readonly' ),
+							),
+							'test_api_context'         => array(
+								'title'             => 'Test API Context',
+								'type'              => 'textarea',
+								'css'               => 'height: 150px;',
+								'custom_attributes' => array( 'readonly' => 'readonly' ),
+							),
+						)
+					);
+				} else {
+					$this->form_fields = array_merge(
+						$this->form_fields,
+						array(
+							'oauth_client_id'     => array(
+								'title' => 'OAuth Client ID',
+								'type'  => 'text',
+							),
+							'oauth_client_secret' => array(
+								'title' => 'OAuth Client Secret',
+								'type'  => 'text',
+							),
+							'api_key'             => array(
+								'title'             => 'Live API Key',
+								'type'              => 'text',
+								'custom_attributes' => array( 'readonly' => 'readonly' ),
+							),
+							'api_context'         => array(
+								'title'             => 'Live API Context',
+								'type'              => 'textarea',
+								'css'               => 'height: 150px;',
+								'custom_attributes' => array( 'readonly' => 'readonly' ),
+							),
+						)
+					);
+				}
+			}
+		}
 
-            $this->load_api_context();
+		public function process_payment( $order_id ) {
 
-            $order = wc_get_order( $order_id );
-            $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
+			$this->load_api_context();
 
-            $payment_request = bunq_create_payment_request(
-                $order->get_total(),
-                $order->get_currency(),
-                '#'.$order->get_order_number(),
-                $this->get_return_url($order),
-                $monetary_account_bank_id
-            );
+			$order                    = wc_get_order( $order_id );
+			$monetary_account_bank_id = $this->get_setting( 'monetary_account_bank_id' ) > 0 ? intval( $this->get_setting( 'monetary_account_bank_id' ) ) : null;
 
-            if($payment_request && isset($payment_request['id'])) {
-                $order->add_order_note('bunq payment_request created '.$payment_request['id']);
-                $order->update_meta_data( 'bunq_payment_request_id', $payment_request['id']);
-                $order->save();
+			$payment_request = bunq_create_payment_request(
+				$order->get_total(),
+				$order->get_currency(),
+				'#' . $order->get_order_number(),
+				$this->get_return_url( $order ),
+				$monetary_account_bank_id
+			);
 
-                return array(
-                    'result'   => 'success',
-                    'redirect' => $payment_request['url'],
-                );
-            }
+			if ( $payment_request && isset( $payment_request['id'] ) ) {
+				$order->add_order_note( 'bunq payment_request created ' . $payment_request['id'] );
+				$order->update_meta_data( 'bunq_payment_request_id', $payment_request['id'] );
+				$order->save();
 
-            return array('result' => 'failure');
-        }
+				return array(
+					'result'   => 'success',
+					'redirect' => $payment_request['url'],
+				);
+			}
 
-        public function bunq_callback() {
+			return array( 'result' => 'failure' );
+		}
 
-	        $this->load_api_context();
+		public function bunq_callback() {
 
-            // Get input and save raw as text file
-            $input = file_get_contents('php://input');
+			$this->load_api_context();
 
-            if(!$input)
-            {
-                exit;
-            }
+			// Get input and save raw as text file
+			$input = file_get_contents( 'php://input' );
 
-            $obj = json_decode($input);
+			if ( ! $input ) {
+				exit;
+			}
 
-            $category = $obj->NotificationUrl->category;
+			$obj = json_decode( $input );
 
-            if($category !== 'BUNQME_TAB')
-            {
-                exit;
-            }
+			$category = $obj->NotificationUrl->category;
 
-            // Retrieve payment request id (bunqmetab)
-            $payment_request_id = $obj->NotificationUrl->object->BunqMeTab->id;
+			if ( $category !== 'BUNQME_TAB' ) {
+				exit;
+			}
 
-            // Retrieve order by bunq payment request id
-            $orders = wc_get_orders( array(
-                'limit'        => 1, // Query all orders
-                'orderby'      => 'date',
-                'order'        => 'DESC',
-                'meta_key'     => 'bunq_payment_request_id',
-                'meta_compare' => $payment_request_id
-            ));
+			// Retrieve payment request id (bunqmetab)
+			$payment_request_id = $obj->NotificationUrl->object->BunqMeTab->id;
 
-            // Only continue is we have exactly 1 order
-            if(count($orders) !== 1)
-            {
-                exit;
-            }
+			// Retrieve order by bunq payment request id
+			$orders = wc_get_orders(
+				array(
+					'limit'        => 1, // Query all orders
+					'orderby'      => 'date',
+					'order'        => 'DESC',
+					'meta_key'     => 'bunq_payment_request_id',
+					'meta_compare' => $payment_request_id,
+				)
+			);
 
-            // Set order
-            $order = $orders[0];
+			// Only continue is we have exactly 1 order
+			if ( count( $orders ) !== 1 ) {
+				exit;
+			}
 
-            if(!$order->needs_payment())
-            {
-                exit;
-            }
+			// Set order
+			$order = $orders[0];
 
-            // Check payment
-            $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
-            $payment_request = bunq_get_payment_request($payment_request_id, $monetary_account_bank_id);
+			if ( ! $order->needs_payment() ) {
+				exit;
+			}
 
-            foreach($payment_request->getResultInquiries() as $resultInquiry)
-            {
-                $payment = $resultInquiry->getPayment();
+			// Check payment
+			$monetary_account_bank_id = $this->get_setting( 'monetary_account_bank_id' ) > 0 ? intval( $this->get_setting( 'monetary_account_bank_id' ) ) : null;
+			$payment_request          = bunq_get_payment_request( $payment_request_id, $monetary_account_bank_id );
 
-                // Process payment
-                if($payment && $payment->getAmount()->getCurrency() === $order->get_currency() && $payment->getAmount()->getValue() === $order->get_total())
-                {
-                    // Update order with payment id
-                    $order->add_order_note('bunq payment received '.$payment->getId());
-                    $order->update_meta_data( 'bunq_payment_id', $payment->getId());
-                    $order->save();
+			foreach ( $payment_request->getResultInquiries() as $resultInquiry ) {
+				$payment = $resultInquiry->getPayment();
 
-                    // Complete order
-                    global $woocommerce;
-                    $woocommerce->cart->empty_cart();
-                    $order->payment_complete();
+				// Process payment
+				if ( $payment && $payment->getAmount()->getCurrency() === $order->get_currency() && $payment->getAmount()->getValue() === $order->get_total() ) {
+					// Update order with payment id
+					$order->add_order_note( 'bunq payment received ' . $payment->getId() );
+					$order->update_meta_data( 'bunq_payment_id', $payment->getId() );
+					$order->save();
 
-                    break;
-                }
-            }
+					// Complete order
+					global $woocommerce;
+					$woocommerce->cart->empty_cart();
+					$order->payment_complete();
 
-            exit;
-        }
+					break;
+				}
+			}
 
-        function load_api_context() {
-	        $api_context_json = $this->get_setting('api_context');
-	        $testmode = $this->get_setting('test_mode');
+			exit;
+		}
 
-	        // Load Bunq API context from JSON
-	        if($api_context_json)
-	        {
-		        $new_api_context_json = bunq_load_api_context_from_json($api_context_json);
+		function load_api_context() {
+			$api_context_json = $this->get_setting( 'api_context' );
+			$testmode         = $this->get_setting( 'test_mode' );
 
-		        if($new_api_context_json && $new_api_context_json != $api_context_json)
-		        {
-			        $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $new_api_context_json);
-		        }
+			// Load Bunq API context from JSON
+			if ( $api_context_json ) {
+				$new_api_context_json = bunq_load_api_context_from_json( $api_context_json );
 
-		        return true;
-	        }
+				if ( $new_api_context_json && $new_api_context_json !== $api_context_json ) {
+					$this->update_option( ( $testmode ? 'test_api_context' : 'api_context' ), $new_api_context_json );
+				}
 
-	        return false;
-        }
-    }
+				return true;
+			}
+
+			return false;
+		}
+	}
 }
