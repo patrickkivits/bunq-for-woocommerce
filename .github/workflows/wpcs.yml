@@ -1,6 +1,6 @@
 name: WPCS check
 
-on: pull_request
+on: push
 
 jobs:
   phpcs:
