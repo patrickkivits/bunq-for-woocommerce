@@ -204,12 +204,14 @@ function bunq_init_gateway_class() {
             {
                 $this->update_option('test_api_context', '');
                 $this->update_option('test_api_key', '');
+                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
             }
 
             if(!$this->settings['oauth_client_id'] || !$this->settings['oauth_client_secret'])
             {
                 $this->update_option('api_context', '');
                 $this->update_option('api_key', '');
+                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
             }
         }
 
