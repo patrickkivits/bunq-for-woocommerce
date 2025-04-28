@@ -14,7 +14,7 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 ## Requirements
 
-- [bunq premium account](https://bunq.com/invite/patrickkivits)
+- [bunq account](https://bunq.com/invite/patrickkivits)
 - HTTPS/SSL certificate (for callbacks/payment processing to work)
 - PHP version: >= 7.0
 - PHP extensions: openssl, curl, json, mbstring
