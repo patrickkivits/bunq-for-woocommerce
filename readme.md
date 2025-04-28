@@ -31,9 +31,9 @@ https://bunq-for-woocommerce.patrickkivits.com/
 ## Configuration
 
 1. In your WordPress admin panel, navigate to **WooCommerce** > **Settings** > **Payments** > **bunq**.
-2. In the bunq app, navigate to **Profile** > **Security & Preferences** > **Developers** > **OAuth** > **Add Redirect URL**.
+2. In the bunq app, navigate to **Developers** > **OAuth** > **Add Redirect URL**.
 3. Enter the **full URL** of the plugin page (e.g. https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq).
-4. In the bunq app, navigate to **Profile** > **Security & Preferences** > **Developers** > **OAuth** > **Show Client Details**.
+4. In the bunq app, navigate to **Developers** > **OAuth** > **Show Client Details**.
 5. Enter the **Client ID** and **Client Secret** in the plugin settings and **Save changes**.
 6. Click the **OAuth Authorization Request** to authorize the plugin in the bunq app.
 
