@@ -87,13 +87,39 @@ function bunq_init_gateway_class() {
         var $api_context;
         var $oauth_client_id;
         var $oauth_client_secret;
+        var $direct_gateway;
 
         public function __construct() {
             $this->id = 'bunq';
             $this->icon = '';
-            $this->has_fields = false;
             $this->method_title = 'bunq';
             $this->method_description = 'bunq payment gateway for WooCommerce';
+            $this->payment_methods = [
+                [
+                    'id' => 'card',
+                    'description' => 'Credit or Debit Card',
+                    'min' => 1,
+                    'max' => 500,
+                ],
+                [
+                    'id' => 'ideal',
+                    'description' => 'iDEAL',
+                    'min' => 0.01,
+                    'max' => null,
+                ],
+                [
+                    'id' => 'bancontact',
+                    'description' => 'Bancontact',
+                    'min' => 5,
+                    'max' => 10000,
+                ],
+                [
+                    'id' => 'bunq-transfer',
+                    'description' => 'From a bunq account',
+                    'min' => 0.01,
+                    'max' => null,
+                ],
+            ];
 
             $this->supports = array(
                 'products'
@@ -112,6 +138,8 @@ function bunq_init_gateway_class() {
             $this->oauth_client_secret = $this->testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
             $this->api_context = $this->testmode ? $this->get_option( 'test_api_context' ) : $this->get_option( 'api_context' );
             $this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
+            $this->direct_gateway = 'yes' === $this->get_option( 'direct_gateway' );
+            $this->has_fields = $this->direct_gateway;
 
             // This action hook saves the settings
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -145,6 +173,39 @@ function bunq_init_gateway_class() {
                 header('Location: '.$oauth_redirect_uri);
                 exit;
             }
+        }
+
+        public function payment_fields()
+        {
+            global $woocommerce;
+
+            $total = $woocommerce->cart->total;
+
+            $allowed_payment_methods = array_filter($this->payment_methods, function($payment_method) use ($total) {
+                return $payment_method['min'] <= $total && ($payment_method['max'] === null || $payment_method['max'] >= $total);
+            });
+
+            if($this->has_fields) {
+                echo woocommerce_form_field(
+                    'wc_bunq_gateway_payment_method',
+                    [
+                        'type'        => 'select',
+                        'class'       => ['form-row-wide'],
+                        'required'    => true,
+                        'options'     =>  array_column($allowed_payment_methods, 'description', 'id')
+                    ]
+                );
+            }
+        }
+
+        public function validate_fields()
+        {
+            if (!empty($_POST['wc_bunq_gateway_payment_method']) && !in_array($_POST['wc_bunq_gateway_payment_method'], array_column($this->payment_methods, 'id'))) {
+                wc_add_notice('Payment method invalid', 'error');
+                return false;
+            }
+
+            return true;
         }
 
         public function admin_options()
@@ -264,6 +325,14 @@ function bunq_init_gateway_class() {
 				        'description' => '',
 				        'default'     => 'no'
 			        ),
+                    'testmode' => array(
+                        'title'       => 'Test mode',
+                        'label'       => 'Enable Test Mode',
+                        'type'        => 'checkbox',
+                        'description' => 'Place the payment gateway in test mode using test API keys.',
+                        'default'     => 'no',
+                        'desc_tip'    => true,
+                    ),
 			        'title' => array(
 				        'title'       => 'Title',
 				        'type'        => 'text',
@@ -282,14 +351,14 @@ function bunq_init_gateway_class() {
 				        'type'        => 'select',
 				        'options'     =>  $bank_accounts
 			        ),
-			        'testmode' => array(
-				        'title'       => 'Test mode',
-				        'label'       => 'Enable Test Mode',
-				        'type'        => 'checkbox',
-				        'description' => 'Place the payment gateway in test mode using test API keys.',
-				        'default'     => 'no',
-				        'desc_tip'    => true,
-			        ),
+                    'direct_gateway' => array(
+                        'title'       => 'Direct Gateway',
+                        'label'       => 'Enable direct gateway',
+                        'type'        => 'checkbox',
+                        'default'     => 'no',
+                        'description' => 'Allow your customers to directly select a payment method from the checkout page.',
+                        'desc_tip'    => true,
+                    ),
 		        );
 
                 $testmode = 'yes' === $this->get_option( 'testmode' );
@@ -362,9 +431,14 @@ function bunq_init_gateway_class() {
                 $order->update_meta_data( 'bunq_payment_request_id', $payment_request['id']);
                 $order->save();
 
+                $payment_method = '';
+                if($_POST['wc_bunq_gateway_payment_method']) {
+                    $payment_method = '/'.$_POST['wc_bunq_gateway_payment_method'];
+                }
+
                 return array(
                     'result'   => 'success',
-                    'redirect' => $payment_request['url'],
+                    'redirect' => $payment_request['url'].$payment_method,
                 );
             }
 
