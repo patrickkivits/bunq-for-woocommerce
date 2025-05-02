@@ -5,11 +5,11 @@ use bunq\Context\ApiContext;
 use bunq\Exception\BunqException;
 use bunq\Http\ApiClient;
 use bunq\Model\Generated\Endpoint\BunqResponseSandboxUserPerson;
-use bunq\Model\Generated\Endpoint\SandboxUserPerson;
+use bunq\Model\Generated\Endpoint\SandboxUserPersonApiObject;
 
 /**
  */
-class SandboxUserInternal extends SandboxUserPerson
+class SandboxUserInternal extends SandboxUserPersonApiObject
 {
     /**
      * Error constants.
@@ -17,14 +17,14 @@ class SandboxUserInternal extends SandboxUserPerson
     const ERROR_API_CONTEXT_IS_NULL = 'ApiContext should not be null, use the generated class instead.';
 
     /**
-     * @param string[] $customHeaders
+     * @param string[] $allCustomHeader
      * @param ApiContext|null $apiContext
      *
      * @return BunqResponseSandboxUserPerson
      * @throws BunqException
      */
     public static function create(
-        array $customHeaders = [],
+        array $allCustomHeader = [],
         ApiContext $apiContext = null
     ): BunqResponseSandboxUserPerson {
         if (is_null($apiContext)) {
@@ -38,7 +38,7 @@ class SandboxUserInternal extends SandboxUserPerson
                 []
             ),
             [],
-            $customHeaders
+            $allCustomHeader
         );
 
         return BunqResponseSandboxUserPerson::castFromBunqResponse(

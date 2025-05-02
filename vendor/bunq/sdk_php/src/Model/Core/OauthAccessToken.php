@@ -3,7 +3,7 @@ namespace bunq\Model\Core;
 
 use bunq\Context\BunqContext;
 use bunq\Exception\BunqException;
-use bunq\Model\Generated\Endpoint\OauthClient;
+use bunq\Model\Generated\Endpoint\OauthClientApiObject;
 use bunq\Util\BunqEnumApiEnvironmentType;
 use GuzzleHttp\Client;
 
@@ -71,7 +71,7 @@ class OauthAccessToken extends BunqModel
      * @param BunqEnumOauthGrantType $grantType
      * @param string $authCode
      * @param string $redirectUri
-     * @param OauthClient $client
+     * @param OauthClientApiObject $client
      *
      * @return OauthAccessToken
      */
@@ -79,7 +79,7 @@ class OauthAccessToken extends BunqModel
         BunqEnumOauthGrantType $grantType,
         string $authCode,
         string $redirectUri,
-        OauthClient $client
+        OauthClientApiObject $client
     ): OauthAccessToken {
         $responseString = (new Client())->post(
             static::createTokenUri($grantType->getChoiceString(), $authCode, $redirectUri, $client)
@@ -104,7 +104,7 @@ class OauthAccessToken extends BunqModel
      * @param string $grantType
      * @param string $authCode
      * @param string $redirectUri
-     * @param OauthClient $client
+     * @param OauthClientApiObject $client
      *
      * @return string
      */
@@ -112,7 +112,7 @@ class OauthAccessToken extends BunqModel
         string $grantType,
         string $authCode,
         string $redirectUri,
-        OauthClient $client
+        OauthClientApiObject $client
     ): string {
         return vsprintf(
             static::determineTokenUriFormat(),

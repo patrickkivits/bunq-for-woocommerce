@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseFeatureAnnouncement extends BunqResponse
 {
     /**
-     * @return FeatureAnnouncement
+     * @return FeatureAnnouncementApiObject
      */
-    public function getValue(): FeatureAnnouncement
+    public function getValue(): FeatureAnnouncementApiObject
     {
         return parent::getValue();
     }

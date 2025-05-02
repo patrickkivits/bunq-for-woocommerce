@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseUserCredentialPasswordIp extends BunqResponse
 {
     /**
-     * @return UserCredentialPasswordIp
+     * @return UserCredentialPasswordIpApiObject
      */
-    public function getValue(): UserCredentialPasswordIp
+    public function getValue(): UserCredentialPasswordIpApiObject
     {
         return parent::getValue();
     }

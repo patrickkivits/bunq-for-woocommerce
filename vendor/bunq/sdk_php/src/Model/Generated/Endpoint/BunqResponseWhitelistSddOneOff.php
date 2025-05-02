@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseWhitelistSddOneOff extends BunqResponse
 {
     /**
-     * @return WhitelistSddOneOff
+     * @return WhitelistSddOneOffApiObject
      */
-    public function getValue(): WhitelistSddOneOff
+    public function getValue(): WhitelistSddOneOffApiObject
     {
         return parent::getValue();
     }

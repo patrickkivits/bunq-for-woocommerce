@@ -2,26 +2,26 @@
 namespace bunq\Model\Core;
 
 use bunq\Http\ApiClient;
-use bunq\Model\Generated\Endpoint\BunqResponseNotificationFilterPushUserList;
-use bunq\Model\Generated\Endpoint\NotificationFilterPushUser;
-use bunq\Model\Generated\Object\NotificationFilterPush;
+use bunq\Model\Generated\Endpoint\BunqResponseNotificationFilterPushApiObjectList;
+use bunq\Model\Generated\Endpoint\NotificationFilterPushApiObject;
+use bunq\Model\Generated\Object\NotificationFilterPushObject;
 
 /**
+ * Class for push notification filter endpoints
  */
-class NotificationFilterPushUserInternal extends NotificationFilterPushUser
+class NotificationFilterPushUserInternal extends NotificationFilterPushApiObject
 {
     /**
-     * Create notification filters with list response type.
+     * Create notification filters
      *
-     * @param NotificationFilterPush[] $allNotificationFilter
-     * @param string[] $allCustomHeader
-     *
-     * @return BunqResponseNotificationFilterPushUserList
+     * @param NotificationFilterPushObject[] $allNotificationFilter
+     * @param string[] $allHeaderCustom
+     * @return BunqResponseNotificationFilterPushApiObjectList
      */
     public static function createWithListResponse(
         array $allNotificationFilter = [],
-        array $allCustomHeader = []
-    ): BunqResponseNotificationFilterPushUserList {
+        array $allHeaderCustom = []
+    ): BunqResponseNotificationFilterPushApiObjectList {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->post(
             vsprintf(
@@ -29,10 +29,10 @@ class NotificationFilterPushUserInternal extends NotificationFilterPushUser
                 [static::determineUserId()]
             ),
             [self::FIELD_NOTIFICATION_FILTERS => $allNotificationFilter],
-            $allCustomHeader
+            $allHeaderCustom
         );
 
-        return BunqResponseNotificationFilterPushUserList::castFromBunqResponse(
+        return BunqResponseNotificationFilterPushApiObjectList::castFromBunqResponse(
             static::fromJsonList($responseRaw, self::OBJECT_TYPE_GET)
         );
     }

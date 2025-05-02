@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseExportRib extends BunqResponse
 {
     /**
-     * @return ExportRib
+     * @return ExportRibApiObject
      */
-    public function getValue(): ExportRib
+    public function getValue(): ExportRibApiObject
     {
         return parent::getValue();
     }

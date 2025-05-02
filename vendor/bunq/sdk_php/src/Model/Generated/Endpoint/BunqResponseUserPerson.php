@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseUserPerson extends BunqResponse
 {
     /**
-     * @return UserPerson
+     * @return UserPersonApiObject
      */
-    public function getValue(): UserPerson
+    public function getValue(): UserPersonApiObject
     {
         return parent::getValue();
     }

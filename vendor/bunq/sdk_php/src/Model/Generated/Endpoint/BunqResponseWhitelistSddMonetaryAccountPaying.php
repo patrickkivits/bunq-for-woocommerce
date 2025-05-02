@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseWhitelistSddMonetaryAccountPaying extends BunqResponse
 {
     /**
-     * @return WhitelistSddMonetaryAccountPaying
+     * @return WhitelistSddMonetaryAccountPayingApiObject
      */
-    public function getValue(): WhitelistSddMonetaryAccountPaying
+    public function getValue(): WhitelistSddMonetaryAccountPayingApiObject
     {
         return parent::getValue();
     }

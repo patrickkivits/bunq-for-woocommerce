@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponsePaymentServiceProviderCredential extends BunqResponse
 {
     /**
-     * @return PaymentServiceProviderCredential
+     * @return PaymentServiceProviderCredentialApiObject
      */
-    public function getValue(): PaymentServiceProviderCredential
+    public function getValue(): PaymentServiceProviderCredentialApiObject
     {
         return parent::getValue();
     }

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseTokenQrRequestSofort extends BunqResponse
 {
     /**
-     * @return TokenQrRequestSofort
+     * @return TokenQrRequestSofortApiObject
      */
-    public function getValue(): TokenQrRequestSofort
+    public function getValue(): TokenQrRequestSofortApiObject
     {
         return parent::getValue();
     }

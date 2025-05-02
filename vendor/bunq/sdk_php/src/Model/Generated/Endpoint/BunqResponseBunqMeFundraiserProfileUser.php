@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseBunqMeFundraiserProfileUser extends BunqResponse
 {
     /**
-     * @return BunqMeFundraiserProfileUser
+     * @return BunqMeFundraiserProfileUserApiObject
      */
-    public function getValue(): BunqMeFundraiserProfileUser
+    public function getValue(): BunqMeFundraiserProfileUserApiObject
     {
         return parent::getValue();
     }

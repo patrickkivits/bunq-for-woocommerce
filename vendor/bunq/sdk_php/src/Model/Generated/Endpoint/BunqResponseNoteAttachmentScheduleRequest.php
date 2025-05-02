@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseNoteAttachmentScheduleRequest extends BunqResponse
 {
     /**
-     * @return NoteAttachmentScheduleRequest
+     * @return NoteAttachmentScheduleRequestApiObject
      */
-    public function getValue(): NoteAttachmentScheduleRequest
+    public function getValue(): NoteAttachmentScheduleRequestApiObject
     {
         return parent::getValue();
     }

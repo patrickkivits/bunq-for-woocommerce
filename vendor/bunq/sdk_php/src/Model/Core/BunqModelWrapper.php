@@ -1,8 +1,8 @@
 <?php
 namespace bunq\Model\Core;
 
-use bunq\Model\Generated\Endpoint\BunqMeTabResultInquiry;
-use bunq\Model\Generated\Endpoint\Payment;
+use bunq\Model\Generated\Endpoint\BunqMeTabResultInquiryApiObject;
+use bunq\Model\Generated\Endpoint\PaymentApiObject;
 use JsonSerializable;
 
 /**
@@ -19,8 +19,8 @@ abstract class BunqModelWrapper implements JsonSerializable
      * The double wrapping map.
      */
     const MODEL_WRAPPING_MAP = [
-        BunqMeTabResultInquiry::class => [
-            self::FIELD_PAYMENT => Payment::OBJECT_TYPE_GET
+        BunqMeTabResultInquiryApiObject::class => [
+            self::FIELD_PAYMENT => PaymentApiObject::OBJECT_TYPE_GET
         ]
     ];
 

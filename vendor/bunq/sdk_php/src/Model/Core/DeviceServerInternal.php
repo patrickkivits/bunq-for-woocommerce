@@ -5,11 +5,11 @@ use bunq\Context\ApiContext;
 use bunq\Exception\BunqException;
 use bunq\Http\ApiClient;
 use bunq\Model\Generated\Endpoint\BunqResponseInt;
-use bunq\Model\Generated\Endpoint\DeviceServer;
+use bunq\Model\Generated\Endpoint\DeviceServerApiObject;
 
 /**
  */
-class DeviceServerInternal extends DeviceServer
+class DeviceServerInternal extends DeviceServerApiObject
 {
     /**
      * Error constants.
@@ -20,7 +20,7 @@ class DeviceServerInternal extends DeviceServer
      * @param string $description
      * @param string $secret
      * @param array|null $permittedIps
-     * @param array $customHeaders
+     * @param array $allCustomHeader
      * @param ApiContext|null $apiContext
      *
      * @return BunqResponseInt
@@ -30,7 +30,7 @@ class DeviceServerInternal extends DeviceServer
         string $description,
         string $secret,
         array $permittedIps = null,
-        array $customHeaders = [],
+        array $allCustomHeader = [],
         ApiContext $apiContext = null
     ): BunqResponseInt {
         if (is_null($apiContext)) {
@@ -48,7 +48,7 @@ class DeviceServerInternal extends DeviceServer
                 self::FIELD_SECRET => $secret,
                 self::FIELD_PERMITTED_IPS => $permittedIps,
             ],
-            $customHeaders
+            $allCustomHeader
         );
 
         return BunqResponseInt::castFromBunqResponse(

@@ -6,12 +6,12 @@ use bunq\Http\ApiClient;
 use bunq\Http\BunqResponse;
 use bunq\Http\BunqResponseRaw;
 use bunq\Model\Generated\Endpoint\BunqResponseUserCredentialPasswordIp;
-use bunq\Model\Generated\Endpoint\PaymentServiceProviderCredential;
-use bunq\Model\Generated\Endpoint\UserCredentialPasswordIp;
+use bunq\Model\Generated\Endpoint\PaymentServiceProviderCredentialApiObject;
+use bunq\Model\Generated\Endpoint\UserCredentialPasswordIpApiObject;
 
 /**
  */
-class PaymentServiceProviderCredentialInternal extends PaymentServiceProviderCredential
+class PaymentServiceProviderCredentialInternal extends PaymentServiceProviderCredentialApiObject
 {
     /**
      * Field constants.
@@ -19,16 +19,10 @@ class PaymentServiceProviderCredentialInternal extends PaymentServiceProviderCre
     const FIELD_OBJECT_TYPE = 'CredentialPasswordIp';
 
     /**
-     * @param string $clientPaymentServiceProviderCertificate      Payment Services
-     *                                                             Directive 2 compatible QSEAL certificate
-     * @param string $clientPaymentServiceProviderCertificateChain Intermediate
-     *                                                             and root certificate belonging to the provided
-     *                                                             certificate.
-     * @param string $clientPublicKeySignature                     The Base64 encoded signature of
-     *                                                             the public key provided during installation and with
-     *                                                             the installation token appended as a nonce. Signed
-     *                                                             with the private key belonging to the QSEAL
-     *                                                             certificate.
+     * @param string $clientPaymentServiceProviderCertificate      Payment Services Directive 2 compatible QSEAL certificate
+     * @param string $clientPaymentServiceProviderCertificateChain Intermediate and root certificate belonging to the provided certificate.
+     * @param string $clientPublicKeySignature The Base64 encoded signature of the public key provided during installation and with
+     * the installation token appended as a nonce. Signed with the private key belonging to the QSEAL certificate.
      * @param ApiContext $apiContext
      * @param string[] $allCustomHeader
      *
@@ -65,7 +59,7 @@ class PaymentServiceProviderCredentialInternal extends PaymentServiceProviderCre
      */
     protected static function fromRawResponse(BunqResponseRaw $responseRaw): BunqResponse
     {
-        $allCredential = UserCredentialPasswordIp::fromJson($responseRaw, self::FIELD_OBJECT_TYPE);
+        $allCredential = UserCredentialPasswordIpApiObject::fromJson($responseRaw, self::FIELD_OBJECT_TYPE);
 
         return new BunqResponseUserCredentialPasswordIp($allCredential->getValue(), $responseRaw->getHeaders());
     }

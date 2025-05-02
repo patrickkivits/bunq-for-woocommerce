@@ -3,10 +3,10 @@ namespace bunq\Model\Core;
 
 use bunq\Context\ApiContext;
 use bunq\Http\ApiClient;
-use bunq\Model\Generated\Endpoint\UserApiKey;
-use bunq\Model\Generated\Endpoint\UserCompany;
-use bunq\Model\Generated\Endpoint\UserPaymentServiceProvider;
-use bunq\Model\Generated\Endpoint\UserPerson;
+use bunq\Model\Generated\Endpoint\UserApiKeyApiObject;
+use bunq\Model\Generated\Endpoint\UserCompanyApiObject;
+use bunq\Model\Generated\Endpoint\UserPaymentServiceProviderApiObject;
+use bunq\Model\Generated\Endpoint\UserPersonApiObject;
 use bunq\Util\ModelUtil;
 
 /**
@@ -34,22 +34,22 @@ class SessionServer extends BunqModel
     protected $id;
 
     /**
-     * @var UserCompany
+     * @var UserCompanyApiObject
      */
     protected $userCompany;
 
     /**
-     * @var UserPerson
+     * @var UserPersonApiObject
      */
     protected $userPerson;
 
     /**
-     * @var UserApiKey
+     * @var UserApiKeyApiObject
      */
     protected $userApiKey;
 
     /**
-     * @var UserPaymentServiceProvider
+     * @var UserPaymentServiceProviderApiObject
      */
     protected $userPaymentServiceProvider;
 
@@ -85,7 +85,7 @@ class SessionServer extends BunqModel
     }
 
     /**
-     * @return UserCompany|null
+     * @return UserCompanyApiObject|null
      */
     public function getUserCompanyOrNull()
     {
@@ -93,7 +93,7 @@ class SessionServer extends BunqModel
     }
 
     /**
-     * @return UserPerson|null
+     * @return UserPersonApiObject|null
      */
     public function getUserPersonOrNull()
     {
@@ -101,7 +101,7 @@ class SessionServer extends BunqModel
     }
 
     /**
-     * @return UserApiKey|null
+     * @return UserApiKeyApiObject|null
      */
     public function getUserApiKeyOrNull()
     {
@@ -109,7 +109,7 @@ class SessionServer extends BunqModel
     }
 
     /**
-     * @return UserPaymentServiceProvider|null
+     * @return UserPaymentServiceProviderApiObject|null
      */
     public function getUserPaymentServiceProviderOrNull()
     {
@@ -117,7 +117,7 @@ class SessionServer extends BunqModel
     }
 
     /**
-     * @return UserCompany|UserPerson|UserApiKey|UserPaymentServiceProvider
+     * @return UserCompanyApiObject|UserPersonApiObject|UserApiKeyApiObject|UserPaymentServiceProviderApiObject
      */
     public function getUserReference()
     {

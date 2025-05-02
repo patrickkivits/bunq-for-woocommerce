@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseExportAnnualOverview extends BunqResponse
 {
     /**
-     * @return ExportAnnualOverview
+     * @return ExportAnnualOverviewApiObject
      */
-    public function getValue(): ExportAnnualOverview
+    public function getValue(): ExportAnnualOverviewApiObject
     {
         return parent::getValue();
     }

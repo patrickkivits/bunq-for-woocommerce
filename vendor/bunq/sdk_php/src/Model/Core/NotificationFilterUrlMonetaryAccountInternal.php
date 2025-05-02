@@ -2,28 +2,29 @@
 namespace bunq\Model\Core;
 
 use bunq\Http\ApiClient;
-use bunq\Model\Generated\Endpoint\BunqResponseNotificationFilterUrlMonetaryAccountList;
-use bunq\Model\Generated\Endpoint\NotificationFilterUrlMonetaryAccount;
-use bunq\Model\Generated\Object\NotificationFilterUrl;
+use bunq\Model\Generated\Endpoint\BunqResponseNotificationFilterUrlMonetaryAccountApiObjectList;
+use bunq\Model\Generated\Endpoint\NotificationFilterUrlMonetaryAccountApiObject;
+use bunq\Model\Generated\Object\NotificationFilterUrlObject;
 
 /**
+ * Class for monetary account notification filter endpoints
  */
-class NotificationFilterUrlMonetaryAccountInternal extends NotificationFilterUrlMonetaryAccount
+class NotificationFilterUrlMonetaryAccountInternal extends NotificationFilterUrlMonetaryAccountApiObject
 {
     /**
-     * Create notification filters with list response type.
+     * Create notification filters
      *
      * @param int|null $monetaryAccountId
-     * @param NotificationFilterUrl[] $allNotificationFilter
-     * @param string[] $allCustomHeader
+     * @param NotificationFilterUrlObject[] $allNotificationFilter
+     * @param string[] $allHeaderCustom
      *
-     * @return BunqResponseNotificationFilterUrlMonetaryAccountList
+     * @return BunqResponseNotificationFilterUrlMonetaryAccountApiObjectList
      */
     public static function createWithListResponse(
         int $monetaryAccountId = null,
         array $allNotificationFilter = [],
-        array $allCustomHeader = []
-    ): BunqResponseNotificationFilterUrlMonetaryAccountList {
+        array $allHeaderCustom = []
+    ): BunqResponseNotificationFilterUrlMonetaryAccountApiObjectList {
         $apiClient = new ApiClient(static::getApiContext());
         $responseRaw = $apiClient->post(
             vsprintf(
@@ -31,10 +32,10 @@ class NotificationFilterUrlMonetaryAccountInternal extends NotificationFilterUrl
                 [static::determineUserId(), static::determineMonetaryAccountId($monetaryAccountId)]
             ),
             [self::FIELD_NOTIFICATION_FILTERS => $allNotificationFilter],
-            $allCustomHeader
+            $allHeaderCustom
         );
 
-        return BunqResponseNotificationFilterUrlMonetaryAccountList::castFromBunqResponse(
+        return BunqResponseNotificationFilterUrlMonetaryAccountApiObjectList::castFromBunqResponse(
             static::fromJsonList($responseRaw, self::OBJECT_TYPE_GET)
         );
     }

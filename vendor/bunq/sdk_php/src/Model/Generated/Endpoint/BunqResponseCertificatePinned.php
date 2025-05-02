@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseCertificatePinned extends BunqResponse
 {
     /**
-     * @return CertificatePinned
+     * @return CertificatePinnedApiObject
      */
-    public function getValue(): CertificatePinned
+    public function getValue(): CertificatePinnedApiObject
     {
         return parent::getValue();
     }

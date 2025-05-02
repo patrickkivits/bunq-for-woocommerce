@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponsePaymentAutoAllocate extends BunqResponse
 {
     /**
-     * @return PaymentAutoAllocate
+     * @return PaymentAutoAllocateApiObject
      */
-    public function getValue(): PaymentAutoAllocate
+    public function getValue(): PaymentAutoAllocateApiObject
     {
         return parent::getValue();
     }

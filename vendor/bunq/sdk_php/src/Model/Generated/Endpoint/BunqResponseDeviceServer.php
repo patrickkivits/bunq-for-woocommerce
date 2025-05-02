@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseDeviceServer extends BunqResponse
 {
     /**
-     * @return DeviceServer
+     * @return DeviceServerApiObject
      */
-    public function getValue(): DeviceServer
+    public function getValue(): DeviceServerApiObject
     {
         return parent::getValue();
     }

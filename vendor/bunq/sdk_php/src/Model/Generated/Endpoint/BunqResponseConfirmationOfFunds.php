@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseConfirmationOfFunds extends BunqResponse
 {
     /**
-     * @return ConfirmationOfFunds
+     * @return ConfirmationOfFundsApiObject
      */
-    public function getValue(): ConfirmationOfFunds
+    public function getValue(): ConfirmationOfFundsApiObject
     {
         return parent::getValue();
     }

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseCurrencyConversionQuote extends BunqResponse
 {
     /**
-     * @return CurrencyConversionQuote
+     * @return CurrencyConversionQuoteApiObject
      */
-    public function getValue(): CurrencyConversionQuote
+    public function getValue(): CurrencyConversionQuoteApiObject
     {
         return parent::getValue();
     }

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseBunqMeTab extends BunqResponse
 {
     /**
-     * @return BunqMeTab
+     * @return BunqMeTabApiObject
      */
-    public function getValue(): BunqMeTab
+    public function getValue(): BunqMeTabApiObject
     {
         return parent::getValue();
     }

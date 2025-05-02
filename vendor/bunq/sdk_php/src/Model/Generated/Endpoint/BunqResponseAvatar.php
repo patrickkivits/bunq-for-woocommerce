@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseAvatar extends BunqResponse
 {
     /**
-     * @return Avatar
+     * @return AvatarApiObject
      */
-    public function getValue(): Avatar
+    public function getValue(): AvatarApiObject
     {
         return parent::getValue();
     }

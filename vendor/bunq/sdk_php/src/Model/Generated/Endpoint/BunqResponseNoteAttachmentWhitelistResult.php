@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseNoteAttachmentWhitelistResult extends BunqResponse
 {
     /**
-     * @return NoteAttachmentWhitelistResult
+     * @return NoteAttachmentWhitelistResultApiObject
      */
-    public function getValue(): NoteAttachmentWhitelistResult
+    public function getValue(): NoteAttachmentWhitelistResultApiObject
     {
         return parent::getValue();
     }

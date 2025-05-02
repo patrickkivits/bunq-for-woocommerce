@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseMonetaryAccountCard extends BunqResponse
 {
     /**
-     * @return MonetaryAccountCard
+     * @return MonetaryAccountCardApiObject
      */
-    public function getValue(): MonetaryAccountCard
+    public function getValue(): MonetaryAccountCardApiObject
     {
         return parent::getValue();
     }

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseTransferwiseQuote extends BunqResponse
 {
     /**
-     * @return TransferwiseQuote
+     * @return TransferwiseQuoteApiObject
      */
-    public function getValue(): TransferwiseQuote
+    public function getValue(): TransferwiseQuoteApiObject
     {
         return parent::getValue();
     }

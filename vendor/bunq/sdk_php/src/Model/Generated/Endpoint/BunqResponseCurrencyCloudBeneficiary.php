@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseCurrencyCloudBeneficiary extends BunqResponse
 {
     /**
-     * @return CurrencyCloudBeneficiary
+     * @return CurrencyCloudBeneficiaryApiObject
      */
-    public function getValue(): CurrencyCloudBeneficiary
+    public function getValue(): CurrencyCloudBeneficiaryApiObject
     {
         return parent::getValue();
     }

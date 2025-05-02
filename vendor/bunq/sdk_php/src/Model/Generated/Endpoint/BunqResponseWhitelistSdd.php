@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseWhitelistSdd extends BunqResponse
 {
     /**
-     * @return WhitelistSdd
+     * @return WhitelistSddApiObject
      */
-    public function getValue(): WhitelistSdd
+    public function getValue(): WhitelistSddApiObject
     {
         return parent::getValue();
     }

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseNotificationFilterEmail extends BunqResponse
 {
     /**
-     * @return NotificationFilterEmail
+     * @return NotificationFilterEmailApiObject
      */
-    public function getValue(): NotificationFilterEmail
+    public function getValue(): NotificationFilterEmailApiObject
     {
         return parent::getValue();
     }

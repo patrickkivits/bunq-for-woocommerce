@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseSchedulePaymentBatch extends BunqResponse
 {
     /**
-     * @return SchedulePaymentBatch
+     * @return SchedulePaymentBatchApiObject
      */
-    public function getValue(): SchedulePaymentBatch
+    public function getValue(): SchedulePaymentBatchApiObject
     {
         return parent::getValue();
     }

@@ -12,7 +12,6 @@ class FileUtil
      */
     const ERROR_COULD_NOT_GET_FILE_CONTENT = 'Could not get the content of "%s".';
     const ERROR_COULD_NOT_WRITE_FILE = 'Could not write to "%s".';
-    const ERROR_DESERIALIZE_NOT_AVAILABLE = 'Class %s doesn\'t contain JSON deserializer method.';
     const ERROR_FILE_DOES_NOT_EXIST = 'The requested file "%s" does not exist.';
     const ERROR_COULD_NOT_SAVE_OBJECT = 'Object ("%s") could not be saved.';
 
@@ -60,20 +59,5 @@ class FileUtil
                 )
             );
         }
-    }
-
-    /**
-     * @param string $fileName
-     * @param $objectClass
-     *
-     * @return mixed
-     * @throws BunqException
-     */
-    public static function readObjectFromJsonFile(string $fileName, $objectClass)
-    {
-        if (method_exists($objectClass, 'fromJsonFile')) {
-            return $objectClass::fromJsonFile($fileName);
-        }
-        throw new BunqException(self::ERROR_DESERIALIZE_NOT_AVAILABLE, [$objectClass]);
     }
 }

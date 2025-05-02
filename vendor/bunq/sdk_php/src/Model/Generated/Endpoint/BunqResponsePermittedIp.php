@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponsePermittedIp extends BunqResponse
 {
     /**
-     * @return PermittedIp
+     * @return PermittedIpApiObject
      */
-    public function getValue(): PermittedIp
+    public function getValue(): PermittedIpApiObject
     {
         return parent::getValue();
     }

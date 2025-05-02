@@ -3,12 +3,12 @@ namespace bunq\Context;
 
 use bunq\Exception\BunqException;
 use bunq\Model\Core\BunqModel;
-use bunq\Model\Generated\Endpoint\MonetaryAccountBank;
-use bunq\Model\Generated\Endpoint\User;
-use bunq\Model\Generated\Endpoint\UserApiKey;
-use bunq\Model\Generated\Endpoint\UserCompany;
-use bunq\Model\Generated\Endpoint\UserPaymentServiceProvider;
-use bunq\Model\Generated\Endpoint\UserPerson;
+use bunq\Model\Generated\Endpoint\MonetaryAccountBankApiObject;
+use bunq\Model\Generated\Endpoint\UserApiKeyApiObject;
+use bunq\Model\Generated\Endpoint\UserApiObject;
+use bunq\Model\Generated\Endpoint\UserCompanyApiObject;
+use bunq\Model\Generated\Endpoint\UserPaymentServiceProviderApiObject;
+use bunq\Model\Generated\Endpoint\UserPersonApiObject;
 
 /**
  */
@@ -18,7 +18,6 @@ class UserContext
      * Error constants.
      */
     const ERROR_NO_ACTIVE_MONETARY_ACCOUNT_FOUND = 'No active monetary account found.';
-    const ERROR_COULD_NOT_DETERMINE_USER_ID = 'Both userPerson and userCompany are set, could not determine user id.';
     const ERROR_PRIMARY_MONETARY_ACCOUNT_HAS_NOT_BEEN_SET = 'Primary monetaryAccount is not set.';
     const ERROR_UNEXPECTED_USER_INSTANCE = '"%s" is unexpected user instance.';
 
@@ -33,27 +32,27 @@ class UserContext
     const INDEX_FIRST = 0;
 
     /**
-     * @var UserCompany
+     * @var UserCompanyApiObject
      */
     protected $userCompany;
 
     /**
-     * @var UserPerson
+     * @var UserPersonApiObject
      */
     protected $userPerson;
 
     /**
-     * @var UserApiKey
+     * @var UserApiKeyApiObject
      */
     protected $userApiKey;
 
     /**
-     * @var UserPaymentServiceProvider
+     * @var UserPaymentServiceProviderApiObject
      */
     protected $userPaymentServiceProvider;
 
     /**
-     * @var MonetaryAccountBank
+     * @var MonetaryAccountBankApiObject
      */
     protected $primaryMonetaryAccount;
 
@@ -64,7 +63,7 @@ class UserContext
 
     /**
      * @param int $userId
-     * @param $user UserPerson|UserCompany|UserApiKey|UserPaymentServiceProvider
+     * @param $user UserPersonApiObject|UserCompanyApiObject|UserApiKeyApiObject|UserPaymentServiceProviderApiObject
      */
     public function __construct(int $userId, $user)
     {
@@ -77,7 +76,7 @@ class UserContext
      */
     private function getUserObject(): BunqModel
     {
-        return User::listing()->getValue()[self::INDEX_FIRST]->getReferencedObject();
+        return UserApiObject::listing()->getValue()[self::INDEX_FIRST]->getReferencedObject();
     }
 
     /**
@@ -87,13 +86,13 @@ class UserContext
      */
     private function setUser($user)
     {
-        if ($user instanceof UserPerson) {
+        if ($user instanceof UserPersonApiObject) {
             $this->userPerson = $user;
-        } elseif ($user instanceof UserCompany) {
+        } elseif ($user instanceof UserCompanyApiObject) {
             $this->userCompany = $user;
-        } elseif ($user instanceof UserApiKey) {
+        } elseif ($user instanceof UserApiKeyApiObject) {
             $this->userApiKey = $user;
-        } elseif ($user instanceof UserPaymentServiceProvider) {
+        } elseif ($user instanceof UserPaymentServiceProviderApiObject) {
             $this->userPaymentServiceProvider = $user;
         } else {
             throw new BunqException(vsprintf(self::ERROR_UNEXPECTED_USER_INSTANCE, [get_class($user)]));
@@ -109,7 +108,7 @@ class UserContext
             return;
         }
 
-        $allMonetaryAccount = MonetaryAccountBank::listing()->getValue();
+        $allMonetaryAccount = MonetaryAccountBankApiObject::listing()->getValue();
 
         foreach ($allMonetaryAccount as $account) {
             if ($account->getStatus() === self::MONETARY_ACCOUNT_STATUS_ACTIVE) {
@@ -176,33 +175,33 @@ class UserContext
     }
 
     /**
-     * @return UserCompany
+     * @return UserCompanyApiObject
      */
-    public function getUserCompany(): UserCompany
+    public function getUserCompany(): UserCompanyApiObject
     {
         return $this->userCompany;
     }
 
     /**
-     * @return UserPerson
+     * @return UserPersonApiObject
      */
-    public function getUserPerson(): UserPerson
+    public function getUserPerson(): UserPersonApiObject
     {
         return $this->userPerson;
     }
 
     /**
-     * @return UserApiKey
+     * @return UserApiKeyApiObject
      */
-    public function getUserApiKey(): UserApiKey
+    public function getUserApiKey(): UserApiKeyApiObject
     {
         return $this->userApiKey;
     }
 
     /**
-     * @return MonetaryAccountBank
+     * @return MonetaryAccountBankApiObject
      */
-    public function getPrimaryMonetaryAccount(): MonetaryAccountBank
+    public function getPrimaryMonetaryAccount(): MonetaryAccountBankApiObject
     {
         return $this->primaryMonetaryAccount;
     }

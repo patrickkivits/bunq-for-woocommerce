@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseCompany extends BunqResponse
 {
     /**
-     * @return Company
+     * @return CompanyApiObject
      */
-    public function getValue(): Company
+    public function getValue(): CompanyApiObject
     {
         return parent::getValue();
     }

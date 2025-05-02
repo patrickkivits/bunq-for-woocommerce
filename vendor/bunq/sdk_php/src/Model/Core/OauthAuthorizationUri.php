@@ -3,7 +3,7 @@ namespace bunq\Model\Core;
 
 use bunq\Context\BunqContext;
 use bunq\Exception\BunqException;
-use bunq\Model\Generated\Endpoint\OauthClient;
+use bunq\Model\Generated\Endpoint\OauthClientApiObject;
 use bunq\Util\BunqEnumApiEnvironmentType;
 
 /**
@@ -48,7 +48,7 @@ class OauthAuthorizationUri extends BunqModel
     /**
      * @param BunqEnumOauthResponseType $responseType
      * @param string $redirectUri
-     * @param OauthClient $client
+     * @param OauthClientApiObject $client
      * @param string|null $state
      *
      * @return OauthAuthorizationUri
@@ -56,7 +56,7 @@ class OauthAuthorizationUri extends BunqModel
     public static function create(
         BunqEnumOauthResponseType $responseType,
         string $redirectUri,
-        OauthClient $client,
+        OauthClientApiObject $client,
         string $state = null
     ): OauthAuthorizationUri {
         $allRequestParameter = [
