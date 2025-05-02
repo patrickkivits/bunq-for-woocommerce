@@ -25,7 +25,7 @@
         "ext-curl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "guzzlehttp/guzzle": "~7"
+        "guzzlehttp/guzzle": "^7.4"
     },
     "autoload": {
         "psr-4": {
@@ -39,10 +39,10 @@
     },
     "require-dev": {
         "composer/composer": "^1.10.11 || ^2.0.1",
-        "friendsofphp/php-cs-fixer": "^2.4",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "php-parallel-lint/php-parallel-lint": "^1.2",
-        "phpro/grumphp": "^v1.3.0",
-        "phpstan/phpstan": "^0.12",
+        "phpro/grumphp": "^1.9",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.5"
     },
     "bin": [
@@ -51,7 +51,10 @@
     "config": {
         "sort-packages": true,
         "platform": {
-            "php": "7.3"
+            "php": "8.3"
+        },
+        "allow-plugins": {
+            "phpro/grumphp": false
         }
     },
     "scripts": {

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseInvoiceExportPdf extends BunqResponse
 {
     /**
-     * @return InvoiceExportPdf
+     * @return InvoiceExportPdfApiObject
      */
-    public function getValue(): InvoiceExportPdf
+    public function getValue(): InvoiceExportPdfApiObject
     {
         return parent::getValue();
     }

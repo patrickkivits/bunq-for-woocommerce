@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseOauthCallbackUrl extends BunqResponse
 {
     /**
-     * @return OauthCallbackUrl
+     * @return OauthCallbackUrlApiObject
      */
-    public function getValue(): OauthCallbackUrl
+    public function getValue(): OauthCallbackUrlApiObject
     {
         return parent::getValue();
     }

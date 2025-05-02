@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseAttachmentUser extends BunqResponse
 {
     /**
-     * @return AttachmentUser
+     * @return AttachmentUserApiObject
      */
-    public function getValue(): AttachmentUser
+    public function getValue(): AttachmentUserApiObject
     {
         return parent::getValue();
     }

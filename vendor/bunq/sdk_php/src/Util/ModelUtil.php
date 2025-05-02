@@ -3,10 +3,10 @@ namespace bunq\Util;
 
 use bunq\Exception\BunqException;
 use bunq\Model\Core\BunqModel;
-use bunq\Model\Generated\Endpoint\UserApiKey;
-use bunq\Model\Generated\Endpoint\UserCompany;
-use bunq\Model\Generated\Endpoint\UserPaymentServiceProvider;
-use bunq\Model\Generated\Endpoint\UserPerson;
+use bunq\Model\Generated\Endpoint\UserApiKeyApiObject;
+use bunq\Model\Generated\Endpoint\UserCompanyApiObject;
+use bunq\Model\Generated\Endpoint\UserPaymentServiceProviderApiObject;
+use bunq\Model\Generated\Endpoint\UserPersonApiObject;
 
 /**
  */
@@ -26,6 +26,12 @@ class ModelUtil
     const FORMAT_QUALIFIED_MODEL_TYPE = 'bunq\\Model\\Generated\\Endpoint\\%s';
     const FORMAT_QUALIFIED_OBJECT_TYPE = 'bunq\\Model\\Generated\\Object\\%s';
     const FORMAT_QUALIFIED_OVERRIDE_TYPE = 'bunq\\Model\\Core\\%s';
+
+    /**
+     * Model suffixes.
+     */
+    const MODEL_SUFFIX_OBJECT = 'Object';
+    const MODEL_SUFFIX_API_OBJECT = 'ApiObject';
 
     /**
      * Error constants.
@@ -68,8 +74,8 @@ class ModelUtil
     public static function getModelClassNameQualifiedOrNull(string $model)
     {
         $classNameOverride = vsprintf(self::FORMAT_QUALIFIED_OVERRIDE_TYPE, [$model]);
-        $classNameModel = vsprintf(self::FORMAT_QUALIFIED_MODEL_TYPE, [$model]);
-        $classNameObject = vsprintf(self::FORMAT_QUALIFIED_OBJECT_TYPE, [$model]);
+        $classNameModel = vsprintf(self::FORMAT_QUALIFIED_MODEL_TYPE, [static::determineClassNameModel($model)]);
+        $classNameObject = vsprintf(self::FORMAT_QUALIFIED_OBJECT_TYPE, [static::determineClassNameObject($model)]);
 
         if (static::isClassSubClassOfBunqModel($classNameOverride)) {
             return $classNameOverride;
@@ -80,6 +86,34 @@ class ModelUtil
         } else {
             return null;
         }
+    }
+
+    /**
+     * @param string $model
+     *
+     * @return string
+     */
+    private static function determineClassNameModel(string $model): string
+    {
+        if (substr($model, -9) === self::MODEL_SUFFIX_API_OBJECT) {
+            return $model;
+        }
+
+        return $model . self::MODEL_SUFFIX_API_OBJECT;
+    }
+
+    /**
+     * @param string $model
+     *
+     * @return string
+     */
+    private static function determineClassNameObject(string $model): string
+    {
+        if (substr($model, -6) === self::MODEL_SUFFIX_OBJECT) {
+            return $model;
+        }
+
+        return $model . self::MODEL_SUFFIX_OBJECT;
     }
 
     /**
@@ -136,19 +170,19 @@ class ModelUtil
     }
 
     /**
-     * @param UserPerson $userPerson
-     * @param UserCompany $userCompany
-     * @param UserApiKey $userApiKey
-     * @param UserPaymentServiceProvider $userPaymentServiceProvider
+     * @param UserPersonApiObject|null $userPerson
+     * @param UserCompanyApiObject|null $userCompany
+     * @param UserApiKeyApiObject|null $userApiKey
+     * @param UserPaymentServiceProviderApiObject|null $userPaymentServiceProvider
      *
-     * @return UserCompany|UserPerson|UserApiKey|UserPaymentServiceProvider
+     * @return UserCompanyApiObject|UserPersonApiObject|UserApiKeyApiObject|UserPaymentServiceProviderApiObject
      * @throws BunqException
      */
     public static function getUserReference(
-        UserPerson $userPerson = null,
-        UserCompany $userCompany = null,
-        UserApiKey $userApiKey = null,
-        UserPaymentServiceProvider $userPaymentServiceProvider = null
+        UserPersonApiObject $userPerson = null,
+        UserCompanyApiObject $userCompany = null,
+        UserApiKeyApiObject $userApiKey = null,
+        UserPaymentServiceProviderApiObject $userPaymentServiceProvider = null
     ) {
         if ((is_null($userPerson) && is_null($userApiKey))
             && !is_null($userCompany)

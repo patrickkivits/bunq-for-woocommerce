@@ -8,8 +8,8 @@ use bunq\Model\Core\PaymentServiceProviderCredentialInternal;
 use bunq\Model\Core\SandboxUserInternal;
 use bunq\Model\Core\SessionServer;
 use bunq\Model\Core\Token;
-use bunq\Model\Generated\Endpoint\Session;
-use bunq\Model\Generated\Object\Certificate;
+use bunq\Model\Generated\Endpoint\SessionApiObject;
+use bunq\Model\Generated\Object\CertificateObject;
 use bunq\Security\KeyPair;
 use bunq\Security\PrivateKey;
 use bunq\Util\BunqEnumApiEnvironmentType;
@@ -40,7 +40,6 @@ class ApiContext
     /**
      * Api context fields.
      */
-    const FIELD_API_CONTEXT = 'api_context';
     const FIELD_INSTALLATION_CONTEXT = 'installation_context';
     const FIELD_SESSION_CONTEXT = 'session_context';
     const FIELD_ENVIRONMENT_TYPE = 'environment_type';
@@ -123,9 +122,9 @@ class ApiContext
 
     /**
      * @param BunqEnumApiEnvironmentType $environmentType
-     * @param Certificate $publicCertificate
+     * @param CertificateObject $publicCertificate
      * @param PrivateKey $privateKey
-     * @param Certificate[] $allChainCertificate
+     * @param CertificateObject[] $allChainCertificate
      * @param string $description
      * @param string[] $allPermittedIp
      * @param string|null $proxyUrl
@@ -134,7 +133,7 @@ class ApiContext
      */
     public static function createForPsd2(
         BunqEnumApiEnvironmentType $environmentType,
-        Certificate $publicCertificate,
+        CertificateObject $publicCertificate,
         PrivateKey $privateKey,
         array $allChainCertificate,
         string $description,
@@ -197,12 +196,12 @@ class ApiContext
     }
 
     /**
-     * @param Certificate $publicCertificate
+     * @param CertificateObject $publicCertificate
      * @param PrivateKey $privateKey
-     * @param Certificate[] $allChainCertificate
+     * @param CertificateObject[] $allChainCertificate
      */
     private function initializePsd2Credential(
-        Certificate $publicCertificate,
+        CertificateObject $publicCertificate,
         PrivateKey $privateKey,
         array $allChainCertificate
     ) {
@@ -340,7 +339,7 @@ class ApiContext
      */
     public function closeSession()
     {
-        Session::delete(self::SESSION_ID_DUMMY);
+        SessionApiObject::delete(self::SESSION_ID_DUMMY);
         $this->dropSessionContext();
     }
 

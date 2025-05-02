@@ -1,0 +1,18 @@
+parameters:
+  level: 2
+  tmpDir: cache/phpstan
+  excludePaths:
+    - vendor/*
+  ignoreErrors:
+    - '#Method .* should return array\<.*\> but returns array\<bunq\\common\\storage\\model\\Model\>\.#'
+    - '#Unsafe usage of new static\(\)\.#'
+    - '#Parameter \$event of method .+ has invalid type Composer\\Script\\Event\.#'
+    - '#Parameter \$io of method .+ has invalid type Composer\\IO\\IOInterface\.#'
+    - '#Call to method getIO\(\) on an unknown class Composer\\Script\\Event\.#'
+    - '#Unsafe call to private method .+ through static::\.#'
+    - '#Unsafe access to private property .+ through static::\.#'
+  reportUnmatchedIgnoredErrors: false
+  featureToggles:
+    nodeConnectingVisitorCompatibility: false
+includes:
+  - phpstan-baseline.neon

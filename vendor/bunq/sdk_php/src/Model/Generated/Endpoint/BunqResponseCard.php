@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseCard extends BunqResponse
 {
     /**
-     * @return Card
+     * @return CardApiObject
      */
-    public function getValue(): Card
+    public function getValue(): CardApiObject
     {
         return parent::getValue();
     }

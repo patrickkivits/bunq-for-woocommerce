@@ -19,12 +19,6 @@ use ReflectionProperty;
 abstract class BunqModel implements JsonSerializable
 {
     /**
-     * Error constants.
-     */
-    const ERROR_PROPERTY_DOES_NOT_EXIST = 'Property "%s" does not exist in "%s"' . PHP_EOL;
-    const ERROR_UNEXPECTED_RESULT = 'Unexpected number of results "%d", expected "1".';
-
-    /**
      * Field constants.
      */
     const FIELD_RESPONSE = 'Response';
@@ -109,8 +103,14 @@ abstract class BunqModel implements JsonSerializable
             return self::createFromResponseArrayAnchorObject($responseArray);
         }
 
-        if (is_string($wrapper) && isset($responseArray[$wrapper])) {
-            $responseArray = $responseArray[$wrapper];
+        if (is_string($wrapper) && !empty($wrapper)) {
+            $pattern = '/^' . preg_quote($wrapper, '/') . '/i';
+            $matchingKeys = preg_grep($pattern, array_keys($responseArray));
+
+            if (!empty($matchingKeys)) {
+                $firstMatchingKey = reset($matchingKeys);
+                $responseArray = $responseArray[$firstMatchingKey];
+            }
         }
 
         return self::createInstanceFromResponseArray($responseArray);
@@ -245,6 +245,10 @@ abstract class BunqModel implements JsonSerializable
         $list = [];
 
         foreach ($responseArray as $className => $element) {
+            if (is_null($element)) {
+                return $list;
+            }
+
             $list[] = static::createFromResponseArray($element, $wrapper);
         }
 

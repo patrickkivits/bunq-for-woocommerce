@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseNoteTextBankSwitchServiceNetherlandsIncomingPayment extends BunqResponse
 {
     /**
-     * @return NoteTextBankSwitchServiceNetherlandsIncomingPayment
+     * @return NoteTextBankSwitchServiceNetherlandsIncomingPaymentApiObject
      */
-    public function getValue(): NoteTextBankSwitchServiceNetherlandsIncomingPayment
+    public function getValue(): NoteTextBankSwitchServiceNetherlandsIncomingPaymentApiObject
     {
         return parent::getValue();
     }

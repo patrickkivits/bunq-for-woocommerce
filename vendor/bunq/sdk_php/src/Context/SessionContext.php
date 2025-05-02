@@ -3,10 +3,10 @@ namespace bunq\Context;
 
 use bunq\Model\Core\SessionServer;
 use bunq\Model\Core\Token;
-use bunq\Model\Generated\Endpoint\UserApiKey;
-use bunq\Model\Generated\Endpoint\UserCompany;
-use bunq\Model\Generated\Endpoint\UserPaymentServiceProvider;
-use bunq\Model\Generated\Endpoint\UserPerson;
+use bunq\Model\Generated\Endpoint\UserApiKeyApiObject;
+use bunq\Model\Generated\Endpoint\UserCompanyApiObject;
+use bunq\Model\Generated\Endpoint\UserPaymentServiceProviderApiObject;
+use bunq\Model\Generated\Endpoint\UserPersonApiObject;
 use bunq\Util\ModelUtil;
 use DateTime;
 use JsonSerializable;
@@ -50,22 +50,22 @@ class SessionContext implements JsonSerializable
     protected $userId;
 
     /**
-     * @var UserPerson
+     * @var UserPersonApiObject
      */
     protected $userPerson;
 
     /**
-     * @var UserCompany
+     * @var UserCompanyApiObject
      */
     protected $userCompany;
 
     /**
-     * @var UserApiKey
+     * @var UserApiKeyApiObject
      */
     protected $userApiKey;
 
     /**
-     * @var UserPaymentServiceProvider
+     * @var UserPaymentServiceProviderApiObject
      */
     protected $userPaymentServiceProvider;
 
@@ -115,7 +115,8 @@ class SessionContext implements JsonSerializable
     {
         $user = $sessionServer->getUserReference();
 
-        if ($user instanceof UserApiKey) {
+        if ($user instanceof UserApiKeyApiObject) {
+            /** @phpstan-ignore-next-line */
             return $user->getRequestedByUser()->getReferencedObject()->getSessionTimeout();
         } else {
             return $user->getSessionTimeout();
@@ -163,12 +164,12 @@ class SessionContext implements JsonSerializable
     /**
      * @param array $sessionContextBody
      *
-     * @return UserPerson|null
+     * @return UserPersonApiObject|null
      */
     private static function getUserPersonFromSessionOrNull(array $sessionContextBody)
     {
         if (isset($sessionContextBody[self::FIELD_USER_PERSON])) {
-            return UserPerson::createFromJsonString(json_encode($sessionContextBody[self::FIELD_USER_PERSON]));
+            return UserPersonApiObject::createFromJsonString(json_encode($sessionContextBody[self::FIELD_USER_PERSON]));
         } else {
             return null;
         }
@@ -177,12 +178,12 @@ class SessionContext implements JsonSerializable
     /**
      * @param array $sessionContextBody
      *
-     * @return UserCompany|null
+     * @return UserCompanyApiObject|null
      */
     private static function getUserCompanyFromSessionOrNull(array $sessionContextBody)
     {
         if (isset($sessionContextBody[self::FIELD_USER_COMPANY])) {
-            return UserCompany::createFromJsonString(json_encode($sessionContextBody[self::FIELD_USER_COMPANY]));
+            return UserCompanyApiObject::createFromJsonString(json_encode($sessionContextBody[self::FIELD_USER_COMPANY]));
         } else {
             return null;
         }
@@ -191,12 +192,12 @@ class SessionContext implements JsonSerializable
     /**
      * @param array $sessionContextBody
      *
-     * @return UserApiKey|null
+     * @return UserApiKeyApiObject|null
      */
     private static function getUserApiKeyFromSessionOrNull(array $sessionContextBody)
     {
         if (isset($sessionContextBody[self::FIELD_USER_API_KEY])) {
-            return UserApiKey::createFromJsonString(json_encode($sessionContextBody[self::FIELD_USER_API_KEY]));
+            return UserApiKeyApiObject::createFromJsonString(json_encode($sessionContextBody[self::FIELD_USER_API_KEY]));
         } else {
             return null;
         }
@@ -205,12 +206,12 @@ class SessionContext implements JsonSerializable
     /**
      * @param array $sessionContextBody
      *
-     * @return UserPaymentServiceProvider|null
+     * @return UserPaymentServiceProviderApiObject|null
      */
     private static function getUserPaymentServiceProviderFromSessionOrNull(array $sessionContextBody)
     {
         if (isset($sessionContextBody[self::FIELD_USER_PAYMENT_SERVICE_PROVIDER])) {
-            return UserPaymentServiceProvider::createFromJsonString(
+            return UserPaymentServiceProviderApiObject::createFromJsonString(
                 json_encode($sessionContextBody[self::FIELD_USER_PAYMENT_SERVICE_PROVIDER])
             );
         } else {
@@ -251,7 +252,7 @@ class SessionContext implements JsonSerializable
     }
 
     /**
-     * @return UserPerson|null
+     * @return UserPersonApiObject|null
      */
     public function getUserPersonOrNull()
     {
@@ -259,7 +260,7 @@ class SessionContext implements JsonSerializable
     }
 
     /**
-     * @return UserCompany|null
+     * @return UserCompanyApiObject|null
      */
     public function getUserCompanyOrNull()
     {
@@ -267,7 +268,7 @@ class SessionContext implements JsonSerializable
     }
 
     /**
-     * @return UserApiKey|null
+     * @return UserApiKeyApiObject|null
      */
     public function getUserApiKeyOrNull()
     {
@@ -275,7 +276,7 @@ class SessionContext implements JsonSerializable
     }
 
     /**
-     * @return UserPaymentServiceProvider|null
+     * @return UserPaymentServiceProviderApiObject|null
      */
     public function getUserPaymentServiceProviderOrNull()
     {
@@ -291,7 +292,7 @@ class SessionContext implements JsonSerializable
     }
 
     /**
-     * @return UserCompany|UserPerson|UserApiKey|UserPaymentServiceProvider
+     * @return UserCompanyApiObject|UserPersonApiObject|UserApiKeyApiObject|UserPaymentServiceProviderApiObject
      */
     public function getUserReference()
     {

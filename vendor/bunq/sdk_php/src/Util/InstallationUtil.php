@@ -1,5 +1,4 @@
 <?php
-
 namespace bunq\Util;
 
 use bunq\Context\ApiContext;

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseOauthClient extends BunqResponse
 {
     /**
-     * @return OauthClient
+     * @return OauthClientApiObject
      */
-    public function getValue(): OauthClient
+    public function getValue(): OauthClientApiObject
     {
         return parent::getValue();
     }

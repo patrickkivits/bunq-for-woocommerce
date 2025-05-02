@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseInvoiceByUser extends BunqResponse
 {
     /**
-     * @return InvoiceByUser
+     * @return InvoiceByUserApiObject
      */
-    public function getValue(): InvoiceByUser
+    public function getValue(): InvoiceByUserApiObject
     {
         return parent::getValue();
     }

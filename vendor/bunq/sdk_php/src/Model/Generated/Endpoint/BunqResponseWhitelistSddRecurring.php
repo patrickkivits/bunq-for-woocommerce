@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseWhitelistSddRecurring extends BunqResponse
 {
     /**
-     * @return WhitelistSddRecurring
+     * @return WhitelistSddRecurringApiObject
      */
-    public function getValue(): WhitelistSddRecurring
+    public function getValue(): WhitelistSddRecurringApiObject
     {
         return parent::getValue();
     }

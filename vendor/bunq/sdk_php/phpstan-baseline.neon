@@ -1,0 +1,16 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userCompanyId$#"
+			count: 2
+			path: src/Model/Generated/Endpoint/UserCompanyApiObject.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userId$#"
+			count: 1
+			path: src/Model/Generated/Endpoint/UserApiObject.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userPersonId$#"
+			count: 2
+			path: src/Model/Generated/Endpoint/UserPersonApiObject.php

@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseNoteTextRequestInquiry extends BunqResponse
 {
     /**
-     * @return NoteTextRequestInquiry
+     * @return NoteTextRequestInquiryApiObject
      */
-    public function getValue(): NoteTextRequestInquiry
+    public function getValue(): NoteTextRequestInquiryApiObject
     {
         return parent::getValue();
     }

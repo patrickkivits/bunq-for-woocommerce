@@ -8,9 +8,9 @@ use bunq\Http\BunqResponse;
 class BunqResponseMasterCardIdentityCheckChallengeRequestUser extends BunqResponse
 {
     /**
-     * @return MasterCardIdentityCheckChallengeRequestUser
+     * @return MasterCardIdentityCheckChallengeRequestUserApiObject
      */
-    public function getValue(): MasterCardIdentityCheckChallengeRequestUser
+    public function getValue(): MasterCardIdentityCheckChallengeRequestUserApiObject
     {
         return parent::getValue();
     }

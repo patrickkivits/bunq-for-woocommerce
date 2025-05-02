@@ -2,7 +2,7 @@
 namespace bunq\Util;
 
 use bunq\Exception\BunqException;
-use bunq\Model\Generated\Object\Certificate;
+use bunq\Model\Generated\Object\CertificateObject;
 use bunq\Security\PrivateKey;
 use bunq\Security\PublicKey;
 
@@ -27,7 +27,7 @@ class SecurityUtil
     }
 
     /**
-     * @param Certificate[] $allChainCertificate
+     * @param CertificateObject[] $allChainCertificate
      *
      * @return string
      */
@@ -37,7 +37,7 @@ class SecurityUtil
         $chainString = '';
 
         foreach ($allChainCertificate as $certificate) {
-            if ($certificate instanceof Certificate) {
+            if ($certificate instanceof CertificateObject) {
                 $chainString .= $certificate->getCertificate() . PHP_EOL;
             }
         }
@@ -48,16 +48,16 @@ class SecurityUtil
     /**
      * @param string $path
      *
-     * @return Certificate
+     * @return CertificateObject
      * @throws BunqException
      */
     public static function getCertificateFromFile(
         string $path
-    ): Certificate {
+    ): CertificateObject {
         if (file_exists($path)) {
             $certificateString = FileUtil::getFileContents($path);
 
-            $certificate = new Certificate($certificateString);
+            $certificate = new CertificateObject($certificateString);
             $certificate->setCertificate($certificateString);
 
             return $certificate;
