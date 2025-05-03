@@ -37,9 +37,17 @@ final class WC_Bunq_WooCommerce_Block_Checkout extends AbstractPaymentMethodType
     public function get_payment_method_data() {
         global $woocommerce;
 
-        $total = $woocommerce->cart->total;
+        $enabled_payment_methods_setting = $this->gateway->settings['enabled_payment_methods'] ?? null;
+        if(is_array($enabled_payment_methods_setting) && !empty($enabled_payment_methods_setting)) {
+            $enabled_payment_methods = array_filter($this->gateway->payment_methods, function($payment_method) use ($enabled_payment_methods_setting) {
+                return in_array($payment_method['id'], $enabled_payment_methods_setting);
+            });
+        } else {
+            $enabled_payment_methods = $this->gateway->payment_methods;
+        }
 
-        $allowed_payment_methods = array_filter($this->gateway->payment_methods, function($payment_method) use ($total) {
+        $total = $woocommerce->cart->total;
+        $allowed_payment_methods = array_filter($enabled_payment_methods, function($payment_method) use ($total) {
             return $payment_method['min'] <= $total && ($payment_method['max'] === null || $payment_method['max'] >= $total);
         });
 

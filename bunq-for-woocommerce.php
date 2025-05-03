@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.2
+ * Version: 1.5.3
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -88,6 +88,7 @@ function bunq_init_gateway_class() {
         var $oauth_client_id;
         var $oauth_client_secret;
         var $direct_gateway;
+        var $enabled_payment_methods;
 
         public function __construct() {
             $this->id = 'bunq';
@@ -140,6 +141,7 @@ function bunq_init_gateway_class() {
             $this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
             $this->direct_gateway = 'yes' === $this->get_option( 'direct_gateway' );
             $this->has_fields = $this->direct_gateway;
+            $this->enabled_payment_methods = $this->get_option( 'enabled_payment_methods' ) || $this->payment_methods;
 
             // This action hook saves the settings
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -179,9 +181,17 @@ function bunq_init_gateway_class() {
         {
             global $woocommerce;
 
-            $total = $woocommerce->cart->total;
+            $enabled_payment_methods_setting = $this->get_setting('enabled_payment_methods');
+            if(is_array($enabled_payment_methods_setting) && !empty($enabled_payment_methods_setting)) {
+                $enabled_payment_methods = array_filter($this->payment_methods, function($payment_method) use ($enabled_payment_methods_setting) {
+                    return in_array($payment_method['id'], $enabled_payment_methods_setting);
+                });
+            } else {
+                $enabled_payment_methods = $this->payment_methods;
+            }
 
-            $allowed_payment_methods = array_filter($this->payment_methods, function($payment_method) use ($total) {
+            $total = $woocommerce->cart->total;
+            $allowed_payment_methods = array_filter($enabled_payment_methods, function($payment_method) use ($total) {
                 return $payment_method['min'] <= $total && ($payment_method['max'] === null || $payment_method['max'] >= $total);
             });
 
@@ -359,7 +369,13 @@ function bunq_init_gateway_class() {
                         'description' => 'Allow your customers to directly select a payment method from the checkout page.',
                         'desc_tip'    => true,
                     ),
-		        );
+                    'enabled_payment_methods' => array(
+                        'title'       => 'Payment methods',
+                        'type'        => 'multiselect',
+                        'custom_attributes' => ['multiple' => 'multiple'],
+                        'options'     =>  array_column($this->payment_methods, 'description', 'id')
+                    ),
+                );
 
                 $testmode = 'yes' === $this->get_option( 'testmode' );
 
