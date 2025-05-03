@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.1
+ * Version: 1.5.2
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
