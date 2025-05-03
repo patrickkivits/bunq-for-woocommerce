@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.3
+ * Version: 1.5.4
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -369,13 +369,20 @@ function bunq_init_gateway_class() {
                         'description' => 'Allow your customers to directly select a payment method from the checkout page.',
                         'desc_tip'    => true,
                     ),
-                    'enabled_payment_methods' => array(
-                        'title'       => 'Payment methods',
-                        'type'        => 'multiselect',
-                        'custom_attributes' => ['multiple' => 'multiple'],
-                        'options'     =>  array_column($this->payment_methods, 'description', 'id')
-                    ),
                 );
+
+                $direct_gateway = 'yes' === $this->get_option( 'direct_gateway' );
+
+                if($direct_gateway) {
+                    $this->form_fields = array_merge($this->form_fields, array(
+                        'enabled_payment_methods' => array(
+                            'title'       => 'Payment methods',
+                            'type'        => 'multiselect',
+                            'custom_attributes' => ['multiple' => 'multiple'],
+                            'options'     =>  array_column($this->payment_methods, 'description', 'id')
+                        )
+                    ));
+                }
 
                 $testmode = 'yes' === $this->get_option( 'testmode' );
 
