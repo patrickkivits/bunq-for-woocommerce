@@ -89,6 +89,7 @@ function bunq_init_gateway_class() {
         var $oauth_client_secret;
         var $direct_gateway;
         var $enabled_payment_methods;
+        var $payment_methods;
 
         public function __construct() {
             $this->id = 'bunq';
