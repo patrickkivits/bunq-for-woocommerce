@@ -12,6 +12,29 @@ function bunq_helper_remove_url_parameter($key, $url) {
 }
 
 /**
+ * Whether a URL points at a host that only resolves locally (development sites), so bunq cannot call it.
+ *
+ * @param string $url
+ * @return bool
+ */
+function bunq_helper_is_local_url($url)
+{
+    $host = strtolower(trim((string) wp_parse_url($url, PHP_URL_HOST), '[]'));
+
+    if ($host === '' || in_array($host, array('localhost', '127.0.0.1', '::1'), true)) {
+        return true;
+    }
+
+    foreach (array('.localhost', '.local', '.test') as $suffix) {
+        if (substr($host, -strlen($suffix)) === $suffix) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Log a message to the WooCommerce log (WooCommerce > Status > Logs, source "bunq")
  * and to the PHP error log when WP_DEBUG is enabled.
  *

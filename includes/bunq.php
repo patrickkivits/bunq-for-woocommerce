@@ -130,9 +130,36 @@ function bunq_get_notification_filters($monetary_account_bank_id = null)
 
 function bunq_create_notification_filters($monetary_account_bank_id = null)
 {
-    $notification_filters = [
-        new \bunq\Model\Generated\Object\NotificationFilterUrlObject('BUNQME_TAB', WC()->api_request_url('wc_bunq_gateway'))
-    ];
+    $callback_url = WC()->api_request_url('wc_bunq_gateway');
+
+    // bunq replaces the complete list of URL notification filters of the monetary account with the posted list,
+    // so keep the filters that are already there (other integrations) and add ours to them.
+    $notification_filters = [];
+
+    try {
+        foreach (bunq_get_notification_filters($monetary_account_bank_id) as $existing_filter_list) {
+            foreach ((array) $existing_filter_list->getNotificationFilters() as $existing_filter) {
+                if ($existing_filter->getCategory() === 'BUNQME_TAB' && $existing_filter->getNotificationTarget() === $callback_url) {
+                    continue; // Ours, added below.
+                }
+
+                // Listed objects also carry response fields (id, created, ...) that must not be posted back.
+                $notification_filters[] = new \bunq\Model\Generated\Object\NotificationFilterUrlObject(
+                    $existing_filter->getCategory(),
+                    $existing_filter->getNotificationTarget(),
+                    $existing_filter->getAllUserId(),
+                    $existing_filter->getAllMonetaryAccountId(),
+                    $existing_filter->getAllVerificationType()
+                );
+            }
+        }
+    } catch (Throwable $exception) {
+        // Registering our callback matters more than preserving the others; log what happened.
+        bunq_helper_log('Could not read the existing bunq notification filters, registering only the WooCommerce callback: '.bunq_helper_format_error($exception), 'warning');
+        $notification_filters = [];
+    }
+
+    $notification_filters[] = new \bunq\Model\Generated\Object\NotificationFilterUrlObject('BUNQME_TAB', $callback_url);
 
 	global $requestThrottler;
 	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Core\NotificationFilterUrlMonetaryAccountInternal::ENDPOINT_URL_CREATE, 'POST');
