@@ -39,10 +39,8 @@ function bunq_load_api_context_from_json($json) {
                     // Re-use current context, return early
                     return $json;
                 }
-            } catch (Exception $exception) {
-                if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                    error_log($exception->getMessage());
-                }
+            } catch (Throwable $exception) {
+                // No context loaded yet in this request, this is expected.
             }
 
             // the current context expired, ensure active session and load api context with new session
@@ -54,10 +52,8 @@ function bunq_load_api_context_from_json($json) {
 
             return $apiContext->toJson();
         }
-        catch (Exception $exception){
-            if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                error_log($exception->getMessage());
-            }
+        catch (Throwable $exception){
+            bunq_helper_log($exception);
         }
     }
 
@@ -107,11 +103,9 @@ function bunq_get_bank_accounts($api_context)
                 }
             }
         }
-        catch (Exception $exception) {
-            if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                error_log($exception->getMessage());
-            }
-            $bank_accounts = ['' => 'Error: '.$exception->getMessage()];
+        catch (Throwable $exception) {
+            bunq_helper_log($exception);
+            $bank_accounts = ['' => 'Error: '.bunq_helper_format_error($exception)];
         }
     }
 

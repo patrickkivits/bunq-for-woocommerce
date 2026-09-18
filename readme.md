@@ -51,6 +51,15 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 10. Select your **Bank account** and **Enable** the plugin and **Save changes**.
 
+## Troubleshooting
+
+If the **Live API Context** stays empty after the OAuth authorization, or the **Bank account** dropdown shows *API key not valid or not setup yet*:
+
+1. The plugin shows the error returned by bunq as a notice at the top of the plugin settings page right after the redirect back from bunq.
+2. Full details are written to **WooCommerce** > **Status** > **Logs** (source: `bunq`).
+3. Make sure the redirect URL registered in the bunq app is **exactly** the plugin settings page URL, including `&section=bunq`.
+4. Every attempt whitelists the IP address the request was sent from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with *Incorrect API key or IP address*.
+
 ## Optional configuration
 
 By default WooCommerce will **hold stock** for unpaid orders for **60 minutes**. When this limit is reached, the pending order will be **cancelled**.

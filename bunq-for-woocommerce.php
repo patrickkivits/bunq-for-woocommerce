@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.5
+ * Version: 1.5.6
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -81,6 +81,9 @@ function bunq_init_gateway_class() {
 
     class WC_Bunq_Gateway extends WC_Payment_Gateway {
 
+        const LAST_ERROR_TRANSIENT = 'wc_bunq_gateway.last_error';
+        const LAST_SUCCESS_TRANSIENT = 'wc_bunq_gateway.last_success';
+
         var $api_key;
         var $testmode;
         var $monetary_account_bank_id;
@@ -150,32 +153,45 @@ function bunq_init_gateway_class() {
             // You can also register a webhook here
             add_action( 'woocommerce_api_wc_bunq_gateway', array( $this, 'bunq_callback' ) );
 
-            if(isset($_GET['code']) && $_GET['code'] && isset($_GET['state']) && $_GET['state'])
+            if(is_admin() && isset($_GET['code']) && $_GET['code'] && isset($_GET['state']) && $_GET['state'] && isset($_GET['section']) && $_GET['section'] === $this->id)
             {
-                $oauth_redirect_uri = bunq_helper_get_current_url();
-                $oauth_redirect_uri = bunq_helper_remove_url_parameter('code', $oauth_redirect_uri);
-                $oauth_redirect_uri = bunq_helper_remove_url_parameter('state', $oauth_redirect_uri);
-                $oauth_redirect_uri = substr($oauth_redirect_uri, 0, -2); // Remove double &&
-                
-                try {
-                    $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $oauth_redirect_uri, $this->testmode);
-
-                    if($access_token)
-                    {
-                        delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
-                        $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
-                        $this->refresh_api_context();
-                    }
-                }
-                catch (Exception $exception) {
-                    if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                        error_log($exception->getMessage());
-                    }
-                }
-
-                header('Location: '.$oauth_redirect_uri);
-                exit;
+                $this->handle_oauth_callback();
             }
+        }
+
+        /**
+         * Handle the redirect back from bunq after the OAuth authorization request.
+         * Exchanges the code for an access token and creates the bunq API context.
+         */
+        public function handle_oauth_callback()
+        {
+            // Strip the OAuth parameters so the redirect URI matches the one registered at bunq.
+            $oauth_redirect_uri = remove_query_arg(array('code', 'state'), bunq_helper_get_current_url());
+
+            // Buffer any output (e.g. PHP deprecation notices from the SDK) so the redirect header can still be sent.
+            ob_start();
+
+            delete_transient(self::LAST_ERROR_TRANSIENT);
+            delete_transient(self::LAST_SUCCESS_TRANSIENT);
+
+            try {
+                $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $oauth_redirect_uri, $this->testmode);
+
+                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
+                $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
+                $this->refresh_api_context();
+
+                set_transient(self::LAST_SUCCESS_TRANSIENT, 'bunq authorization completed. Select your bank account and save the settings.', 5 * MINUTE_IN_SECONDS);
+            }
+            catch (Throwable $exception) {
+                bunq_helper_log($exception);
+                set_transient(self::LAST_ERROR_TRANSIENT, bunq_helper_format_error($exception), 5 * MINUTE_IN_SECONDS);
+            }
+
+            ob_end_clean();
+
+            wp_safe_redirect($oauth_redirect_uri);
+            exit;
         }
 
         public function payment_fields()
@@ -221,6 +237,19 @@ function bunq_init_gateway_class() {
 
         public function admin_options()
         {
+            $last_error = get_transient(self::LAST_ERROR_TRANSIENT);
+            if($last_error) {
+                delete_transient(self::LAST_ERROR_TRANSIENT);
+                echo '<div class="notice notice-error"><p><strong>bunq for WooCommerce:</strong> '.esc_html($last_error).'</p>'
+                    .'<p>Details are logged in <a href="'.esc_url(admin_url('admin.php?page=wc-status&tab=logs')).'">WooCommerce &gt; Status &gt; Logs</a> (source: <code>bunq</code>).</p></div>';
+            }
+
+            $last_success = get_transient(self::LAST_SUCCESS_TRANSIENT);
+            if($last_success) {
+                delete_transient(self::LAST_SUCCESS_TRANSIENT);
+                echo '<div class="notice notice-success"><p><strong>bunq for WooCommerce:</strong> '.esc_html($last_success).'</p></div>';
+            }
+
             parent::admin_options();
             $this->init_settings();
 
@@ -241,29 +270,37 @@ function bunq_init_gateway_class() {
             }
         }
 
+        /**
+         * (Re)create the bunq API context from the saved API key.
+         *
+         * @throws Throwable When the API context could not be created (e.g. bunq rejected the key).
+         */
         public function refresh_api_context()
         {
             // Get saved testmode and api key
-            $testmode = 'yes' === $this->settings['testmode'];
-            $api_key = $testmode ? $this->settings['test_api_key'] : $this->settings['api_key'];
-            $monetary_account_bank_id = $this->settings['monetary_account_bank_id'] > 0 ? intval($this->settings['monetary_account_bank_id']) : null;
+            $testmode = 'yes' === $this->get_setting('testmode');
+            $api_key = $testmode ? $this->get_setting('test_api_key') : $this->get_setting('api_key');
+            $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
 
-            // Recreate API context after settings are saved
-            try {
-                if($api_key)
-                {
-                    $api_context = bunq_create_api_context($api_key, $testmode);
-                    $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
+            if(!$api_key)
+            {
+                return;
+            }
 
-                    // Setup callback URL for bunq (not for local environment)
-                    if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
-                    {
-                        bunq_create_notification_filters($monetary_account_bank_id);
-                    }
-                }
-            } catch (Exception $exception) {
-                if(defined( 'WP_DEBUG' ) && WP_DEBUG) {
-                    error_log($exception->getMessage());
+            // Creating the context talks to bunq (installation, device-server, session-server). Let errors bubble up
+            // so the caller can show them to the admin instead of silently leaving the API context empty.
+            $api_context = bunq_create_api_context($api_key, $testmode);
+            $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
+            bunq_helper_log('bunq API context created for '.($testmode ? 'sandbox' : 'production'), 'info');
+
+            // Setup callback URL for bunq (not for local environment)
+            if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
+            {
+                try {
+                    bunq_create_notification_filters($monetary_account_bank_id);
+                } catch (Throwable $exception) {
+                    // Not fatal for the setup: payments still work, only the automatic payment confirmation is affected.
+                    bunq_helper_log($exception, 'warning');
                 }
             }
         }
@@ -546,7 +583,7 @@ function bunq_init_gateway_class() {
 
         function load_api_context() {
 	        $api_context_json = $this->get_setting('api_context');
-	        $testmode = $this->get_setting('test_mode');
+	        $testmode = 'yes' === $this->get_setting('testmode');
 
 	        // Load Bunq API context from JSON
 	        if($api_context_json)
