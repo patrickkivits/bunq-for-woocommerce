@@ -176,10 +176,10 @@ msgstr "De bunq-betaling van deze bestelling heeft geen IBAN om naar terug te be
 msgid "Refund order %1$s %2$s"
 msgstr "Terugbetaling bestelling %1$s %2$s"
 
-#. translators: 1: refunded amount, 2: bunq payment id of the refund
+#. translators: 1: refunded amount, 2: bunq draft payment id
 #: bunq-for-woocommerce.php:690
-msgid "bunq refund of %1$s sent (payment %2$s)"
-msgstr "bunq-terugbetaling van %1$s verzonden (betaling %2$s)"
+msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
+msgstr "bunq-terugbetaling van %1$s aangemaakt als conceptbetaling %2$s. Keur deze goed in de bunq-app om het geld te versturen."
 
 #. translators: %s: error message from bunq
 #: bunq-for-woocommerce.php:703

@@ -13,7 +13,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 - iDEAL, credit and debit cards, Bancontact and bunq-to-bunq transfers through a [bunq.me](https://bunq.me) payment request.
 - Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
-- Refunds from the WooCommerce order screen, sent back to the IBAN the payment came from.
+- Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
 - Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
 - Translated into Dutch, French and German; other languages can be added from the `languages/` template.
 
@@ -68,7 +68,9 @@ The bank account list is cached for an hour. Use **Refresh bank accounts** on th
 
 ## Refunds
 
-Open the order in WooCommerce, click **Refund**, enter the amount and choose **Refund via bunq**. The money is sent back to the IBAN the payment came from and a note with the bunq payment id is added to the order. Payments without a counterparty IBAN (for example card payments) cannot be refunded through the API; refund those from the bunq app.
+Open the order in WooCommerce, click **Refund**, enter the amount and choose **Refund via bunq**. The plugin creates a **draft payment** at bunq back to the IBAN the payment came from and adds a note with the draft payment id to the order. Approve the draft in the bunq app (it appears as a pending payment on the account) to actually send the money; bunq does not let an OAuth-connected app pay an external IBAN without that approval.
+
+WooCommerce records the refund as soon as the draft is created, so an unapproved draft leaves the order marked as refunded while the customer has not received anything. Payments without a counterparty IBAN (for example card payments) cannot be refunded through the API; refund those from the bunq app.
 
 ## Troubleshooting
 

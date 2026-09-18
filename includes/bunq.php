@@ -207,7 +207,12 @@ function bunq_sanitize_payment_description($description)
 }
 
 /**
- * Send money back to an IBAN (a refund of a received payment).
+ * Create a draft payment back to an IBAN (a refund of a received payment).
+ *
+ * The plugin authenticates with an OAuth access token, and bunq only lets OAuth apps move money between
+ * the user's own accounts or create draft payments. A direct payment to the customer's IBAN is rejected
+ * with "Not enough permissions to create payment", so the refund is created as a draft that the merchant
+ * approves in the bunq app.
  *
  * @param float $amount
  * @param string $currency
@@ -215,19 +220,21 @@ function bunq_sanitize_payment_description($description)
  * @param string $name Account holder name, required by bunq for IBAN pointers.
  * @param string $description Shown to the recipient; sanitized with bunq_sanitize_payment_description() and cut to the 140 characters bunq allows.
  * @param int|null $monetary_account_bank_id
- * @return int The id of the outgoing payment.
+ * @return int The id of the draft payment.
  */
 function bunq_create_refund($amount, $currency, $iban, $name, $description, $monetary_account_bank_id = null)
 {
     $amount = new \bunq\Model\Generated\Object\AmountObject(number_format((float) $amount, 2, '.', ''), $currency);
     $counterparty = new \bunq\Model\Generated\Object\PointerObject('IBAN', $iban, $name);
     $description = mb_substr(bunq_sanitize_payment_description($description), 0, 140);
+    $entry = new \bunq\Model\Generated\Object\DraftPaymentEntryObject($amount, $counterparty, $description);
 
 	global $requestThrottler;
-	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\PaymentApiObject::ENDPOINT_URL_CREATE, 'POST');
+	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\DraftPaymentApiObject::ENDPOINT_URL_CREATE, 'POST');
 
-    return bunq_retry(function() use ($amount, $counterparty, $description, $monetary_account_bank_id) {
-        return \bunq\Model\Generated\Endpoint\PaymentApiObject::create($amount, $counterparty, $description, $monetary_account_bank_id)->getValue();
+    return bunq_retry(function() use ($entry, $monetary_account_bank_id) {
+        // One accept: the merchant approves the draft in the bunq app.
+        return \bunq\Model\Generated\Endpoint\DraftPaymentApiObject::create([$entry], 1, $monetary_account_bank_id)->getValue();
     });
 }
 

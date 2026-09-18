@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.6.2
+ * Version: 1.6.3
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -696,12 +696,12 @@ function bunq_init_gateway_class() {
                 );
 
                 $order->add_order_note(sprintf(
-                    /* translators: 1: refunded amount, 2: bunq payment id of the refund */
-                    __('bunq refund of %1$s sent (payment %2$s)', 'bunq-for-woocommerce'),
+                    /* translators: 1: refunded amount, 2: bunq draft payment id */
+                    __('bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money.', 'bunq-for-woocommerce'),
                     wc_price($amount, array('currency' => $order->get_currency())),
                     $refund_payment_id
                 ));
-                bunq_helper_log('bunq refund '.$refund_payment_id.' of '.$order->get_currency().' '.$amount.' sent for order #'.$order->get_order_number(), 'info');
+                bunq_helper_log('bunq draft payment '.$refund_payment_id.' of '.$order->get_currency().' '.$amount.' created for the refund of order #'.$order->get_order_number().', waiting for approval in the bunq app', 'info');
 
                 return true;
             }
