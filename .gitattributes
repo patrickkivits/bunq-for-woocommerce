@@ -1,8 +1,0 @@
-# Files excluded from `git archive`, which the release workflow uses to build
-# the plugin zip. Everything else, including the committed vendor/ directory,
-# ships in the zip.
-.gitattributes export-ignore
-.gitignore export-ignore
-.github export-ignore
-.idea export-ignore
-.DS_Store export-ignore
