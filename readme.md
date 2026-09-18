@@ -16,7 +16,7 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 - [bunq account](https://bunq.com/invite/patrickkivits)
 - HTTPS/SSL certificate (for callbacks/payment processing to work)
-- PHP version: >= 7.0
+- PHP version: >= 7.3 (up to and including 8.5)
 - PHP extensions: openssl, curl, json, mbstring
 - Wordpress version: >= 3.8
 - WooCommerce version: >= 2.2

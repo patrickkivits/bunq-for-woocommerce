@@ -2,10 +2,11 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.7
+ * Version: 1.5.8
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
+ * Requires PHP: 7.3
  * Tested up to: 6.8
  * Text Domain: bunq-for-woocommerce
  * License: GPLv2 or later
@@ -294,7 +295,7 @@ function bunq_init_gateway_class() {
             bunq_helper_log('bunq API context created for '.($testmode ? 'sandbox' : 'production'), 'info');
 
             // Setup callback URL for bunq (not for local environment)
-            if(!in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1')))
+            if(!in_array($_SERVER['REMOTE_ADDR'] ?? '', array('127.0.0.1', '::1')))
             {
                 try {
                     bunq_create_notification_filters($monetary_account_bank_id);
@@ -493,7 +494,7 @@ function bunq_init_gateway_class() {
                 $order->save();
 
                 $payment_method = '';
-                if($_POST['wc_bunq_gateway_payment_method']) {
+                if(!empty($_POST['wc_bunq_gateway_payment_method'])) {
                     $payment_method = '/'.$_POST['wc_bunq_gateway_payment_method'];
                 }
 
