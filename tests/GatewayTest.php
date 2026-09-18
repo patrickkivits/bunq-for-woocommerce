@@ -456,6 +456,41 @@ final class GatewayTest extends TestCase
         $this->assertSame('{"live":1}', $saved['api_context']);
     }
 
+    public function testTheFirstSaveOnAFreshInstallDoesNotWarnAboutTheMissingTestClient()
+    {
+        // Outside test mode the test_* fields are not part of the form, so WooCommerce never fills their
+        // defaults: reading them directly raised "Undefined array key" on the first save.
+        $gateway = $this->createGateway();
+        $this->postSettings(array(
+            'oauth_client_id' => 'live-client-id',
+            'oauth_client_secret' => 'live-client-secret',
+        ));
+
+        $gateway->process_admin_options();
+
+        $saved = get_option('woocommerce_bunq_settings');
+        $this->assertSame('', $saved['test_api_key']);
+        $this->assertSame('', $saved['test_api_context']);
+        $this->assertSame('live-client-id', $saved['oauth_client_id']);
+    }
+
+    public function testTheFirstSaveInTestModeDoesNotWarnAboutTheMissingLiveClient()
+    {
+        $gateway = $this->createGateway(array('testmode' => 'yes'));
+        $this->postSettings(array(
+            'testmode' => '1',
+            'test_oauth_client_id' => 'test-client-id',
+            'test_oauth_client_secret' => 'test-client-secret',
+        ));
+
+        $gateway->process_admin_options();
+
+        $saved = get_option('woocommerce_bunq_settings');
+        $this->assertSame('', $saved['api_key']);
+        $this->assertSame('', $saved['api_context']);
+        $this->assertSame('test-client-id', $saved['test_oauth_client_id']);
+    }
+
     public function testRefreshingTheApiContextNeedsAnApiKey()
     {
         $gateway = $this->createGateway($this->liveSettings(array('api_key' => '')));

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.6.3
+ * Version: 1.6.4
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -392,15 +392,17 @@ function bunq_init_gateway_class() {
         public function process_admin_options() {
             parent::process_admin_options();
 
-            // Reset readonly options based on OAuth Client ID and OAuth Client Secret
-            if(!$this->settings['test_oauth_client_id'] || !$this->settings['test_oauth_client_secret'])
+            // Reset readonly options based on OAuth Client ID and OAuth Client Secret.
+            // Only the fields of the active mode are in the form, so the other mode's keys can be absent
+            // until they have been saved once: a missing key counts as "not set".
+            if(empty($this->settings['test_oauth_client_id']) || empty($this->settings['test_oauth_client_secret']))
             {
                 $this->update_option('test_api_context', '');
                 $this->update_option('test_api_key', '');
                 delete_transient(self::BANK_ACCOUNTS_TRANSIENT);
             }
 
-            if(!$this->settings['oauth_client_id'] || !$this->settings['oauth_client_secret'])
+            if(empty($this->settings['oauth_client_id']) || empty($this->settings['oauth_client_secret']))
             {
                 $this->update_option('api_context', '');
                 $this->update_option('api_key', '');

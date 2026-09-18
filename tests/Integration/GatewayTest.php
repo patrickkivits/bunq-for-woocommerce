@@ -124,6 +124,39 @@ final class GatewayTest extends TestCase
         $this->assertFalse(get_transient(WC_Bunq_Gateway::BANK_ACCOUNTS_TRANSIENT));
     }
 
+    public function testTheFirstSaveOnAFreshInstallDoesNotWarnAboutTheOtherModesClient()
+    {
+        // Only the fields of the active mode are in the form, so WooCommerce never fills the other mode's
+        // defaults; reading them directly raised "Undefined array key" on the first save.
+        $gateway = $this->createGateway();
+        $this->postSettings(array(
+            'oauth_client_id' => 'live-client-id',
+            'oauth_client_secret' => 'live-client-secret',
+        ));
+
+        $gateway->process_admin_options();
+
+        $saved = get_option('woocommerce_bunq_settings');
+        $this->assertSame('live-client-id', $saved['oauth_client_id']);
+        $this->assertSame('', $saved['test_api_key']);
+        $this->assertSame('', $saved['test_api_context']);
+
+        $_POST = array();
+        $gateway = $this->createGateway(array('testmode' => 'yes'));
+        $this->postSettings(array(
+            'testmode' => '1',
+            'test_oauth_client_id' => 'test-client-id',
+            'test_oauth_client_secret' => 'test-client-secret',
+        ));
+
+        $gateway->process_admin_options();
+
+        $saved = get_option('woocommerce_bunq_settings');
+        $this->assertSame('test-client-id', $saved['test_oauth_client_id']);
+        $this->assertSame('', $saved['api_key']);
+        $this->assertSame('', $saved['api_context']);
+    }
+
     public function testTheCheckoutTotalIsTheCartTotal()
     {
         $gateway = $this->createGateway($this->liveSettings());
