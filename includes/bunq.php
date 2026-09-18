@@ -188,13 +188,32 @@ function bunq_get_payment($payment_id, $monetary_account_bank_id = null)
 }
 
 /**
+ * Strip characters bunq rejects in the description of a payment to a non-bunq account.
+ *
+ * Such payments leave bunq as SEPA transfers, whose remittance text allows letters, digits,
+ * spaces and the punctuation / - ? : ( ) . , ' +. Anything else (for example # or emojis)
+ * makes bunq return HTTP 478 "The description text of a payment to a non-bunqer cannot
+ * contain special characters or emojis".
+ *
+ * @param string $description
+ * @return string
+ */
+function bunq_sanitize_payment_description($description)
+{
+    $description = preg_replace('/[^\p{L}\p{N} \/\-?:().,\'+]/u', ' ', (string) $description);
+    $description = preg_replace('/ {2,}/', ' ', $description);
+
+    return trim($description);
+}
+
+/**
  * Send money back to an IBAN (a refund of a received payment).
  *
  * @param float $amount
  * @param string $currency
  * @param string $iban
  * @param string $name Account holder name, required by bunq for IBAN pointers.
- * @param string $description Shown to the recipient; bunq allows 140 characters.
+ * @param string $description Shown to the recipient; sanitized with bunq_sanitize_payment_description() and cut to the 140 characters bunq allows.
  * @param int|null $monetary_account_bank_id
  * @return int The id of the outgoing payment.
  */
@@ -202,7 +221,7 @@ function bunq_create_refund($amount, $currency, $iban, $name, $description, $mon
 {
     $amount = new \bunq\Model\Generated\Object\AmountObject(number_format((float) $amount, 2, '.', ''), $currency);
     $counterparty = new \bunq\Model\Generated\Object\PointerObject('IBAN', $iban, $name);
-    $description = mb_substr($description, 0, 140);
+    $description = mb_substr(bunq_sanitize_payment_description($description), 0, 140);
 
 	global $requestThrottler;
 	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\PaymentApiObject::ENDPOINT_URL_CREATE, 'POST');

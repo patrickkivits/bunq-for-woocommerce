@@ -173,8 +173,8 @@ msgstr "De bunq-betaling van deze bestelling heeft geen IBAN om naar terug te be
 
 #. translators: 1: order number, 2: shop name
 #: bunq-for-woocommerce.php:671
-msgid "Refund order #%1$s %2$s"
-msgstr "Terugbetaling bestelling #%1$s %2$s"
+msgid "Refund order %1$s %2$s"
+msgstr "Terugbetaling bestelling %1$s %2$s"
 
 #. translators: 1: refunded amount, 2: bunq payment id of the refund
 #: bunq-for-woocommerce.php:690
