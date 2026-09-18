@@ -176,10 +176,10 @@ msgstr "Le paiement bunq de cette commande n’a pas d’IBAN vers lequel rembou
 msgid "Refund order %1$s %2$s"
 msgstr "Remboursement commande %1$s %2$s"
 
-#. translators: 1: refunded amount, 2: bunq payment id of the refund
+#. translators: 1: refunded amount, 2: bunq draft payment id
 #: bunq-for-woocommerce.php:690
-msgid "bunq refund of %1$s sent (payment %2$s)"
-msgstr "Remboursement bunq de %1$s envoyé (paiement %2$s)"
+msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
+msgstr "Remboursement bunq de %1$s créé comme paiement brouillon %2$s. Approuvez-le dans l'application bunq pour envoyer l'argent."
 
 #. translators: %s: error message from bunq
 #: bunq-for-woocommerce.php:703
