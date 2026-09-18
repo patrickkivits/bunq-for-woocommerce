@@ -23,10 +23,16 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 ## Installation
 
-1. Download the [latest zip](https://github.com/patrickkivits/bunq-for-woocommerce/archive/master.zip) of this repository.
+1. Download `bunq-for-woocommerce.zip` from the [latest release](https://github.com/patrickkivits/bunq-for-woocommerce/releases/latest/download/bunq-for-woocommerce.zip).
 2. In your WordPress admin panel, navigate to **Plugins** > **Add New**.
 3. Click Upload Plugin.
 4. Upload the zip file that you downloaded.
+
+### Updating
+
+Upload the new `bunq-for-woocommerce.zip` the same way. WordPress recognises the installed plugin and offers **Replace current with uploaded**, which keeps your settings.
+
+Do not use the "Source code (zip)" archives on the release page or the repository's own download button: those unpack to a versioned folder name, so WordPress installs them as a second plugin instead of an upgrade. If you installed an older release that way, the plugin folder is named `bunq-for-woocommerce-<version>`. Upload the new zip, deactivate the old copy, activate the new one, and then remove the old folder. Note that deleting a copy from 1.5.6 or later through the Plugins screen runs its uninstall script and clears the saved bunq settings, so delete that folder over FTP/SSH instead.
 
 ## Configuration
 
