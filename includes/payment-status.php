@@ -6,6 +6,7 @@
  */
 
 const BUNQ_PAYMENT_CHECK_ACTION = 'wc_bunq_check_payment';
+const BUNQ_CANCEL_REQUEST_ACTION = 'wc_bunq_cancel_payment_request';
 const BUNQ_ACTION_GROUP = 'bunq';
 
 /**
@@ -143,7 +144,9 @@ function bunq_check_payment_on_return()
 }
 
 /**
- * A cancelled order must not be payable any more, so cancel its payment request at bunq as well.
+ * A cancelled order must not be payable any more, so cancel its payment request at bunq as well. The bunq call is
+ * queued so that bulk cancellations (unpaid-order cron, bulk actions) do not make one rate-limited call per order
+ * inside the request that cancels them.
  */
 add_action('woocommerce_order_status_cancelled', 'bunq_cancel_payment_request_for_order', 10, 2);
 function bunq_cancel_payment_request_for_order($order_id, $order = null)
@@ -154,9 +157,29 @@ function bunq_cancel_payment_request_for_order($order_id, $order = null)
         return;
     }
 
+    // Nothing to cancel, or bunq already reported the request as cancelled or expired.
+    if (!intval($order->get_meta('bunq_payment_request_id')) || $order->get_meta('bunq_payment_request_status')) {
+        return;
+    }
+
+    if (function_exists('as_enqueue_async_action')) {
+        as_enqueue_async_action(BUNQ_CANCEL_REQUEST_ACTION, array(intval($order_id)), BUNQ_ACTION_GROUP);
+    } else {
+        bunq_cancel_payment_request_now($order_id);
+    }
+}
+
+add_action(BUNQ_CANCEL_REQUEST_ACTION, 'bunq_cancel_payment_request_now');
+function bunq_cancel_payment_request_now($order_id)
+{
+    $order = wc_get_order($order_id);
+
+    if (!$order || $order->get_payment_method() !== 'bunq') {
+        return;
+    }
+
     $payment_request_id = intval($order->get_meta('bunq_payment_request_id'));
 
-    // Nothing to cancel, or bunq already reported the request as cancelled or expired.
     if (!$payment_request_id || $order->get_meta('bunq_payment_request_status')) {
         return;
     }

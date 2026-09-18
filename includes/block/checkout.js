@@ -10,16 +10,18 @@
 
     // Checkout: lets the customer pick a payment method and hands the choice to process_payment().
     const Content = ( props ) => {
-        if ( ! settings.direct_gateway || paymentMethods.length === 0 ) {
-            return Description();
-        }
-
-        const [ paymentMethod, setPaymentMethod ] = useState( paymentMethods[ 0 ].id );
+        // Hooks first, unconditionally (rules of hooks); the branches below only decide what to render.
+        const selectable = settings.direct_gateway && paymentMethods.length > 0;
+        const [ paymentMethod, setPaymentMethod ] = useState( selectable ? paymentMethods[ 0 ].id : '' );
         const { eventRegistration, emitResponse } = props;
         // onPaymentSetup replaced onPaymentProcessing in WooCommerce Blocks 9.x; keep the old name as a fallback.
         const onPaymentSetup = eventRegistration.onPaymentSetup || eventRegistration.onPaymentProcessing;
 
         useEffect( () => {
+            if ( ! selectable ) {
+                return undefined;
+            }
+
             const unsubscribe = onPaymentSetup( async () => ( {
                 type: emitResponse.responseTypes.SUCCESS,
                 meta: {
@@ -30,7 +32,11 @@
             } ) );
 
             return () => unsubscribe();
-        }, [ onPaymentSetup, emitResponse.responseTypes.SUCCESS, paymentMethod ] );
+        }, [ selectable, onPaymentSetup, emitResponse.responseTypes.SUCCESS, paymentMethod ] );
+
+        if ( ! selectable ) {
+            return Description();
+        }
 
         return createElement( 'div', { className: 'payment-methods' },
             Description(),

@@ -1,6 +1,6 @@
 <?php
 
-const BUNQ_REQUIREMENTS_TRANSIENT = 'wc_bunq_gateway.requirements';
+const BUNQ_REQUIREMENTS_OPTION = 'wc_bunq_gateway.requirements';
 
 function bunq_requirements_check() {
     $min_wp  = '3.8';
@@ -30,10 +30,11 @@ function bunq_requirements_check() {
     }
 
     // Generating a key pair proves OpenSSL can do what the bunq SDK needs, but it costs tens of milliseconds,
-    // so the outcome is cached per PHP/OpenSSL build instead of being repeated on every request.
+    // so the outcome is remembered per PHP/OpenSSL build in an autoloaded option (a transient would cost two
+    // queries per request without an object cache).
     $fingerprint = md5( PHP_VERSION . '|' . ( defined( 'OPENSSL_VERSION_TEXT' ) ? OPENSSL_VERSION_TEXT : '' ) );
 
-    if ( get_transient( BUNQ_REQUIREMENTS_TRANSIENT ) === $fingerprint ) {
+    if ( get_option( BUNQ_REQUIREMENTS_OPTION ) === $fingerprint ) {
         return true;
     }
 
@@ -46,7 +47,7 @@ function bunq_requirements_check() {
         return false;
     }
 
-    set_transient( BUNQ_REQUIREMENTS_TRANSIENT, $fingerprint, DAY_IN_SECONDS );
+    update_option( BUNQ_REQUIREMENTS_OPTION, $fingerprint, true );
 
     return true;
 }

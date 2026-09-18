@@ -13,7 +13,8 @@ delete_option( 'woocommerce_bunq_settings' );
 delete_transient( 'wc_bunq_gateway.bunq_get_bank_accounts' );
 delete_transient( 'wc_bunq_gateway.last_error' );
 delete_transient( 'wc_bunq_gateway.last_success' );
-delete_transient( 'wc_bunq_gateway.requirements' );
+delete_option( 'wc_bunq_gateway.requirements' );
+delete_transient( 'wc_bunq_gateway.context_failed' );
 
 // Pending background payment checks (Action Scheduler is available while WooCommerce is active).
 if ( function_exists( 'as_unschedule_all_actions' ) ) {

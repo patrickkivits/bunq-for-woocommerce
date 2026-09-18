@@ -2,163 +2,227 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bunq for WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/patrickkivits/bunq-for-woocommerce/issues\n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: bunq-for-woocommerce\n"
 
+#: bunq-for-woocommerce.php:114
 msgid "bunq payment gateway for WooCommerce"
 msgstr "bunq-Zahlungsgateway für WooCommerce"
 
+#: bunq-for-woocommerce.php:118
 msgid "Credit or Debit Card"
 msgstr "Kredit- oder Debitkarte"
 
+#: bunq-for-woocommerce.php:124
 msgid "iDEAL"
 msgstr "iDEAL"
 
+#: bunq-for-woocommerce.php:130
 msgid "Bancontact"
 msgstr "Bancontact"
 
+#: bunq-for-woocommerce.php:136
 msgid "From a bunq account"
 msgstr "Von einem bunq-Konto"
 
+#: bunq-for-woocommerce.php:204
 msgid "bunq authorization completed. Select your bank account and save the settings."
 msgstr "bunq-Autorisierung abgeschlossen. Wählen Sie Ihr Bankkonto aus und speichern Sie die Einstellungen."
 
+#: bunq-for-woocommerce.php:285
 msgid "Payment method invalid"
 msgstr "Ungültige Zahlungsmethode"
 
+#. translators: %s: link to the WooCommerce log page
+#: bunq-for-woocommerce.php:300
 msgid "Details are logged in %s (source: bunq)."
 msgstr "Details werden in %s protokolliert (Quelle: bunq)."
 
+#: bunq-for-woocommerce.php:301
 msgid "WooCommerce > Status > Logs"
 msgstr "WooCommerce > Status > Protokolle"
 
+#: bunq-for-woocommerce.php:328
 msgid "OAuth Authorization Request"
 msgstr "OAuth-Autorisierungsanfrage"
 
+#: bunq-for-woocommerce.php:334
 msgid "Refresh bank accounts"
 msgstr "Bankkonten aktualisieren"
 
+#: bunq-for-woocommerce.php:468
 msgid "Enable/Disable"
 msgstr "Aktivieren/Deaktivieren"
 
+#: bunq-for-woocommerce.php:469
 msgid "Enable bunq Gateway"
 msgstr "bunq-Gateway aktivieren"
 
+#: bunq-for-woocommerce.php:475
 msgid "Test mode"
 msgstr "Testmodus"
 
+#: bunq-for-woocommerce.php:476
 msgid "Enable Test Mode"
 msgstr "Testmodus aktivieren"
 
+#: bunq-for-woocommerce.php:478
 msgid "Place the payment gateway in test mode using test API keys."
 msgstr "Das Zahlungsgateway mit Test-API-Schlüsseln in den Testmodus versetzen."
 
+#: bunq-for-woocommerce.php:483
 msgid "Title"
 msgstr "Titel"
 
+#: bunq-for-woocommerce.php:485
 msgid "This controls the title which the user sees during checkout."
 msgstr "Dieser Titel wird dem Kunden beim Bezahlvorgang angezeigt."
 
+#: bunq-for-woocommerce.php:486
 msgid "iDEAL, Credit Card or Bancontact"
 msgstr "iDEAL, Kreditkarte oder Bancontact"
 
+#: bunq-for-woocommerce.php:490
 msgid "Description"
 msgstr "Beschreibung"
 
+#: bunq-for-woocommerce.php:492
 msgid "This controls the description which the user sees during checkout."
 msgstr "Diese Beschreibung wird dem Kunden beim Bezahlvorgang angezeigt."
 
+#: bunq-for-woocommerce.php:493
 msgid "Pay with iDEAL, Credit Card or Bancontact"
 msgstr "Bezahlen mit iDEAL, Kreditkarte oder Bancontact"
 
+#: bunq-for-woocommerce.php:496
 msgid "Bank account"
 msgstr "Bankkonto"
 
+#: bunq-for-woocommerce.php:501
 msgid "Direct Gateway"
 msgstr "Direktes Gateway"
 
+#: bunq-for-woocommerce.php:502
 msgid "Enable direct gateway"
 msgstr "Direktes Gateway aktivieren"
 
+#: bunq-for-woocommerce.php:505
 msgid "Allow your customers to directly select a payment method from the checkout page."
 msgstr "Kunden können die Zahlungsmethode direkt auf der Kassenseite auswählen."
 
+#: bunq-for-woocommerce.php:515
 msgid "Payment methods"
 msgstr "Zahlungsmethoden"
 
+#: bunq-for-woocommerce.php:528
 msgid "Test OAuth Client ID"
 msgstr "Test OAuth Client ID"
 
+#: bunq-for-woocommerce.php:532
 msgid "Test OAuth Client Secret"
 msgstr "Test OAuth Client Secret"
 
+#: bunq-for-woocommerce.php:536
 msgid "Test API Key"
 msgstr "Test-API-Schlüssel"
 
+#: bunq-for-woocommerce.php:541
 msgid "Test API Context"
 msgstr "Test-API-Kontext"
 
+#: bunq-for-woocommerce.php:550
 msgid "OAuth Client ID"
 msgstr "OAuth Client ID"
 
+#: bunq-for-woocommerce.php:554
 msgid "OAuth Client Secret"
 msgstr "OAuth Client Secret"
 
+#: bunq-for-woocommerce.php:558
 msgid "Live API Key"
 msgstr "Live-API-Schlüssel"
 
+#: bunq-for-woocommerce.php:563
 msgid "Live API Context"
 msgstr "Live-API-Kontext"
 
+#. translators: %s: bunq payment request id
+#: bunq-for-woocommerce.php:614
 msgid "bunq payment request %s created"
 msgstr "bunq-Zahlungsanfrage %s erstellt"
 
+#: bunq-for-woocommerce.php:631
 msgid "The payment could not be started with bunq. Please try again or choose another payment method."
 msgstr "Die Zahlung konnte bei bunq nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsmethode."
 
+#: bunq-for-woocommerce.php:650
 msgid "This order has no bunq payment that can be refunded."
 msgstr "Diese Bestellung hat keine bunq-Zahlung, die erstattet werden kann."
 
+#: bunq-for-woocommerce.php:654
 msgid "The refund amount must be greater than zero."
 msgstr "Der Erstattungsbetrag muss größer als null sein."
 
+#: bunq-for-woocommerce.php:666
 msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
 msgstr "Die bunq-Zahlung dieser Bestellung hat keine IBAN für die Erstattung (zum Beispiel eine Kartenzahlung). Erstatten Sie sie stattdessen über die bunq-App."
 
+#. translators: 1: order number, 2: shop name
+#: bunq-for-woocommerce.php:671
 msgid "Refund order #%1$s %2$s"
 msgstr "Erstattung Bestellung #%1$s %2$s"
 
+#. translators: 1: refunded amount, 2: bunq payment id of the refund
+#: bunq-for-woocommerce.php:690
 msgid "bunq refund of %1$s sent (payment %2$s)"
 msgstr "bunq-Erstattung von %1$s gesendet (Zahlung %2$s)"
 
+#. translators: %s: error message from bunq
+#: bunq-for-woocommerce.php:703
 msgid "bunq refund failed: %s"
 msgstr "bunq-Erstattung fehlgeschlagen: %s"
 
+#. translators: %s: bunq payment id
+#: bunq-for-woocommerce.php:819
 msgid "bunq payment %s received"
 msgstr "bunq-Zahlung %s erhalten"
 
+#. translators: 1: bunq payment id, 2: amount received, 3: order total
+#: bunq-for-woocommerce.php:840
+msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
+msgstr "bunq-Zahlung %1$s über %2$s erhalten, aber der Bestellwert beträgt %3$s. Prüfen Sie die Zahlung, bevor Sie die Bestellung bearbeiten."
+
+#. translators: 1: bunq payment request id, 2: status reported by bunq
+#: bunq-for-woocommerce.php:860
 msgid "bunq payment request %1$s is %2$s"
 msgstr "bunq-Zahlungsanfrage %1$s ist %2$s"
 
+#: includes/bunq.php:97
 msgid "API key not valid or not setup yet"
 msgstr "API-Schlüssel ungültig oder noch nicht eingerichtet"
 
+#: includes/bunq.php:101
 msgid "Select a bank account"
 msgstr "Bankkonto auswählen"
 
+#: includes/bunq.php:118
 msgid "(Joint)"
 msgstr "(Gemeinschaftskonto)"
 
+#. translators: %s: error message from bunq
+#: includes/bunq.php:127
 msgid "Error: %s"
 msgstr "Fehler: %s"
 
+#. translators: %s: bunq payment request id
+#: includes/payment-status.php:199
 msgid "bunq payment request %s cancelled"
 msgstr "bunq-Zahlungsanfrage %s storniert"
 
+#: includes/requirements.php:70
 msgid "cannot be activated due to incompatible environment."
 msgstr "kann nicht aktiviert werden, da die Umgebung nicht kompatibel ist."
-
