@@ -41,8 +41,11 @@ function bunq_requirements_check() {
 }
 
 function bunq_requirements_disable_plugin() {
-    if ( current_user_can('activate_plugins') && is_plugin_active( plugin_basename( __FILE__ ) ) ) {
-        deactivate_plugins( plugin_basename( __FILE__ ) );
+    // __FILE__ would point at this include, not at the plugin, so use the main plugin file.
+    $plugin = plugin_basename( BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE );
+
+    if ( current_user_can('activate_plugins') && is_plugin_active( $plugin ) ) {
+        deactivate_plugins( $plugin );
 
         // Hide the default "Plugin activated" notice
         if ( isset( $_GET['activate'] ) ) {
