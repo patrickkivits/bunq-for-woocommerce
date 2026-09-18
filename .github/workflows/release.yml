@@ -1,0 +1,66 @@
+name: Release
+
+# Builds a plugin zip whose top-level folder is always "bunq-for-woocommerce/"
+# and attaches it to the GitHub release. GitHub's own source archives unpack to
+# "bunq-for-woocommerce-<tag>/", which makes WordPress treat every release as a
+# different plugin instead of an upgrade of the installed one.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to (re)build the zip for, e.g. v1.5.9'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and attach plugin zip
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      SLUG: bunq-for-woocommerce
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Check that the plugin header version matches the tag
+        run: |
+          header=$(sed -n 's/^ \* Version: *//p' "$SLUG.php" | head -n1)
+          echo "Tag: $TAG, plugin header: $header"
+          if [ "v$header" != "$TAG" ] && [ "$header" != "$TAG" ]; then
+            echo "::error::Plugin header version ($header) does not match release tag ($TAG)"
+            exit 1
+          fi
+
+      - name: Build the zip with a fixed top-level folder
+        run: |
+          # git archive honours the export-ignore rules in .gitattributes, so
+          # development files stay out of the zip while the committed vendor/
+          # directory is included.
+          git archive --format=zip --prefix="$SLUG/" -o "$SLUG.zip" "$TAG"
+          unzip -l "$SLUG.zip" | head -n 20
+          # Every entry must live under the fixed folder.
+          if unzip -Z1 "$SLUG.zip" | grep -v "^$SLUG/" ; then
+            echo "::error::Zip contains entries outside $SLUG/"
+            exit 1
+          fi
+          for f in "$SLUG.php" uninstall.php vendor/autoload.php includes/helpers.php; do
+            unzip -Z1 "$SLUG.zip" | grep -qx "$SLUG/$f" || { echo "::error::$f missing from zip"; exit 1; }
+          done
+          if unzip -Z1 "$SLUG.zip" | grep -q "^$SLUG/\.github/"; then
+            echo "::error::.github/ leaked into the zip"
+            exit 1
+          fi
+
+      - name: Attach the zip to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "$SLUG.zip" --clobber
