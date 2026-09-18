@@ -2,13 +2,14 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.10
+ * Version: 1.6.0
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
  * Requires PHP: 7.3
  * Tested up to: 6.8
  * Text Domain: bunq-for-woocommerce
+ * Domain Path: /languages
  * License: GPLv2 or later
  * WC requires at least: 2.2.0
  * WC tested up to: 9.8
@@ -61,11 +62,18 @@ function bunq_register_blocks_payment_method_type() {
 // Hook the custom function to the 'before_woocommerce_init' action
 add_action('before_woocommerce_init', 'declare_cart_checkout_blocks_compatibility');
 
+// Translations live in /languages (the plugin is not distributed through wordpress.org).
+add_action( 'init', function() {
+    load_plugin_textdomain( 'bunq-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}, 1 );
+
 if ( ! bunq_requirements_check() ) {
     add_action( 'admin_init', 'bunq_requirements_disable_plugin' );
     add_action( 'admin_notices', 'bunq_requirements_show_notice' );
     return;
 }
+
+require_once (__DIR__.'/includes/payment-status.php');
 
 /*
  * This action hook registers our PHP class as a WooCommerce payment gateway
@@ -86,6 +94,9 @@ function bunq_init_gateway_class() {
 
         const LAST_ERROR_TRANSIENT = 'wc_bunq_gateway.last_error';
         const LAST_SUCCESS_TRANSIENT = 'wc_bunq_gateway.last_success';
+        const BANK_ACCOUNTS_TRANSIENT = 'wc_bunq_gateway.bunq_get_bank_accounts';
+        const REFRESH_ACCOUNTS_ACTION = 'bunq_refresh_accounts';
+        const CONTEXT_FAILED_TRANSIENT = 'wc_bunq_gateway.context_failed';
 
         var $api_key;
         var $testmode;
@@ -94,44 +105,51 @@ function bunq_init_gateway_class() {
         var $oauth_client_id;
         var $oauth_client_secret;
         var $direct_gateway;
-        var $enabled_payment_methods;
         var $payment_methods;
 
         public function __construct() {
             $this->id = 'bunq';
             $this->icon = '';
             $this->method_title = 'bunq';
-            $this->method_description = 'bunq payment gateway for WooCommerce';
+            $this->method_description = __('bunq payment gateway for WooCommerce', 'bunq-for-woocommerce');
             $this->payment_methods = [
                 [
                     'id' => 'card',
-                    'description' => 'Credit or Debit Card',
+                    'description' => __('Credit or Debit Card', 'bunq-for-woocommerce'),
                     'min' => 1,
                     'max' => 500,
                 ],
                 [
                     'id' => 'ideal',
-                    'description' => 'iDEAL',
+                    'description' => __('iDEAL', 'bunq-for-woocommerce'),
                     'min' => 0.01,
                     'max' => null,
                 ],
                 [
                     'id' => 'bancontact',
-                    'description' => 'Bancontact',
+                    'description' => __('Bancontact', 'bunq-for-woocommerce'),
                     'min' => 5,
                     'max' => 10000,
                 ],
                 [
                     'id' => 'bunq-transfer',
-                    'description' => 'From a bunq account',
+                    'description' => __('From a bunq account', 'bunq-for-woocommerce'),
                     'min' => 0.01,
                     'max' => null,
                 ],
             ];
 
             $this->supports = array(
-                'products'
+                'products',
+                'refunds',
             );
+
+            // "Refresh bank accounts" button on the settings page: drop the cached list before the fields are built.
+            if(is_admin() && isset($_GET[self::REFRESH_ACCOUNTS_ACTION]) && current_user_can('manage_woocommerce')
+                && wp_verify_nonce(sanitize_key(wp_unslash($_GET['_wpnonce'] ?? '')), self::REFRESH_ACCOUNTS_ACTION))
+            {
+                delete_transient(self::BANK_ACCOUNTS_TRANSIENT);
+            }
 
             $this->init_form_fields();
 
@@ -148,7 +166,6 @@ function bunq_init_gateway_class() {
             $this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
             $this->direct_gateway = 'yes' === $this->get_option( 'direct_gateway' );
             $this->has_fields = $this->direct_gateway;
-            $this->enabled_payment_methods = $this->get_option( 'enabled_payment_methods' ) || $this->payment_methods;
 
             // This action hook saves the settings
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -180,11 +197,11 @@ function bunq_init_gateway_class() {
             try {
                 $access_token = bunq_oauth2_get_access_token($this->oauth_client_id, $this->oauth_client_secret, $oauth_redirect_uri, $this->testmode);
 
-                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
+                delete_transient(self::BANK_ACCOUNTS_TRANSIENT);
                 $this->update_option(($this->testmode ? 'test_api_key' : 'api_key'), $access_token);
                 $this->refresh_api_context();
 
-                set_transient(self::LAST_SUCCESS_TRANSIENT, 'bunq authorization completed. Select your bank account and save the settings.', 5 * MINUTE_IN_SECONDS);
+                set_transient(self::LAST_SUCCESS_TRANSIENT, __('bunq authorization completed. Select your bank account and save the settings.', 'bunq-for-woocommerce'), 5 * MINUTE_IN_SECONDS);
             }
             catch (Throwable $exception) {
                 bunq_helper_log($exception);
@@ -197,10 +214,14 @@ function bunq_init_gateway_class() {
             exit;
         }
 
-        public function payment_fields()
+        /**
+         * The payment methods the customer may pick, limited to the enabled ones and to those whose bunq limits fit the total.
+         *
+         * @param float|null $total Cart or order total; null allows every enabled method.
+         * @return array
+         */
+        public function get_allowed_payment_methods($total = null)
         {
-            global $woocommerce;
-
             $enabled_payment_methods_setting = $this->get_setting('enabled_payment_methods');
             if(is_array($enabled_payment_methods_setting) && !empty($enabled_payment_methods_setting)) {
                 $enabled_payment_methods = array_filter($this->payment_methods, function($payment_method) use ($enabled_payment_methods_setting) {
@@ -210,19 +231,49 @@ function bunq_init_gateway_class() {
                 $enabled_payment_methods = $this->payment_methods;
             }
 
-            $total = $woocommerce->cart->total;
-            $allowed_payment_methods = array_filter($enabled_payment_methods, function($payment_method) use ($total) {
+            if($total === null) {
+                return $enabled_payment_methods;
+            }
+
+            return array_filter($enabled_payment_methods, function($payment_method) use ($total) {
                 return $payment_method['min'] <= $total && ($payment_method['max'] === null || $payment_method['max'] >= $total);
             });
+        }
+
+        /**
+         * The amount the customer is about to pay: the order total on the pay-for-order page, otherwise the cart
+         * total. Null when there is no amount to filter on (empty cart, block editor).
+         *
+         * @return float|null
+         */
+        public function get_checkout_total()
+        {
+            if(function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-pay')) {
+                $order = wc_get_order(absint(get_query_var('order-pay')));
+                $total = $order ? (float) $order->get_total() : 0;
+            } else {
+                $total = function_exists('WC') && WC()->cart ? (float) WC()->cart->total : 0;
+            }
+
+            return $total > 0 ? $total : null;
+        }
+
+        public function payment_fields()
+        {
+            if($this->description) {
+                echo wpautop(wp_kses_post($this->description));
+            }
 
             if($this->has_fields) {
-                echo woocommerce_form_field(
+                $total = $this->get_checkout_total();
+
+                woocommerce_form_field(
                     'wc_bunq_gateway_payment_method',
                     [
                         'type'        => 'select',
                         'class'       => ['form-row-wide'],
                         'required'    => true,
-                        'options'     =>  array_column($allowed_payment_methods, 'description', 'id')
+                        'options'     =>  array_column($this->get_allowed_payment_methods($total), 'description', 'id')
                     ]
                 );
             }
@@ -231,7 +282,7 @@ function bunq_init_gateway_class() {
         public function validate_fields()
         {
             if (!empty($_POST['wc_bunq_gateway_payment_method']) && !in_array($_POST['wc_bunq_gateway_payment_method'], array_column($this->payment_methods, 'id'))) {
-                wc_add_notice('Payment method invalid', 'error');
+                wc_add_notice(__('Payment method invalid', 'bunq-for-woocommerce'), 'error');
                 return false;
             }
 
@@ -244,7 +295,11 @@ function bunq_init_gateway_class() {
             if($last_error) {
                 delete_transient(self::LAST_ERROR_TRANSIENT);
                 echo '<div class="notice notice-error"><p><strong>bunq for WooCommerce:</strong> '.esc_html($last_error).'</p>'
-                    .'<p>Details are logged in <a href="'.esc_url(admin_url('admin.php?page=wc-status&tab=logs')).'">WooCommerce &gt; Status &gt; Logs</a> (source: <code>bunq</code>).</p></div>';
+                    .'<p>'.sprintf(
+                        /* translators: %s: link to the WooCommerce log page */
+                        esc_html__('Details are logged in %s (source: bunq).', 'bunq-for-woocommerce'),
+                        '<a href="'.esc_url(admin_url('admin.php?page=wc-status&tab=logs')).'">'.esc_html__('WooCommerce > Status > Logs', 'bunq-for-woocommerce').'</a>'
+                    ).'</p></div>';
             }
 
             $last_success = get_transient(self::LAST_SUCCESS_TRANSIENT);
@@ -260,16 +315,23 @@ function bunq_init_gateway_class() {
             $oauth_client_id = $testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
             $oauth_client_secret = $testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
 
+            $settings_url = remove_query_arg(array('code', 'state', self::REFRESH_ACCOUNTS_ACTION, '_wpnonce'), bunq_helper_get_current_url());
+
             if($oauth_client_id && $oauth_client_secret)
             {
-                $oauth_redirect_uri = bunq_helper_get_current_url();
                 $url = bunq_oauth2_get_authorization_url(
                     $oauth_client_id,
                     $oauth_client_secret,
-                    $oauth_redirect_uri,
+                    $settings_url,
                     $testmode
                 );
-                echo '<a href="'.$url.'" class="button-secondary">OAuth Authorization Request</a>';
+                echo '<a href="'.esc_url($url).'" class="button-secondary">'.esc_html__('OAuth Authorization Request', 'bunq-for-woocommerce').'</a> ';
+            }
+
+            if($this->get_setting('api_context'))
+            {
+                $refresh_url = wp_nonce_url(add_query_arg(self::REFRESH_ACCOUNTS_ACTION, '1', $settings_url), self::REFRESH_ACCOUNTS_ACTION);
+                echo '<a href="'.esc_url($refresh_url).'" class="button-secondary">'.esc_html__('Refresh bank accounts', 'bunq-for-woocommerce').'</a>';
             }
         }
 
@@ -278,12 +340,11 @@ function bunq_init_gateway_class() {
          *
          * @throws Throwable When the API context could not be created (e.g. bunq rejected the key).
          */
-        public function refresh_api_context()
+        public function refresh_api_context($register_callback = true)
         {
             // Get saved testmode and api key
             $testmode = 'yes' === $this->get_setting('testmode');
             $api_key = $testmode ? $this->get_setting('test_api_key') : $this->get_setting('api_key');
-            $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
 
             if(!$api_key)
             {
@@ -294,7 +355,13 @@ function bunq_init_gateway_class() {
             // so the caller can show them to the admin instead of silently leaving the API context empty.
             $api_context = bunq_create_api_context($api_key, $testmode);
             $this->update_option(($testmode ? 'test_api_context' : 'api_context'), $api_context->toJson());
+            delete_transient(self::CONTEXT_FAILED_TRANSIENT);
             bunq_helper_log('bunq API context created for '.($testmode ? 'sandbox' : 'production'), 'info');
+
+            if(!$register_callback)
+            {
+                return;
+            }
 
             // Register the callback URL at bunq so payments are confirmed automatically. A callback URL that only
             // resolves locally (development sites) cannot be reached by bunq, so skip it there.
@@ -307,7 +374,7 @@ function bunq_init_gateway_class() {
             else
             {
                 try {
-                    bunq_create_notification_filters($monetary_account_bank_id);
+                    bunq_create_notification_filters($this->get_monetary_account_bank_id());
                     bunq_helper_log('bunq callback URL registered: '.$callback_url, 'info');
                 } catch (Throwable $exception) {
                     // Not fatal for the setup: payments still work, only the automatic payment confirmation is affected.
@@ -324,14 +391,14 @@ function bunq_init_gateway_class() {
             {
                 $this->update_option('test_api_context', '');
                 $this->update_option('test_api_key', '');
-                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
+                delete_transient(self::BANK_ACCOUNTS_TRANSIENT);
             }
 
             if(!$this->settings['oauth_client_id'] || !$this->settings['oauth_client_secret'])
             {
                 $this->update_option('api_context', '');
                 $this->update_option('api_key', '');
-                delete_transient('wc_bunq_gateway.bunq_get_bank_accounts');
+                delete_transient(self::BANK_ACCOUNTS_TRANSIENT);
             }
         }
 
@@ -364,6 +431,16 @@ function bunq_init_gateway_class() {
             return isset($this->settings[$key]) ? $this->settings[$key] : null;
         }
 
+        /**
+         * @return int|null The selected bunq monetary account, or null for the account's default.
+         */
+        public function get_monetary_account_bank_id()
+        {
+            $monetary_account_bank_id = intval($this->get_setting('monetary_account_bank_id'));
+
+            return $monetary_account_bank_id > 0 ? $monetary_account_bank_id : null;
+        }
+
         public function init_form_fields()
         {
             // The bank account list is only needed to render the settings page, and
@@ -374,56 +451,58 @@ function bunq_init_gateway_class() {
             $bank_accounts = array();
 
             if(is_admin()) {
-                $transient = 'wc_bunq_gateway.bunq_get_bank_accounts';
-                $bank_accounts = get_transient($transient);
+                $bank_accounts = get_transient(self::BANK_ACCOUNTS_TRANSIENT);
 
                 if(! $bank_accounts) {
                     $api_context = $this->load_api_context();
                     $bank_accounts = bunq_get_bank_accounts($api_context);
-                    set_transient($transient, $bank_accounts);
+
+                    // A real account list is kept for an hour; an error or "not set up yet" result only briefly, so
+                    // it does not stick around after the merchant fixed the cause.
+                    set_transient(self::BANK_ACCOUNTS_TRANSIENT, $bank_accounts, count($bank_accounts) > 1 ? HOUR_IN_SECONDS : 5 * MINUTE_IN_SECONDS);
                 }
             }
 
             $this->form_fields = array(
                 'enabled' => array(
-                    'title'       => 'Enable/Disable',
-                    'label'       => 'Enable bunq Gateway',
+                    'title'       => __('Enable/Disable', 'bunq-for-woocommerce'),
+                    'label'       => __('Enable bunq Gateway', 'bunq-for-woocommerce'),
                     'type'        => 'checkbox',
                     'description' => '',
                     'default'     => 'no'
                 ),
                 'testmode' => array(
-                    'title'       => 'Test mode',
-                    'label'       => 'Enable Test Mode',
+                    'title'       => __('Test mode', 'bunq-for-woocommerce'),
+                    'label'       => __('Enable Test Mode', 'bunq-for-woocommerce'),
                     'type'        => 'checkbox',
-                    'description' => 'Place the payment gateway in test mode using test API keys.',
+                    'description' => __('Place the payment gateway in test mode using test API keys.', 'bunq-for-woocommerce'),
                     'default'     => 'no',
                     'desc_tip'    => true,
                 ),
                 'title' => array(
-                    'title'       => 'Title',
+                    'title'       => __('Title', 'bunq-for-woocommerce'),
                     'type'        => 'text',
-                    'description' => 'This controls the title which the user sees during checkout.',
-                    'default'     => 'iDEAL, Credit Card or Sofort',
+                    'description' => __('This controls the title which the user sees during checkout.', 'bunq-for-woocommerce'),
+                    'default'     => __('iDEAL, Credit Card or Bancontact', 'bunq-for-woocommerce'),
                     'desc_tip'    => true,
                 ),
                 'description' => array(
-                    'title'       => 'Description',
+                    'title'       => __('Description', 'bunq-for-woocommerce'),
                     'type'        => 'textarea',
-                    'description' => 'This controls the description which the user sees during checkout.',
-                    'default'     => 'Pay with iDEAL, Credit Card or Sofort',
+                    'description' => __('This controls the description which the user sees during checkout.', 'bunq-for-woocommerce'),
+                    'default'     => __('Pay with iDEAL, Credit Card or Bancontact', 'bunq-for-woocommerce'),
                 ),
                 'monetary_account_bank_id' => array(
-                    'title'       => 'Bank account',
+                    'title'       => __('Bank account', 'bunq-for-woocommerce'),
                     'type'        => 'select',
                     'options'     =>  $bank_accounts
                 ),
                 'direct_gateway' => array(
-                    'title'       => 'Direct Gateway',
-                    'label'       => 'Enable direct gateway',
+                    'title'       => __('Direct Gateway', 'bunq-for-woocommerce'),
+                    'label'       => __('Enable direct gateway', 'bunq-for-woocommerce'),
                     'type'        => 'checkbox',
                     'default'     => 'no',
-                    'description' => 'Allow your customers to directly select a payment method from the checkout page.',
+                    'description' => __('Allow your customers to directly select a payment method from the checkout page.', 'bunq-for-woocommerce'),
                     'desc_tip'    => true,
                 ),
             );
@@ -433,7 +512,7 @@ function bunq_init_gateway_class() {
             if($direct_gateway) {
                 $this->form_fields = array_merge($this->form_fields, array(
                     'enabled_payment_methods' => array(
-                        'title'       => 'Payment methods',
+                        'title'       => __('Payment methods', 'bunq-for-woocommerce'),
                         'type'        => 'multiselect',
                         'custom_attributes' => ['multiple' => 'multiple'],
                         'options'     =>  array_column($this->payment_methods, 'description', 'id')
@@ -446,20 +525,20 @@ function bunq_init_gateway_class() {
             if($testmode) {
                 $this->form_fields = array_merge($this->form_fields, array(
                     'test_oauth_client_id' => array(
-                        'title'       => 'Test OAuth Client ID',
+                        'title'       => __('Test OAuth Client ID', 'bunq-for-woocommerce'),
                         'type'        => 'text',
                     ),
                     'test_oauth_client_secret' => array(
-                        'title'       => 'Test OAuth Client Secret',
-                        'type'        => 'text',
+                        'title'       => __('Test OAuth Client Secret', 'bunq-for-woocommerce'),
+                        'type'        => 'password',
                     ),
                     'test_api_key' => array(
-                        'title'       => 'Test API Key',
-                        'type'        => 'text',
+                        'title'       => __('Test API Key', 'bunq-for-woocommerce'),
+                        'type'        => 'password',
                         'custom_attributes' => array('readonly' => 'readonly')
                     ),
                     'test_api_context' => array(
-                        'title'       => 'Test API Context',
+                        'title'       => __('Test API Context', 'bunq-for-woocommerce'),
                         'type'        => 'textarea',
                         'css'         => 'height: 150px;',
                         'custom_attributes' => array('readonly' => 'readonly')
@@ -468,26 +547,39 @@ function bunq_init_gateway_class() {
             } else {
                 $this->form_fields = array_merge($this->form_fields, array(
                     'oauth_client_id' => array(
-                        'title'       => 'OAuth Client ID',
+                        'title'       => __('OAuth Client ID', 'bunq-for-woocommerce'),
                         'type'        => 'text'
                     ),
                     'oauth_client_secret' => array(
-                        'title'       => 'OAuth Client Secret',
-                        'type'        => 'text'
+                        'title'       => __('OAuth Client Secret', 'bunq-for-woocommerce'),
+                        'type'        => 'password'
                     ),
                     'api_key' => array(
-                        'title'       => 'Live API Key',
-                        'type'        => 'text',
+                        'title'       => __('Live API Key', 'bunq-for-woocommerce'),
+                        'type'        => 'password',
                         'custom_attributes' => array('readonly' => 'readonly')
                     ),
                     'api_context' => array(
-                        'title'       => 'Live API Context',
+                        'title'       => __('Live API Context', 'bunq-for-woocommerce'),
                         'type'        => 'textarea',
                         'css'         => 'height: 150px;',
                         'custom_attributes' => array('readonly' => 'readonly')
                     ),
                 ));
             }
+        }
+
+        /**
+         * Only offer the gateway at checkout when the bunq authorization has been completed; without an API
+         * context no payment request can be created.
+         */
+        public function is_available()
+        {
+            if(!parent::is_available()) {
+                return false;
+            }
+
+            return (bool) $this->get_setting('api_context') && !get_transient(self::CONTEXT_FAILED_TRANSIENT);
         }
 
         public function process_payment( $order_id ) {
@@ -505,23 +597,28 @@ function bunq_init_gateway_class() {
                     }
                 }
 
-                $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
-
                 $payment_request = bunq_create_payment_request(
                     $order->get_total(),
                     $order->get_currency(),
                     '#'.$order->get_order_number(),
                     $this->get_return_url($order),
-                    $monetary_account_bank_id
+                    $this->get_monetary_account_bank_id()
                 );
 
                 if(!$payment_request || empty($payment_request['id']) || empty($payment_request['url'])) {
                     throw new Exception('bunq did not return a payment request for order #'.$order->get_order_number());
                 }
 
-                $order->add_order_note('bunq payment_request created '.$payment_request['id']);
+                $order->add_order_note(sprintf(
+                    /* translators: %s: bunq payment request id */
+                    __('bunq payment request %s created', 'bunq-for-woocommerce'),
+                    $payment_request['id']
+                ));
                 $order->update_meta_data( 'bunq_payment_request_id', $payment_request['id']);
                 $order->save();
+
+                // Fallback for a callback that never arrives: re-check the payment request in the background.
+                bunq_schedule_payment_check($order->get_id());
 
                 return array(
                     'result'   => 'success',
@@ -531,31 +628,88 @@ function bunq_init_gateway_class() {
             catch (Throwable $exception) {
                 // Log the real cause for the merchant; the customer only gets a generic message.
                 bunq_helper_log($exception);
-                wc_add_notice('The payment could not be started with bunq. Please try again or choose another payment method.', 'error');
+                wc_add_notice(__('The payment could not be started with bunq. Please try again or choose another payment method.', 'bunq-for-woocommerce'), 'error');
 
                 return array('result' => 'failure');
             }
         }
 
         /**
-         * Make sure the bunq API context is loaded for this request. When the stored context is missing or can no
-         * longer be used (expired or revoked session), rebuild it from the saved API key before giving up.
+         * Refund (part of) the order by sending the money back to the account the bunq payment came from.
          *
-         * @throws Throwable When no usable API context is available.
+         * @param int $order_id
+         * @param float|null $amount
+         * @param string $reason
+         * @return bool|WP_Error
          */
-        private function ensure_api_context_loaded() {
-            if($this->load_api_context()) {
-                return;
+        public function process_refund( $order_id, $amount = null, $reason = '' ) {
+            $order = wc_get_order( $order_id );
+            $payment_id = $order ? intval($order->get_meta('bunq_payment_id')) : 0;
+
+            if(!$payment_id) {
+                return new WP_Error('bunq_refund', __('This order has no bunq payment that can be refunded.', 'bunq-for-woocommerce'));
             }
 
-            bunq_helper_log('bunq API context could not be loaded, recreating it from the saved API key', 'warning');
-            $this->refresh_api_context();
+            if(!$amount || (float) $amount <= 0) {
+                return new WP_Error('bunq_refund', __('The refund amount must be greater than zero.', 'bunq-for-woocommerce'));
+            }
 
-            if(!$this->load_api_context()) {
-                throw new Exception('bunq API context is not available. Complete the OAuth authorization in WooCommerce > Settings > Payments > bunq.');
+            try {
+                $this->ensure_api_context_loaded();
+
+                $monetary_account_id = intval($order->get_meta('bunq_monetary_account_id')) ?: $this->get_monetary_account_bank_id();
+                $payment = bunq_get_payment($payment_id, $monetary_account_id);
+                $counterparty = $payment->getCounterpartyAlias();
+                $iban = $counterparty ? $counterparty->getIban() : null;
+
+                if(!$iban) {
+                    return new WP_Error('bunq_refund', __('The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead.', 'bunq-for-woocommerce'));
+                }
+
+                $description = sprintf(
+                    /* translators: 1: order number, 2: shop name */
+                    __('Refund order #%1$s %2$s', 'bunq-for-woocommerce'),
+                    $order->get_order_number(),
+                    get_bloginfo('name')
+                );
+                if($reason) {
+                    $description .= ': '.$reason;
+                }
+
+                $refund_payment_id = bunq_create_refund(
+                    (float) $amount,
+                    $order->get_currency(),
+                    $iban,
+                    $counterparty->getDisplayName() ?: $order->get_formatted_billing_full_name(),
+                    $description,
+                    $monetary_account_id
+                );
+
+                $order->add_order_note(sprintf(
+                    /* translators: 1: refunded amount, 2: bunq payment id of the refund */
+                    __('bunq refund of %1$s sent (payment %2$s)', 'bunq-for-woocommerce'),
+                    wc_price($amount, array('currency' => $order->get_currency())),
+                    $refund_payment_id
+                ));
+                bunq_helper_log('bunq refund '.$refund_payment_id.' of '.$order->get_currency().' '.$amount.' sent for order #'.$order->get_order_number(), 'info');
+
+                return true;
+            }
+            catch (Throwable $exception) {
+                bunq_helper_log($exception);
+
+                return new WP_Error('bunq_refund', sprintf(
+                    /* translators: %s: error message from bunq */
+                    __('bunq refund failed: %s', 'bunq-for-woocommerce'),
+                    bunq_helper_format_error($exception)
+                ));
             }
         }
 
+        /**
+         * Callback from bunq (notification filter BUNQME_TAB). Confirms the order after fetching the payment
+         * request from bunq; the notification body itself is not trusted.
+         */
         public function bunq_callback() {
             $input = file_get_contents('php://input');
             $notification = $input ? json_decode($input) : null;
@@ -595,52 +749,169 @@ function bunq_init_gateway_class() {
             }
 
             try {
-                $this->ensure_api_context_loaded();
-
-                $monetary_account_bank_id = $this->get_setting('monetary_account_bank_id') > 0 ? intval($this->get_setting('monetary_account_bank_id')) : null;
-                $payment_request = bunq_get_payment_request($payment_request_id, $monetary_account_bank_id);
+                $outcome = $this->check_payment_status($order);
+                bunq_helper_log('bunq callback for bunqme-tab '.$payment_request_id.': order #'.$order->get_order_number().' is '.$outcome, 'debug');
             }
             catch (Throwable $exception) {
                 bunq_helper_log($exception);
-                exit;
-            }
-
-            foreach($payment_request->getResultInquiries() as $resultInquiry)
-            {
-                $payment = $resultInquiry->getPayment();
-
-                if(!$payment)
-                {
-                    continue;
-                }
-
-                // bunq returns the amount as a string; compare it as a decimal so the number of decimals in the shop does not matter.
-                $paid_amount = $payment->getAmount();
-                $amount_matches = $paid_amount->getCurrency() === $order->get_currency()
-                    && abs((float) $paid_amount->getValue() - (float) $order->get_total()) < 0.005;
-
-                if(!$amount_matches)
-                {
-                    bunq_helper_log('bunq callback for bunqme-tab '.$payment_request_id.': payment '.$payment->getId().' of '.$paid_amount->getCurrency().' '.$paid_amount->getValue().' does not match order #'.$order->get_order_number().' total '.$order->get_currency().' '.$order->get_total(), 'warning');
-                    continue;
-                }
-
-                bunq_helper_log('bunq callback for bunqme-tab '.$payment_request_id.': payment '.$payment->getId().' received for order #'.$order->get_order_number(), 'info');
-
-                // Update order with payment id
-                $order->add_order_note('bunq payment received '.$payment->getId());
-                $order->update_meta_data( 'bunq_payment_id', $payment->getId());
-                $order->save();
-
-                // Complete order
-                global $woocommerce;
-                $woocommerce->cart->empty_cart();
-                $order->payment_complete();
-
-                break;
             }
 
             exit;
+        }
+
+        /**
+         * Fetch the bunq payment request of an order and bring the order in line with it: complete the order when
+         * a matching payment came in, cancel it when bunq cancelled or expired the request.
+         *
+         * @param WC_Order $order
+         * @return string One of "paid", "on-hold" (a payment with another amount came in), "cancelled", "pending"
+         *                or "settled" (the order did not need payment).
+         * @throws Throwable When bunq could not be reached.
+         */
+        public function check_payment_status( $order ) {
+            if(!$order->needs_payment()) {
+                return 'settled';
+            }
+
+            $payment_request_id = intval($order->get_meta('bunq_payment_request_id'));
+
+            if(!$payment_request_id) {
+                throw new Exception('Order #'.$order->get_order_number().' has no bunq payment request');
+            }
+
+            // The callback, the customer's return and the scheduled check can run at the same time; let one of
+            // them do the work.
+            $lock = 'wc_bunq_gateway.lock.'.$order->get_id();
+            if(get_transient($lock)) {
+                return 'pending';
+            }
+            set_transient($lock, 1, 30);
+
+            try {
+                $this->ensure_api_context_loaded();
+                $payment_request = bunq_get_payment_request($payment_request_id, $this->get_monetary_account_bank_id());
+
+                $unmatched_payment = null;
+
+                foreach((array) $payment_request->getResultInquiries() as $result_inquiry)
+                {
+                    $payment = $result_inquiry->getPayment();
+
+                    if(!$payment)
+                    {
+                        continue;
+                    }
+
+                    // bunq returns the amount as a string; compare it as a decimal so the number of decimals in the shop does not matter.
+                    $paid_amount = $payment->getAmount();
+
+                    if($paid_amount->getCurrency() !== $order->get_currency() || !bunq_helper_amounts_match($paid_amount->getValue(), $order->get_total()))
+                    {
+                        bunq_helper_log('bunqme-tab '.$payment_request_id.': payment '.$payment->getId().' of '.$paid_amount->getCurrency().' '.$paid_amount->getValue().' does not match order #'.$order->get_order_number().' total '.$order->get_currency().' '.$order->get_total(), 'warning');
+                        $unmatched_payment = $payment;
+                        continue;
+                    }
+
+                    bunq_helper_log('bunqme-tab '.$payment_request_id.': payment '.$payment->getId().' received for order #'.$order->get_order_number(), 'info');
+
+                    $order->add_order_note(sprintf(
+                        /* translators: %s: bunq payment id */
+                        __('bunq payment %s received', 'bunq-for-woocommerce'),
+                        $payment->getId()
+                    ));
+                    $order->update_meta_data( 'bunq_payment_id', $payment->getId());
+                    // The account the money landed on, so a refund still works after the merchant changes the setting.
+                    $order->update_meta_data( 'bunq_monetary_account_id', $payment->getMonetaryAccountId());
+                    $order->save();
+                    $order->payment_complete((string) $payment->getId());
+
+                    return 'paid';
+                }
+
+                // Money arrived but not the right amount: never cancel such an order, let the merchant decide.
+                if($unmatched_payment)
+                {
+                    $unmatched_amount = $unmatched_payment->getAmount();
+                    $order->update_meta_data( 'bunq_payment_id', $unmatched_payment->getId());
+                    $order->update_meta_data( 'bunq_monetary_account_id', $unmatched_payment->getMonetaryAccountId());
+                    $order->save();
+                    $order->update_status('on-hold', sprintf(
+                        /* translators: 1: bunq payment id, 2: amount received, 3: order total */
+                        __('bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order.', 'bunq-for-woocommerce'),
+                        $unmatched_payment->getId(),
+                        $unmatched_amount->getCurrency().' '.$unmatched_amount->getValue(),
+                        $order->get_currency().' '.$order->get_total()
+                    ));
+
+                    return 'on-hold';
+                }
+
+                $status = (string) $payment_request->getStatus();
+
+                if(in_array($status, array('CANCELLED', 'EXPIRED'), true))
+                {
+                    bunq_helper_log('bunqme-tab '.$payment_request_id.' is '.$status.', cancelling order #'.$order->get_order_number(), 'info');
+
+                    // Remember bunq's final state so the order-cancelled hook does not try to cancel the request again.
+                    $order->update_meta_data('bunq_payment_request_status', $status);
+                    $order->save();
+                    $order->update_status('cancelled', sprintf(
+                        /* translators: 1: bunq payment request id, 2: status reported by bunq */
+                        __('bunq payment request %1$s is %2$s', 'bunq-for-woocommerce'),
+                        $payment_request_id,
+                        strtolower($status)
+                    ));
+
+                    return 'cancelled';
+                }
+
+                return 'pending';
+            }
+            finally {
+                delete_transient($lock);
+            }
+        }
+
+        /**
+         * Cancel the bunq payment request of an order at bunq so it can no longer be paid.
+         *
+         * @param int $payment_request_id
+         * @throws Throwable
+         */
+        public function cancel_payment_request( $payment_request_id ) {
+            $this->ensure_api_context_loaded();
+            bunq_cancel_payment_request($payment_request_id, $this->get_monetary_account_bank_id());
+        }
+
+        /**
+         * Make sure the bunq API context is loaded for this request. When the stored context is missing or can no
+         * longer be used (expired or revoked session), rebuild it from the saved API key before giving up.
+         *
+         * @throws Throwable When no usable API context is available.
+         */
+        public function ensure_api_context_loaded() {
+            if($this->load_api_context()) {
+                return;
+            }
+
+            // A rebuild costs several bunq calls; do not repeat it for every request while the key stays unusable.
+            if(get_transient(self::CONTEXT_FAILED_TRANSIENT)) {
+                throw new Exception('bunq API context is not available and a recent attempt to recreate it failed. Complete the OAuth authorization in WooCommerce > Settings > Payments > bunq.');
+            }
+
+            bunq_helper_log('bunq API context could not be loaded, recreating it from the saved API key', 'warning');
+
+            try {
+                $this->refresh_api_context(false);
+            } catch (Throwable $exception) {
+                set_transient(self::CONTEXT_FAILED_TRANSIENT, 1, 5 * MINUTE_IN_SECONDS);
+                throw $exception;
+            }
+
+            if(!$this->load_api_context()) {
+                set_transient(self::CONTEXT_FAILED_TRANSIENT, 1, 5 * MINUTE_IN_SECONDS);
+                throw new Exception('bunq API context is not available. Complete the OAuth authorization in WooCommerce > Settings > Payments > bunq.');
+            }
         }
 
         function load_api_context() {

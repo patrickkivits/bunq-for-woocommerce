@@ -49,18 +49,20 @@ jobs:
             "$SLUG/.github/*" "$SLUG/.gitignore" \
             "$SLUG/.idea/*" "$SLUG/.DS_Store" "$SLUG/.claude/*" || true
           unzip -l "$SLUG.zip" | head -n 20
-          # Every entry must live under the fixed folder.
-          if unzip -Z1 "$SLUG.zip" | grep -v "^$SLUG/" ; then
-            echo "::error::Zip contains entries outside $SLUG/"
+
+      - name: Check that the zip holds every tracked file and nothing else
+        run: |
+          # Everything tracked at the tag, minus the stripped development paths,
+          # must be in the zip under the fixed folder; anything else is a leak.
+          git ls-tree -r --name-only "$TAG" \
+            | grep -vE '^(\.github/|\.gitignore$|\.idea/|\.DS_Store$|\.claude/)' \
+            | sed "s|^|$SLUG/|" | sort > expected.txt
+          unzip -Z1 "$SLUG.zip" | grep -v '/$' | sort > actual.txt
+          if ! diff -u expected.txt actual.txt; then
+            echo "::error::Zip content differs from the tracked files ('-' missing from zip, '+' unexpected in zip)"
             exit 1
           fi
-          for f in "$SLUG.php" uninstall.php vendor/autoload.php includes/helpers.php; do
-            unzip -Z1 "$SLUG.zip" | grep -qx "$SLUG/$f" || { echo "::error::$f missing from zip"; exit 1; }
-          done
-          if unzip -Z1 "$SLUG.zip" | grep -q "^$SLUG/\.github/"; then
-            echo "::error::.github/ leaked into the zip"
-            exit 1
-          fi
+          echo "$(wc -l < actual.txt) files verified"
 
       - name: Attach the zip to the release
         env:

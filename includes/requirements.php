@@ -1,5 +1,7 @@
 <?php
 
+const BUNQ_REQUIREMENTS_OPTION = 'wc_bunq_gateway.requirements';
+
 function bunq_requirements_check() {
     $min_wp  = '3.8';
     $min_php = '7.3.0';
@@ -27,7 +29,15 @@ function bunq_requirements_check() {
         }
     }
 
-    // Test bunq creating key pair
+    // Generating a key pair proves OpenSSL can do what the bunq SDK needs, but it costs tens of milliseconds,
+    // so the outcome is remembered per PHP/OpenSSL build in an autoloaded option (a transient would cost two
+    // queries per request without an object cache).
+    $fingerprint = md5( PHP_VERSION . '|' . ( defined( 'OPENSSL_VERSION_TEXT' ) ? OPENSSL_VERSION_TEXT : '' ) );
+
+    if ( get_option( BUNQ_REQUIREMENTS_OPTION ) === $fingerprint ) {
+        return true;
+    }
+
     try {
         \bunq\Security\KeyPair::generate();
     } catch (Exception $exception) {
@@ -36,6 +46,8 @@ function bunq_requirements_check() {
 	    }
         return false;
     }
+
+    update_option( BUNQ_REQUIREMENTS_OPTION, $fingerprint, true );
 
     return true;
 }
@@ -55,5 +67,5 @@ function bunq_requirements_disable_plugin() {
 }
 
 function bunq_requirements_show_notice() {
-    echo '<div class="error"><p><strong>bunq for WooCommerce</strong> cannot be activated due to incompatible environment.</p></div>';
+    echo '<div class="error"><p><strong>bunq for WooCommerce</strong> '.esc_html__('cannot be activated due to incompatible environment.', 'bunq-for-woocommerce').'</p></div>';
 }

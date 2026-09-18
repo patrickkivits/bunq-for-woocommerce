@@ -9,14 +9,17 @@ final class WC_Bunq_WooCommerce_Block_Checkout extends AbstractPaymentMethodType
     protected $name = 'bunq';
 
     public function initialize() {
-        $this->gateway = new WC_Bunq_Gateway();
+        // Reuse the instance WooCommerce registered; a second one would register the gateway's hooks twice.
+        $gateway = function_exists('bunq_get_gateway') ? bunq_get_gateway() : null;
+        $this->gateway = $gateway ?: new WC_Bunq_Gateway();
     }
 
     public function is_active() {
-        return isset($this->gateway->enabled) && $this->gateway->enabled === 'yes';
+        return $this->gateway->is_available();
     }
 
     public function get_payment_method_script_handles() {
+        $script_path = plugin_dir_path(__FILE__) . 'block/checkout.js';
 
         wp_register_script(
             'wc-bunq-blocks-integration',
@@ -27,7 +30,7 @@ final class WC_Bunq_WooCommerce_Block_Checkout extends AbstractPaymentMethodType
                 'wp-element',
                 'wp-html-entities',
             ],
-            null,
+            file_exists($script_path) ? (string) filemtime($script_path) : null,
             true
         );
 
@@ -35,28 +38,16 @@ final class WC_Bunq_WooCommerce_Block_Checkout extends AbstractPaymentMethodType
     }
 
     public function get_payment_method_data() {
-        global $woocommerce;
-
-        $enabled_payment_methods_setting = $this->gateway->settings['enabled_payment_methods'] ?? null;
-        if(is_array($enabled_payment_methods_setting) && !empty($enabled_payment_methods_setting)) {
-            $enabled_payment_methods = array_filter($this->gateway->payment_methods, function($payment_method) use ($enabled_payment_methods_setting) {
-                return in_array($payment_method['id'], $enabled_payment_methods_setting);
-            });
-        } else {
-            $enabled_payment_methods = $this->gateway->payment_methods;
-        }
-
-        $total = $woocommerce->cart->total;
-        $allowed_payment_methods = array_filter($enabled_payment_methods, function($payment_method) use ($total) {
-            return $payment_method['min'] <= $total && ($payment_method['max'] === null || $payment_method['max'] >= $total);
-        });
+        // Null (no cart in the block editor, empty cart) means every enabled method is offered.
+        $total = $this->gateway->get_checkout_total();
 
         return [
             'id' => $this->gateway->id,
             'title' => $this->gateway->title,
             'description' => $this->gateway->description,
-            'payment_methods' => array_column($allowed_payment_methods, 'description', 'id'),
+            'payment_methods' => array_column($this->gateway->get_allowed_payment_methods($total), 'description', 'id'),
             'direct_gateway' => $this->gateway->direct_gateway,
+            'supports' => array_values(array_filter($this->gateway->supports, [$this->gateway, 'supports'])),
         ];
     }
 
