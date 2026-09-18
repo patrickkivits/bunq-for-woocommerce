@@ -1,0 +1,78 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    name: Unit tests on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: openssl, curl, json, mbstring
+          coverage: none
+          tools: composer:v2
+
+      # PHPUnit lives in tests/composer.json so it never ends up in the committed,
+      # shipped vendor/ directory.
+      - name: Install PHPUnit
+        run: composer install --working-dir=tests --no-interaction --no-progress
+
+      - name: Run the unit tests
+        run: tests/vendor/bin/phpunit
+
+  integration:
+    name: Integration tests on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The plugin runs inside the WordPress test suite with the WooCommerce version
+        # pinned in tests/composer.lock, which needs PHP 7.4 or newer.
+        php: ['7.4', '8.1', '8.3', '8.5']
+
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress_tests
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      WP_TESTS_DB_NAME: wordpress_tests
+      WP_TESTS_DB_USER: root
+      WP_TESTS_DB_PASSWORD: root
+      WP_TESTS_DB_HOST: 127.0.0.1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, openssl, curl, json, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHPUnit, the WordPress test suite and WooCommerce
+        run: composer install --working-dir=tests --no-interaction --no-progress
+
+      - name: Run the integration tests
+        run: tests/vendor/bin/phpunit -c phpunit-integration.xml.dist

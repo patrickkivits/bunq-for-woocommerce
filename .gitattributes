@@ -1,0 +1,17 @@
+# Development files that stay out of the release zip: git archive leaves out every path marked export-ignore,
+# and .github/workflows/release.yml checks the zip against this list. Directories are listed twice: the plain
+# pattern keeps the directory entry out of the archive, the /** pattern makes git check-attr report the
+# attribute for the files inside it.
+/.github                       export-ignore
+/.github/**                    export-ignore
+/.gitattributes                export-ignore
+/.gitignore                    export-ignore
+/.claude                       export-ignore
+/.claude/**                    export-ignore
+/.idea                         export-ignore
+/.idea/**                      export-ignore
+/.DS_Store                     export-ignore
+/tests                         export-ignore
+/tests/**                      export-ignore
+/phpunit.xml.dist              export-ignore
+/phpunit-integration.xml.dist  export-ignore

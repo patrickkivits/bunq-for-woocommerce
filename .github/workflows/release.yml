@@ -42,20 +42,19 @@ jobs:
 
       - name: Build the zip with a fixed top-level folder
         run: |
-          # The committed vendor/ directory is included; development files are
-          # stripped from the zip afterwards.
+          # The committed vendor/ directory is included. Development files are
+          # left out by git archive through the export-ignore attributes in
+          # .gitattributes, the single place that lists them.
           git archive --format=zip --prefix="$SLUG/" -o "$SLUG.zip" "$TAG"
-          zip -q -d "$SLUG.zip" \
-            "$SLUG/.github/*" "$SLUG/.gitignore" \
-            "$SLUG/.idea/*" "$SLUG/.DS_Store" "$SLUG/.claude/*" || true
           unzip -l "$SLUG.zip" | head -n 20
 
       - name: Check that the zip holds every tracked file and nothing else
         run: |
-          # Everything tracked at the tag, minus the stripped development paths,
-          # must be in the zip under the fixed folder; anything else is a leak.
+          # Every file tracked at the tag that is not marked export-ignore must
+          # be in the zip under the fixed folder; anything else is a leak.
           git ls-tree -r --name-only "$TAG" \
-            | grep -vE '^(\.github/|\.gitignore$|\.idea/|\.DS_Store$|\.claude/)' \
+            | git check-attr --stdin export-ignore \
+            | awk -F': ' '$3 != "set" { print $1 }' \
             | sed "s|^|$SLUG/|" | sort > expected.txt
           unzip -Z1 "$SLUG.zip" | grep -v '/$' | sort > actual.txt
           if ! diff -u expected.txt actual.txt; then

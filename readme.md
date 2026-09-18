@@ -99,6 +99,31 @@ php .github/scripts/make-pot.php
 
 The bunq.me payment page itself is hosted by bunq and follows the language of the customer's browser.
 
+## Development
+
+There are two test suites, both installed from `tests/composer.json` so that nothing lands in the committed `vendor/` directory that ships in the plugin zip:
+
+```
+composer install --working-dir=tests
+```
+
+**Unit tests** run without WordPress: `tests/stubs/` stands in for the WordPress and WooCommerce functions the plugin calls, and nothing talks to bunq. They cover the pure logic (rate limiting, retries, description sanitising, scheduling) and run on PHP 7.3 up to 8.5.
+
+```
+tests/vendor/bin/phpunit
+```
+
+A few tests in the `slow` group wait for the real `sleep()` calls of the rate limit handling; skip them while iterating with `tests/vendor/bin/phpunit --exclude-group slow`.
+
+**Integration tests** run the plugin inside a real WordPress and WooCommerce, using the WordPress test suite ([wp-phpunit](https://github.com/wp-phpunit/wp-phpunit)) with WordPress core and WooCommerce installed by composer under `tests/`. They exercise the gateway against the real settings API, cart, orders, order status transitions and Action Scheduler; only the calls to bunq itself stay out of reach. They need a MySQL or MariaDB database that they may empty, reachable through `WP_TESTS_DB_NAME`, `WP_TESTS_DB_USER`, `WP_TESTS_DB_PASSWORD` and `WP_TESTS_DB_HOST` (defaults: `wordpress_tests`, `root`, `root`, `127.0.0.1`). For example with Docker:
+
+```
+docker run -d --name bunq-wc-tests -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=wordpress_tests -p 3306:3306 mariadb:10.11
+tests/vendor/bin/phpunit -c phpunit-integration.xml.dist
+```
+
+The WooCommerce version under test is the one pinned in `tests/composer.lock`; update it with `composer update --working-dir=tests wpackagist-plugin/woocommerce`. Both suites run on every push through GitHub Actions.
+
 ## Disclaimer
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
