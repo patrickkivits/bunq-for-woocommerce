@@ -8,8 +8,6 @@ jobs:
   smoke-test:
     name: WP ${{ matrix.wordpress }} / WC ${{ matrix.woocommerce }} / PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
-    env:
-      WP_PATH: ${{ runner.temp }}/wordpress
     strategy:
       fail-fast: false
       matrix:
@@ -59,6 +57,9 @@ jobs:
 
       - name: Install WordPress ${{ matrix.wordpress }}
         run: |
+          WP_PATH="$RUNNER_TEMP/wordpress"
+          echo "WP_PATH=$WP_PATH" >> "$GITHUB_ENV"
+
           mkdir -p ~/.wp-cli
           echo "path: $WP_PATH" > ~/.wp-cli/config.yml
 
