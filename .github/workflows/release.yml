@@ -54,7 +54,7 @@ jobs:
             echo "::error::Zip contains entries outside $SLUG/"
             exit 1
           fi
-          for f in "$SLUG.php" uninstall.php vendor/autoload.php includes/helpers.php; do
+          for f in "$SLUG.php" uninstall.php vendor/autoload.php includes/helpers.php includes/payment-status.php languages/bunq-for-woocommerce-nl_NL.mo; do
             unzip -Z1 "$SLUG.zip" | grep -qx "$SLUG/$f" || { echo "::error::$f missing from zip"; exit 1; }
           done
           if unzip -Z1 "$SLUG.zip" | grep -q "^$SLUG/\.github/"; then

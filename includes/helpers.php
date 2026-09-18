@@ -35,6 +35,18 @@ function bunq_helper_is_local_url($url)
 }
 
 /**
+ * Compare two money amounts (strings or floats) as decimals with a tolerance of half a cent.
+ *
+ * @param string|float $a
+ * @param string|float $b
+ * @return bool
+ */
+function bunq_helper_amounts_match($a, $b)
+{
+    return abs((float) $a - (float) $b) < 0.005;
+}
+
+/**
  * Log a message to the WooCommerce log (WooCommerce > Status > Logs, source "bunq")
  * and to the PHP error log when WP_DEBUG is enabled.
  *

@@ -1,0 +1,164 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: bunq for WooCommerce\n"
+"Report-Msgid-Bugs-To: https://github.com/patrickkivits/bunq-for-woocommerce/issues\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: bunq-for-woocommerce\n"
+
+msgid "bunq payment gateway for WooCommerce"
+msgstr "Passerelle de paiement bunq pour WooCommerce"
+
+msgid "Credit or Debit Card"
+msgstr "Carte de crédit ou de débit"
+
+msgid "iDEAL"
+msgstr "iDEAL"
+
+msgid "Bancontact"
+msgstr "Bancontact"
+
+msgid "From a bunq account"
+msgstr "Depuis un compte bunq"
+
+msgid "bunq authorization completed. Select your bank account and save the settings."
+msgstr "Autorisation bunq terminée. Sélectionnez votre compte bancaire et enregistrez les réglages."
+
+msgid "Payment method invalid"
+msgstr "Moyen de paiement invalide"
+
+msgid "Details are logged in %s (source: bunq)."
+msgstr "Les détails sont consignés dans %s (source : bunq)."
+
+msgid "WooCommerce > Status > Logs"
+msgstr "WooCommerce > État > Journaux"
+
+msgid "OAuth Authorization Request"
+msgstr "Demande d’autorisation OAuth"
+
+msgid "Refresh bank accounts"
+msgstr "Actualiser les comptes bancaires"
+
+msgid "Enable/Disable"
+msgstr "Activer/Désactiver"
+
+msgid "Enable bunq Gateway"
+msgstr "Activer la passerelle bunq"
+
+msgid "Test mode"
+msgstr "Mode test"
+
+msgid "Enable Test Mode"
+msgstr "Activer le mode test"
+
+msgid "Place the payment gateway in test mode using test API keys."
+msgstr "Placer la passerelle de paiement en mode test avec des clés API de test."
+
+msgid "Title"
+msgstr "Titre"
+
+msgid "This controls the title which the user sees during checkout."
+msgstr "Titre affiché au client lors du paiement."
+
+msgid "iDEAL, Credit Card or Bancontact"
+msgstr "iDEAL, carte bancaire ou Bancontact"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "This controls the description which the user sees during checkout."
+msgstr "Description affichée au client lors du paiement."
+
+msgid "Pay with iDEAL, Credit Card or Bancontact"
+msgstr "Payer avec iDEAL, carte bancaire ou Bancontact"
+
+msgid "Bank account"
+msgstr "Compte bancaire"
+
+msgid "Direct Gateway"
+msgstr "Passerelle directe"
+
+msgid "Enable direct gateway"
+msgstr "Activer la passerelle directe"
+
+msgid "Allow your customers to directly select a payment method from the checkout page."
+msgstr "Permettre à vos clients de choisir directement un moyen de paiement sur la page de commande."
+
+msgid "Payment methods"
+msgstr "Moyens de paiement"
+
+msgid "Test OAuth Client ID"
+msgstr "Client ID OAuth de test"
+
+msgid "Test OAuth Client Secret"
+msgstr "Client Secret OAuth de test"
+
+msgid "Test API Key"
+msgstr "Clé API de test"
+
+msgid "Test API Context"
+msgstr "Contexte API de test"
+
+msgid "OAuth Client ID"
+msgstr "Client ID OAuth"
+
+msgid "OAuth Client Secret"
+msgstr "Client Secret OAuth"
+
+msgid "Live API Key"
+msgstr "Clé API de production"
+
+msgid "Live API Context"
+msgstr "Contexte API de production"
+
+msgid "bunq payment request %s created"
+msgstr "Demande de paiement bunq %s créée"
+
+msgid "The payment could not be started with bunq. Please try again or choose another payment method."
+msgstr "Le paiement n’a pas pu être lancé avec bunq. Veuillez réessayer ou choisir un autre moyen de paiement."
+
+msgid "This order has no bunq payment that can be refunded."
+msgstr "Cette commande n’a aucun paiement bunq pouvant être remboursé."
+
+msgid "The refund amount must be greater than zero."
+msgstr "Le montant du remboursement doit être supérieur à zéro."
+
+msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
+msgstr "Le paiement bunq de cette commande n’a pas d’IBAN vers lequel rembourser (par exemple un paiement par carte). Remboursez-le depuis l’application bunq."
+
+msgid "Refund order #%1$s %2$s"
+msgstr "Remboursement commande #%1$s %2$s"
+
+msgid "bunq refund of %1$s sent (payment %2$s)"
+msgstr "Remboursement bunq de %1$s envoyé (paiement %2$s)"
+
+msgid "bunq refund failed: %s"
+msgstr "Échec du remboursement bunq : %s"
+
+msgid "bunq payment %s received"
+msgstr "Paiement bunq %s reçu"
+
+msgid "bunq payment request %1$s is %2$s"
+msgstr "La demande de paiement bunq %1$s est %2$s"
+
+msgid "API key not valid or not setup yet"
+msgstr "Clé API invalide ou pas encore configurée"
+
+msgid "Select a bank account"
+msgstr "Sélectionnez un compte bancaire"
+
+msgid "(Joint)"
+msgstr "(Commun)"
+
+msgid "Error: %s"
+msgstr "Erreur : %s"
+
+msgid "bunq payment request %s cancelled"
+msgstr "Demande de paiement bunq %s annulée"
+
+msgid "cannot be activated due to incompatible environment."
+msgstr "ne peut pas être activé car l’environnement n’est pas compatible."
+

@@ -2,11 +2,20 @@
 
 Contributors: patrickkivits\
 Donate link: https://bunq.me/patrickkivits \
-Tags: woocommerce, psp, payment gateway, bunq, ideal, credit card, sofort\
+Tags: woocommerce, psp, payment gateway, bunq, ideal, credit card, bancontact\
 License: GPLv2 or later\
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Accept payments in your WooCommerce shop with just your bunq account.
+
+## Features
+
+- iDEAL, credit and debit cards, Bancontact and bunq-to-bunq transfers through a [bunq.me](https://bunq.me) payment request.
+- Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
+- Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
+- Refunds from the WooCommerce order screen, sent back to the IBAN the payment came from.
+- Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
+- Translated into Dutch and French; other languages can be added from the `languages/` template.
 
 ## Demo
 
@@ -55,7 +64,15 @@ Upload the new `bunq-for-woocommerce.zip` the same way. WordPress recognises the
 
 10. Select your **Bank account** and **Enable** the plugin and **Save changes**.
 
+The bank account list is cached for an hour. Use **Refresh bank accounts** on the settings page after adding an account in the bunq app.
+
+## Refunds
+
+Open the order in WooCommerce, click **Refund**, enter the amount and choose **Refund via bunq**. The money is sent back to the IBAN the payment came from and a note with the bunq payment id is added to the order. Payments without a counterparty IBAN (for example card payments) cannot be refunded through the API; refund those from the bunq app.
+
 ## Troubleshooting
+
+Everything the plugin does with bunq (callbacks received, payments matched, refunds, errors) is written to **WooCommerce** > **Status** > **Logs** (source: `bunq`). Look there first when an order does not change status.
 
 If the **Live API Context** stays empty after the OAuth authorization, or the **Bank account** dropdown shows *API key not valid or not setup yet*:
 
@@ -68,7 +85,17 @@ If the **Live API Context** stays empty after the OAuth authorization, or the **
 
 By default WooCommerce will **hold stock** for unpaid orders for **60 minutes**. When this limit is reached, the pending order will be **cancelled**.
 
-Some payment methods (like SOFORT) provided by bunq.me may take more than 60 minutes to complete. To avoid premature cancellation this setting can be increased or disabled in the WooCommerce configuration here: **WooCommerce** > **Settings** > **Products** > **Inventory** > **Hold stock (minutes)**
+Some payment methods provided by bunq.me may take longer than that to complete. To avoid premature cancellation this setting can be increased or disabled in the WooCommerce configuration here: **WooCommerce** > **Settings** > **Products** > **Inventory** > **Hold stock (minutes)**. The plugin keeps checking unpaid orders in the background for two days and cancels an order once bunq reports its payment request as expired.
+
+## Translations
+
+The plugin ships with Dutch (`nl_NL`) and French (`fr_FR`) translations. To add a language, translate `languages/bunq-for-woocommerce.pot` with a tool such as Poedit and save the `.po` and `.mo` files as `languages/bunq-for-woocommerce-<locale>.po`. After changing strings in the code, regenerate the template with:
+
+```
+php .github/scripts/make-pot.php
+```
+
+The bunq.me payment page itself is hosted by bunq and follows the language of the customer's browser.
 
 ## Disclaimer
 

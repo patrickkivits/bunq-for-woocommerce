@@ -6,6 +6,31 @@ if (empty($GLOBALS['requestThrottler'])) {
     $GLOBALS['requestThrottler'] = new RequestThrottler(new RequestThrottlerConfiguration());
 }
 
+/**
+ * Run a bunq API call and retry it when bunq answers "too many requests". The in-process throttler cannot see
+ * requests made by other PHP processes, so the rate limit can still be hit.
+ *
+ * @param callable $callback
+ * @param int $attempts
+ * @return mixed
+ * @throws Throwable
+ */
+function bunq_retry(callable $callback, $attempts = 3)
+{
+    for ($attempt = 1; ; $attempt++) {
+        try {
+            return $callback();
+        } catch (\bunq\Exception\TooManyRequestsException $exception) {
+            if ($attempt >= $attempts) {
+                throw $exception;
+            }
+
+            bunq_helper_log('bunq rate limit hit, retrying in 3 seconds (attempt '.$attempt.' of '.$attempts.')', 'warning');
+            sleep(3);
+        }
+    }
+}
+
 function bunq_environment($testmode) {
     return $testmode ? \bunq\Util\BunqEnumApiEnvironmentType::SANDBOX() : \bunq\Util\BunqEnumApiEnvironmentType::PRODUCTION();
 }
@@ -67,10 +92,14 @@ function bunq_create_payment_request($amount, $currency, $description, $returnUr
 
 	global $requestThrottler;
 	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\BunqMeTabApiObject::ENDPOINT_URL_CREATE, 'POST');
-    $createBunqMeTab = \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::create($bunqMeTabEntry, $monetary_account_bank_id)->getValue();
+    $createBunqMeTab = bunq_retry(function() use ($bunqMeTabEntry, $monetary_account_bank_id) {
+        return \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::create($bunqMeTabEntry, $monetary_account_bank_id)->getValue();
+    });
 
     $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\BunqMeTabApiObject::ENDPOINT_URL_READ, 'GET');
-    $bunqMeRequest = \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::get($createBunqMeTab, $monetary_account_bank_id)->getValue();
+    $bunqMeRequest = bunq_retry(function() use ($createBunqMeTab, $monetary_account_bank_id) {
+        return \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::get($createBunqMeTab, $monetary_account_bank_id)->getValue();
+    });
 
     return [
         'url' => $bunqMeRequest->getBunqmeTabShareUrl(),
@@ -80,14 +109,17 @@ function bunq_create_payment_request($amount, $currency, $description, $returnUr
 
 function bunq_get_bank_accounts($api_context)
 {
-    $bank_accounts = ['' => 'API key not valid or not setup yet'];
+    $bank_accounts = ['' => __('API key not valid or not setup yet', 'bunq-for-woocommerce')];
 
     if($api_context){
         try {
-            $bank_accounts = ['' => 'Select a bank account'];
+            $bank_accounts = ['' => __('Select a bank account', 'bunq-for-woocommerce')];
             global $requestThrottler;
             $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountBankApiObject::ENDPOINT_URL_LISTING, 'GET');
-            foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountBankApiObject::listing()->getValue() as $monetaryAccountBank) {
+            $monetary_accounts_bank = bunq_retry(function() {
+                return \bunq\Model\Generated\Endpoint\MonetaryAccountBankApiObject::listing()->getValue();
+            });
+            foreach ($monetary_accounts_bank as $monetaryAccountBank) {
                 foreach($monetaryAccountBank->getAlias() as $alias) {
                     if($alias->getType() === 'IBAN'){
                         $bank_accounts[$monetaryAccountBank->getId()] = $alias->getValue().' - '.$monetaryAccountBank->getDescription();
@@ -95,30 +127,89 @@ function bunq_get_bank_accounts($api_context)
                 }
             }
             $requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\MonetaryAccountJointApiObject::ENDPOINT_URL_LISTING, 'GET');
-            foreach (\bunq\Model\Generated\Endpoint\MonetaryAccountJointApiObject::listing()->getValue() as $monetaryAccountJoint) {
+            $monetary_accounts_joint = bunq_retry(function() {
+                return \bunq\Model\Generated\Endpoint\MonetaryAccountJointApiObject::listing()->getValue();
+            });
+            foreach ($monetary_accounts_joint as $monetaryAccountJoint) {
                 foreach($monetaryAccountJoint->getAlias() as $alias) {
                     if($alias->getType() === 'IBAN'){
-                        $bank_accounts[$monetaryAccountJoint->getId()] = $alias->getValue().' - '.$monetaryAccountJoint->getDescription().' (Joint)';
+                        $bank_accounts[$monetaryAccountJoint->getId()] = $alias->getValue().' - '.$monetaryAccountJoint->getDescription().' '.__('(Joint)', 'bunq-for-woocommerce');
                     }
                 }
             }
         }
         catch (Throwable $exception) {
             bunq_helper_log($exception);
-            $bank_accounts = ['' => 'Error: '.bunq_helper_format_error($exception)];
+            $bank_accounts = ['' => sprintf(
+                /* translators: %s: error message from bunq */
+                __('Error: %s', 'bunq-for-woocommerce'),
+                bunq_helper_format_error($exception)
+            )];
         }
     }
 
     return $bank_accounts;
 }
 
-function bunq_get_payment_request($payment_id, $monetary_account_bank_id = null)
+function bunq_get_payment_request($payment_request_id, $monetary_account_bank_id = null)
 {
 	global $requestThrottler;
 	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\BunqMeTabApiObject::ENDPOINT_URL_READ, 'GET');
-    $payment = \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::get($payment_id, $monetary_account_bank_id);
 
-    return $payment->getValue();
+    return bunq_retry(function() use ($payment_request_id, $monetary_account_bank_id) {
+        return \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::get($payment_request_id, $monetary_account_bank_id)->getValue();
+    });
+}
+
+/**
+ * Cancel a bunq.me payment request so it can no longer be paid.
+ */
+function bunq_cancel_payment_request($payment_request_id, $monetary_account_bank_id = null)
+{
+	global $requestThrottler;
+	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\BunqMeTabApiObject::ENDPOINT_URL_UPDATE, 'PUT');
+
+    bunq_retry(function() use ($payment_request_id, $monetary_account_bank_id) {
+        return \bunq\Model\Generated\Endpoint\BunqMeTabApiObject::update($payment_request_id, $monetary_account_bank_id, 'CANCELLED');
+    });
+}
+
+/**
+ * @return \bunq\Model\Generated\Endpoint\PaymentApiObject The payment as received on the bunq account.
+ */
+function bunq_get_payment($payment_id, $monetary_account_bank_id = null)
+{
+	global $requestThrottler;
+	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\PaymentApiObject::ENDPOINT_URL_READ, 'GET');
+
+    return bunq_retry(function() use ($payment_id, $monetary_account_bank_id) {
+        return \bunq\Model\Generated\Endpoint\PaymentApiObject::get($payment_id, $monetary_account_bank_id)->getValue();
+    });
+}
+
+/**
+ * Send money back to an IBAN (a refund of a received payment).
+ *
+ * @param float $amount
+ * @param string $currency
+ * @param string $iban
+ * @param string $name Account holder name, required by bunq for IBAN pointers.
+ * @param string $description Shown to the recipient; bunq allows 140 characters.
+ * @param int|null $monetary_account_bank_id
+ * @return int The id of the outgoing payment.
+ */
+function bunq_create_refund($amount, $currency, $iban, $name, $description, $monetary_account_bank_id = null)
+{
+    $amount = new \bunq\Model\Generated\Object\AmountObject(number_format((float) $amount, 2, '.', ''), $currency);
+    $counterparty = new \bunq\Model\Generated\Object\PointerObject('IBAN', $iban, $name);
+    $description = mb_substr($description, 0, 140);
+
+	global $requestThrottler;
+	$requestThrottler->ensureApiLimitsAreRespected(\bunq\Model\Generated\Endpoint\PaymentApiObject::ENDPOINT_URL_CREATE, 'POST');
+
+    return bunq_retry(function() use ($amount, $counterparty, $description, $monetary_account_bank_id) {
+        return \bunq\Model\Generated\Endpoint\PaymentApiObject::create($amount, $counterparty, $description, $monetary_account_bank_id)->getValue();
+    });
 }
 
 function bunq_get_notification_filters($monetary_account_bank_id = null)
