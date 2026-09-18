@@ -15,7 +15,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 - Refunds from the WooCommerce order screen, sent back to the IBAN the payment came from.
 - Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
-- Translated into Dutch and French; other languages can be added from the `languages/` template.
+- Translated into Dutch, French and German; other languages can be added from the `languages/` template.
 
 ## Demo
 
@@ -89,7 +89,7 @@ Some payment methods provided by bunq.me may take longer than that to complete. 
 
 ## Translations
 
-The plugin ships with Dutch (`nl_NL`) and French (`fr_FR`) translations. To add a language, translate `languages/bunq-for-woocommerce.pot` with a tool such as Poedit and save the `.po` and `.mo` files as `languages/bunq-for-woocommerce-<locale>.po`. After changing strings in the code, regenerate the template with:
+The plugin ships with Dutch (`nl_NL`), French (`fr_FR`) and German (`de_DE`) translations. To add a language, translate `languages/bunq-for-woocommerce.pot` with a tool such as Poedit and save the `.po` and `.mo` files as `languages/bunq-for-woocommerce-<locale>.po`. After changing strings in the code, regenerate the template with:
 
 ```
 php .github/scripts/make-pot.php
