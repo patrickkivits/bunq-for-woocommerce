@@ -75,12 +75,15 @@ $check( false !== has_action( 'wc_bunq_check_payment', 'bunq_scheduled_payment_c
 $check( false !== has_action( 'woocommerce_order_status_cancelled', 'bunq_cancel_payment_request_for_order' ), 'cancelled orders cancel the bunq payment request' );
 $check( function_exists( 'as_schedule_single_action' ), 'Action Scheduler is available' );
 
-// Translations ship with the plugin and load from its languages/ folder.
-if ( function_exists( 'switch_to_locale' ) ) {
-    switch_to_locale( 'nl_NL' );
-    $check( 'Bankrekening' === __( 'Bank account', 'bunq-for-woocommerce' ), 'Dutch translation loads from languages/' );
-    restore_previous_locale();
-}
+// Translations ship with the plugin and load from its languages/ folder. switch_to_locale() only accepts
+// locales installed in wp-content/languages, so point the plugin's own loader at nl_NL instead.
+$dutch = function () { return 'nl_NL'; };
+add_filter( 'plugin_locale', $dutch );
+unload_textdomain( 'bunq-for-woocommerce' );
+$loaded = load_plugin_textdomain( 'bunq-for-woocommerce', false, 'bunq-for-woocommerce/languages' );
+$check( $loaded && 'Bankrekening' === __( 'Bank account', 'bunq-for-woocommerce' ), 'Dutch translation loads from languages/' );
+remove_filter( 'plugin_locale', $dutch );
+unload_textdomain( 'bunq-for-woocommerce' );
 
 // Compatibility declarations (HPOS since WooCommerce 7.1, block checkout since 8.3).
 if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' )
