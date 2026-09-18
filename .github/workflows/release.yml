@@ -42,10 +42,13 @@ jobs:
 
       - name: Build the zip with a fixed top-level folder
         run: |
-          # git archive honours the export-ignore rules in .gitattributes, so
-          # development files stay out of the zip while the committed vendor/
-          # directory is included.
+          # The committed vendor/ directory is included. Development files are
+          # stripped explicitly rather than via .gitattributes export-ignore,
+          # because older tags were cut before that file existed.
           git archive --format=zip --prefix="$SLUG/" -o "$SLUG.zip" "$TAG"
+          zip -q -d "$SLUG.zip" \
+            "$SLUG/.github/*" "$SLUG/.gitattributes" "$SLUG/.gitignore" \
+            "$SLUG/.idea/*" "$SLUG/.DS_Store" "$SLUG/.claude/*" || true
           unzip -l "$SLUG.zip" | head -n 20
           # Every entry must live under the fixed folder.
           if unzip -Z1 "$SLUG.zip" | grep -v "^$SLUG/" ; then
