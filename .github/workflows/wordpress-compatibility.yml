@@ -4,13 +4,12 @@ on:
   push:
   pull_request:
 
-env:
-  WP_PATH: ${{ runner.temp }}/wordpress
-
 jobs:
   smoke-test:
     name: WP ${{ matrix.wordpress }} / WC ${{ matrix.woocommerce }} / PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    env:
+      WP_PATH: ${{ runner.temp }}/wordpress
     strategy:
       fail-fast: false
       matrix:
