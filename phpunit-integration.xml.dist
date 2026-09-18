@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Integration tests: the plugin inside a real WordPress and WooCommerce, against a database.
+     Needs a MySQL/MariaDB reachable through the WP_TESTS_DB_* environment variables (see the readme). -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="tests/vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/Integration/bootstrap.php"
+         cacheResultFile="tests/.phpunit.integration.result.cache"
+         colors="true"
+         backupGlobals="false"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="bunq for WooCommerce integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="display_errors" value="1"/>
+    </php>
+</phpunit>

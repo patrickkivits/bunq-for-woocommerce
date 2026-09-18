@@ -1,1 +1,7 @@
 .idea
+tests/vendor/
+tests/wordpress/
+tests/wp-content/
+tests/.phpunit.result.cache
+tests/.phpunit.integration.result.cache
+tests/.integration-error.log

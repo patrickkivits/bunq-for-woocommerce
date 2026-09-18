@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="tests/vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheResultFile="tests/.phpunit.result.cache"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutOutputDuringTests="true">
+    <testsuites>
+        <testsuite name="bunq for WooCommerce">
+            <directory>tests</directory>
+            <exclude>tests/vendor</exclude>
+            <exclude>tests/Integration</exclude>
+            <exclude>tests/wordpress</exclude>
+            <exclude>tests/wp-content</exclude>
+        </testsuite>
+    </testsuites>
+    <!-- Tests in the "slow" group wait for the real sleep() calls of the rate limit handling (a few seconds).
+         Skip them while iterating by excluding that group (see the readme). -->
+    <php>
+        <ini name="display_errors" value="1"/>
+    </php>
+</phpunit>

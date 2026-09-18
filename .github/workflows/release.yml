@@ -47,7 +47,8 @@ jobs:
           git archive --format=zip --prefix="$SLUG/" -o "$SLUG.zip" "$TAG"
           zip -q -d "$SLUG.zip" \
             "$SLUG/.github/*" "$SLUG/.gitignore" \
-            "$SLUG/.idea/*" "$SLUG/.DS_Store" "$SLUG/.claude/*" || true
+            "$SLUG/.idea/*" "$SLUG/.DS_Store" "$SLUG/.claude/*" \
+            "$SLUG/tests/*" "$SLUG/phpunit.xml.dist" || true
           unzip -l "$SLUG.zip" | head -n 20
 
       - name: Check that the zip holds every tracked file and nothing else
@@ -55,7 +56,7 @@ jobs:
           # Everything tracked at the tag, minus the stripped development paths,
           # must be in the zip under the fixed folder; anything else is a leak.
           git ls-tree -r --name-only "$TAG" \
-            | grep -vE '^(\.github/|\.gitignore$|\.idea/|\.DS_Store$|\.claude/)' \
+            | grep -vE '^(\.github/|\.gitignore$|\.idea/|\.DS_Store$|\.claude/|tests/|phpunit\.xml\.dist$)' \
             | sed "s|^|$SLUG/|" | sort > expected.txt
           unzip -Z1 "$SLUG.zip" | grep -v '/$' | sort > actual.txt
           if ! diff -u expected.txt actual.txt; then
