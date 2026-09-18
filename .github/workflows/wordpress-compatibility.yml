@@ -1,0 +1,131 @@
+name: WordPress compatibility
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke-test:
+    name: WP ${{ matrix.wordpress }} / WC ${{ matrix.woocommerce }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # WooCommerce releases only support a window of WordPress and PHP versions,
+        # so the matrix lists combinations that are valid together rather than a full
+        # cross product. Versions are pinned per row; "latest" follows wordpress.org.
+        include:
+          # Oldest combination the plugin is still exercised against.
+          - wordpress: '6.2'
+            woocommerce: '8.1.0'
+            php: '7.4'
+          - wordpress: '6.5'
+            woocommerce: '8.9.0'
+            php: '8.1'
+          # The "Tested up to" / "WC tested up to" pair from the plugin header.
+          - wordpress: '6.8'
+            woocommerce: '9.8.0'
+            php: '8.3'
+          # Whatever wordpress.org currently serves.
+          - wordpress: 'latest'
+            woocommerce: 'latest'
+            php: '8.4'
+
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, openssl, curl, json, mbstring, zip
+          tools: wp-cli
+          coverage: none
+
+      - name: Install WordPress ${{ matrix.wordpress }}
+        run: |
+          WP_PATH="$RUNNER_TEMP/wordpress"
+          echo "WP_PATH=$WP_PATH" >> "$GITHUB_ENV"
+
+          mkdir -p ~/.wp-cli
+          echo "path: $WP_PATH" > ~/.wp-cli/config.yml
+
+          wp core download --version="${{ matrix.wordpress }}"
+          wp config create \
+            --dbname=wordpress \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=127.0.0.1 \
+            --extra-php <<'PHP'
+          define( 'WP_DEBUG', true );
+          define( 'WP_DEBUG_LOG', true );
+          define( 'WP_DEBUG_DISPLAY', false );
+          PHP
+          wp core install \
+            --url=http://localhost \
+            --title="bunq for WooCommerce CI" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com \
+            --skip-email
+          wp core version --extra
+
+      - name: Install WooCommerce ${{ matrix.woocommerce }}
+        run: |
+          if [ "${{ matrix.woocommerce }}" = "latest" ]; then
+            wp plugin install woocommerce --activate
+          else
+            wp plugin install woocommerce --version="${{ matrix.woocommerce }}" --activate
+          fi
+          wp plugin list --name=woocommerce
+
+      - name: Install and activate bunq for WooCommerce
+        run: |
+          rsync -a --exclude=.git ./ "$WP_PATH/wp-content/plugins/bunq-for-woocommerce/"
+          wp plugin activate bunq-for-woocommerce
+          wp plugin list --name=bunq-for-woocommerce
+          test "$(wp plugin list --name=bunq-for-woocommerce --field=status)" = "active"
+
+      - name: Verify the gateway is registered with WooCommerce
+        run: wp eval-file "$GITHUB_WORKSPACE/.github/scripts/verify-plugin.php"
+
+      # WP_DEBUG_LOG collects every PHP notice raised while WordPress, WooCommerce and
+      # the plugin were installed and loaded. Only entries raised by the plugin's own
+      # code fail the job: WordPress/WooCommerce notices are not ours, and deprecations
+      # are excluded because bunq/sdk_php still uses implicitly nullable parameters.
+      - name: Check the debug log for notices raised by the plugin
+        if: always()
+        run: |
+          log="$WP_PATH/wp-content/debug.log"
+          if [ ! -f "$log" ]; then
+            echo "No debug.log written."
+            exit 0
+          fi
+
+          echo "::group::debug.log"
+          cat "$log"
+          echo "::endgroup::"
+
+          plugin_entries=$(grep 'plugins/bunq-for-woocommerce/' "$log" \
+            | grep -v 'plugins/bunq-for-woocommerce/vendor/' \
+            | grep -v 'PHP Deprecated' || true)
+
+          if [ -n "$plugin_entries" ]; then
+            echo "::error::The plugin raised PHP notices or warnings:"
+            echo "$plugin_entries"
+            exit 1
+          fi
+          echo "No notices or warnings raised by the plugin."
