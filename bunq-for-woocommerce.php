@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.5.8
+ * Version: 1.5.9
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -356,7 +356,14 @@ function bunq_init_gateway_class() {
 
         public function init_form_fields()
         {
-	        if(is_admin()) {
+            // The bank account list is only needed to render the settings page, and
+            // fetching it costs a bunq API call. Outside admin the select simply has
+            // no options; the field definitions themselves are always set so that
+            // get_option() can fall back to each field's default on the frontend and
+            // under WP-CLI.
+            $bank_accounts = array();
+
+            if(is_admin()) {
                 $transient = 'wc_bunq_gateway.bunq_get_bank_accounts';
                 $bank_accounts = get_transient($transient);
 
@@ -365,112 +372,112 @@ function bunq_init_gateway_class() {
                     $bank_accounts = bunq_get_bank_accounts($api_context);
                     set_transient($transient, $bank_accounts);
                 }
+            }
 
-		        $this->form_fields = array(
-			        'enabled' => array(
-				        'title'       => 'Enable/Disable',
-				        'label'       => 'Enable bunq Gateway',
-				        'type'        => 'checkbox',
-				        'description' => '',
-				        'default'     => 'no'
-			        ),
-                    'testmode' => array(
-                        'title'       => 'Test mode',
-                        'label'       => 'Enable Test Mode',
-                        'type'        => 'checkbox',
-                        'description' => 'Place the payment gateway in test mode using test API keys.',
-                        'default'     => 'no',
-                        'desc_tip'    => true,
+            $this->form_fields = array(
+                'enabled' => array(
+                    'title'       => 'Enable/Disable',
+                    'label'       => 'Enable bunq Gateway',
+                    'type'        => 'checkbox',
+                    'description' => '',
+                    'default'     => 'no'
+                ),
+                'testmode' => array(
+                    'title'       => 'Test mode',
+                    'label'       => 'Enable Test Mode',
+                    'type'        => 'checkbox',
+                    'description' => 'Place the payment gateway in test mode using test API keys.',
+                    'default'     => 'no',
+                    'desc_tip'    => true,
+                ),
+                'title' => array(
+                    'title'       => 'Title',
+                    'type'        => 'text',
+                    'description' => 'This controls the title which the user sees during checkout.',
+                    'default'     => 'iDEAL, Credit Card or Sofort',
+                    'desc_tip'    => true,
+                ),
+                'description' => array(
+                    'title'       => 'Description',
+                    'type'        => 'textarea',
+                    'description' => 'This controls the description which the user sees during checkout.',
+                    'default'     => 'Pay with iDEAL, Credit Card or Sofort',
+                ),
+                'monetary_account_bank_id' => array(
+                    'title'       => 'Bank account',
+                    'type'        => 'select',
+                    'options'     =>  $bank_accounts
+                ),
+                'direct_gateway' => array(
+                    'title'       => 'Direct Gateway',
+                    'label'       => 'Enable direct gateway',
+                    'type'        => 'checkbox',
+                    'default'     => 'no',
+                    'description' => 'Allow your customers to directly select a payment method from the checkout page.',
+                    'desc_tip'    => true,
+                ),
+            );
+
+            $direct_gateway = 'yes' === $this->get_option( 'direct_gateway' );
+
+            if($direct_gateway) {
+                $this->form_fields = array_merge($this->form_fields, array(
+                    'enabled_payment_methods' => array(
+                        'title'       => 'Payment methods',
+                        'type'        => 'multiselect',
+                        'custom_attributes' => ['multiple' => 'multiple'],
+                        'options'     =>  array_column($this->payment_methods, 'description', 'id')
+                    )
+                ));
+            }
+
+            $testmode = 'yes' === $this->get_option( 'testmode' );
+
+            if($testmode) {
+                $this->form_fields = array_merge($this->form_fields, array(
+                    'test_oauth_client_id' => array(
+                        'title'       => 'Test OAuth Client ID',
+                        'type'        => 'text',
                     ),
-			        'title' => array(
-				        'title'       => 'Title',
-				        'type'        => 'text',
-				        'description' => 'This controls the title which the user sees during checkout.',
-				        'default'     => 'iDEAL, Credit Card or Sofort',
-				        'desc_tip'    => true,
-			        ),
-			        'description' => array(
-				        'title'       => 'Description',
-				        'type'        => 'textarea',
-				        'description' => 'This controls the description which the user sees during checkout.',
-				        'default'     => 'Pay with iDEAL, Credit Card or Sofort',
-			        ),
-			        'monetary_account_bank_id' => array(
-				        'title'       => 'Bank account',
-				        'type'        => 'select',
-				        'options'     =>  $bank_accounts
-			        ),
-                    'direct_gateway' => array(
-                        'title'       => 'Direct Gateway',
-                        'label'       => 'Enable direct gateway',
-                        'type'        => 'checkbox',
-                        'default'     => 'no',
-                        'description' => 'Allow your customers to directly select a payment method from the checkout page.',
-                        'desc_tip'    => true,
+                    'test_oauth_client_secret' => array(
+                        'title'       => 'Test OAuth Client Secret',
+                        'type'        => 'text',
                     ),
-                );
-
-                $direct_gateway = 'yes' === $this->get_option( 'direct_gateway' );
-
-                if($direct_gateway) {
-                    $this->form_fields = array_merge($this->form_fields, array(
-                        'enabled_payment_methods' => array(
-                            'title'       => 'Payment methods',
-                            'type'        => 'multiselect',
-                            'custom_attributes' => ['multiple' => 'multiple'],
-                            'options'     =>  array_column($this->payment_methods, 'description', 'id')
-                        )
-                    ));
-                }
-
-                $testmode = 'yes' === $this->get_option( 'testmode' );
-
-                if($testmode) {
-                    $this->form_fields = array_merge($this->form_fields, array(
-                        'test_oauth_client_id' => array(
-                            'title'       => 'Test OAuth Client ID',
-                            'type'        => 'text',
-                        ),
-                        'test_oauth_client_secret' => array(
-                            'title'       => 'Test OAuth Client Secret',
-                            'type'        => 'text',
-                        ),
-                        'test_api_key' => array(
-                            'title'       => 'Test API Key',
-                            'type'        => 'text',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                        'test_api_context' => array(
-                            'title'       => 'Test API Context',
-                            'type'        => 'textarea',
-                            'css'         => 'height: 150px;',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                    ));
-                } else {
-                    $this->form_fields = array_merge($this->form_fields, array(
-                        'oauth_client_id' => array(
-                            'title'       => 'OAuth Client ID',
-                            'type'        => 'text'
-                        ),
-                        'oauth_client_secret' => array(
-                            'title'       => 'OAuth Client Secret',
-                            'type'        => 'text'
-                        ),
-                        'api_key' => array(
-                            'title'       => 'Live API Key',
-                            'type'        => 'text',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                        'api_context' => array(
-                            'title'       => 'Live API Context',
-                            'type'        => 'textarea',
-                            'css'         => 'height: 150px;',
-                            'custom_attributes' => array('readonly' => 'readonly')
-                        ),
-                    ));
-                }
-	        }
+                    'test_api_key' => array(
+                        'title'       => 'Test API Key',
+                        'type'        => 'text',
+                        'custom_attributes' => array('readonly' => 'readonly')
+                    ),
+                    'test_api_context' => array(
+                        'title'       => 'Test API Context',
+                        'type'        => 'textarea',
+                        'css'         => 'height: 150px;',
+                        'custom_attributes' => array('readonly' => 'readonly')
+                    ),
+                ));
+            } else {
+                $this->form_fields = array_merge($this->form_fields, array(
+                    'oauth_client_id' => array(
+                        'title'       => 'OAuth Client ID',
+                        'type'        => 'text'
+                    ),
+                    'oauth_client_secret' => array(
+                        'title'       => 'OAuth Client Secret',
+                        'type'        => 'text'
+                    ),
+                    'api_key' => array(
+                        'title'       => 'Live API Key',
+                        'type'        => 'text',
+                        'custom_attributes' => array('readonly' => 'readonly')
+                    ),
+                    'api_context' => array(
+                        'title'       => 'Live API Context',
+                        'type'        => 'textarea',
+                        'css'         => 'height: 150px;',
+                        'custom_attributes' => array('readonly' => 'readonly')
+                    ),
+                ));
+            }
         }
 
         public function process_payment( $order_id ) {
