@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.6.1
+ * Version: 1.6.2
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -678,7 +678,7 @@ function bunq_init_gateway_class() {
 
                 $description = sprintf(
                     /* translators: 1: order number, 2: shop name */
-                    __('Refund order #%1$s %2$s', 'bunq-for-woocommerce'),
+                    __('Refund order %1$s %2$s', 'bunq-for-woocommerce'),
                     $order->get_order_number(),
                     get_bloginfo('name')
                 );

@@ -174,7 +174,7 @@ msgstr ""
 
 #. translators: 1: order number, 2: shop name
 #: bunq-for-woocommerce.php:671
-msgid "Refund order #%1$s %2$s"
+msgid "Refund order %1$s %2$s"
 msgstr ""
 
 #. translators: 1: refunded amount, 2: bunq payment id of the refund
