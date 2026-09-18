@@ -55,8 +55,12 @@ if ( $gateway ) {
     $check( 'bunq' === $gateway->get_method_title(), 'gateway method title is "bunq"' );
     $check( in_array( 'products', (array) $gateway->supports, true ), 'gateway supports "products"' );
 
-    // The settings form fields are not checked here: WC_Bunq_Gateway::init_form_fields()
-    // only defines them when is_admin() is true, which is never the case under WP-CLI.
+    // Field definitions must be available outside admin (checkout, WP-CLI) so that
+    // get_option() can fall back to each field's default. Only the bank account
+    // lookup that fills the select options is gated on is_admin().
+    $form_fields = $gateway->get_form_fields();
+    $check( is_array( $form_fields ) && ! empty( $form_fields ), 'gateway settings form fields are defined' );
+    $check( isset( $form_fields['enabled'] ), 'gateway settings contain the "enabled" field' );
 }
 
 // Compatibility declarations (HPOS since WooCommerce 7.1, block checkout since 8.3).
