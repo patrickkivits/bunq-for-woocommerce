@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.6.0
+ * Version: 1.6.1
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 3.8
@@ -112,27 +112,33 @@ function bunq_init_gateway_class() {
             $this->icon = '';
             $this->method_title = 'bunq';
             $this->method_description = __('bunq payment gateway for WooCommerce', 'bunq-for-woocommerce');
+            // 'id' is what the setting and the checkout form store (keep stable); 'bunqme' is the value bunq.me
+            // expects in its paymentMethod query parameter to open that method directly.
             $this->payment_methods = [
                 [
                     'id' => 'card',
+                    'bunqme' => 'CARD',
                     'description' => __('Credit or Debit Card', 'bunq-for-woocommerce'),
                     'min' => 1,
                     'max' => 500,
                 ],
                 [
                     'id' => 'ideal',
+                    'bunqme' => 'IDEAL',
                     'description' => __('iDEAL', 'bunq-for-woocommerce'),
                     'min' => 0.01,
                     'max' => null,
                 ],
                 [
                     'id' => 'bancontact',
+                    'bunqme' => 'BANCONTACT',
                     'description' => __('Bancontact', 'bunq-for-woocommerce'),
                     'min' => 5,
                     'max' => 10000,
                 ],
                 [
                     'id' => 'bunq-transfer',
+                    'bunqme' => 'BUNQ_TRANSFER',
                     'description' => __('From a bunq account', 'bunq-for-woocommerce'),
                     'min' => 0.01,
                     'max' => null,
@@ -589,12 +595,10 @@ function bunq_init_gateway_class() {
                 $this->ensure_api_context_loaded();
 
                 // The block checkout does not call validate_fields(), so check the posted method here as well.
-                $payment_method = '';
+                $bunqme_payment_method = null;
                 if(!empty($_POST['wc_bunq_gateway_payment_method'])) {
                     $requested_payment_method = sanitize_text_field(wp_unslash($_POST['wc_bunq_gateway_payment_method']));
-                    if(in_array($requested_payment_method, array_column($this->payment_methods, 'id'), true)) {
-                        $payment_method = '/'.$requested_payment_method;
-                    }
+                    $bunqme_payment_method = array_column($this->payment_methods, 'bunqme', 'id')[$requested_payment_method] ?? null;
                 }
 
                 $payment_request = bunq_create_payment_request(
@@ -620,9 +624,15 @@ function bunq_init_gateway_class() {
                 // Fallback for a callback that never arrives: re-check the payment request in the background.
                 bunq_schedule_payment_check($order->get_id());
 
+                // Direct gateway: bunq.me opens the chosen method straight away when it is passed as ?paymentMethod=
+                // (it used to be a path segment, which bunq.me now ignores).
+                $redirect = $bunqme_payment_method
+                    ? add_query_arg('paymentMethod', $bunqme_payment_method, $payment_request['url'])
+                    : $payment_request['url'];
+
                 return array(
                     'result'   => 'success',
-                    'redirect' => $payment_request['url'].$payment_method,
+                    'redirect' => $redirect,
                 );
             }
             catch (Throwable $exception) {
