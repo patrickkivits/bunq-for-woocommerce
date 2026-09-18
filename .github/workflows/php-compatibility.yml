@@ -1,0 +1,47 @@
+name: PHP compatibility
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: openssl, curl, json, mbstring
+          coverage: none
+
+      - name: Syntax check plugin and vendored dependencies
+        run: |
+          find . -name '*.php' -not -path './.git/*' -print0 \
+            | xargs -0 -n1 -P4 php -l \
+            | { ! grep -v 'No syntax errors'; }
+
+      # Deprecations are filtered out because bunq/sdk_php 1.28 still uses implicitly
+      # nullable parameters (deprecated since PHP 8.4); anything more severe fails the step.
+      - name: Load the vendored dependencies at runtime
+        run: |
+          php -d 'error_reporting=E_ALL & ~E_DEPRECATED' -d display_errors=1 -r '
+            require "vendor/autoload.php";
+            \bunq\Security\KeyPair::generate();
+            new \League\OAuth2\Client\Provider\GenericProvider([
+                "clientId" => "id",
+                "clientSecret" => "secret",
+                "redirectUri" => "https://example.com/",
+                "urlAuthorize" => "https://oauth.bunq.com/auth",
+                "urlAccessToken" => "https://api.oauth.bunq.com/v1/token",
+                "urlResourceOwnerDetails" => null,
+            ]);
+            echo "OK\n";
+          '

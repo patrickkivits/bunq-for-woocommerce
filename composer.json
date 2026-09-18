@@ -1,6 +1,9 @@
 {
     "config": {
-        "platform-check": false
+        "platform-check": false,
+        "platform": {
+            "php": "7.3.0"
+        }
     },
     "require": {
         "bunq/sdk_php": "^1.15",

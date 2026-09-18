@@ -2,7 +2,7 @@
 
 function bunq_requirements_check() {
     $min_wp  = '3.8';
-    $min_php = '7.0.13';
+    $min_php = '7.3.0';
     $exts = ['openssl', 'curl', 'json', 'mbstring'];
 
     // Check for WordPress version
