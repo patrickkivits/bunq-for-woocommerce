@@ -35,6 +35,9 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
     /** @var array What get_bank_accounts() returns. */
     public $bankAccounts = array('' => 'Select a bank account', 123 => 'NL00BUNQ0000000123 - Shop');
 
+    /** @var string|null What get_account_name() returns. */
+    public $accountName = null;
+
     /** @var \Throwable[] Thrown by the named method (create_payment_request, get_payment, ...) when set. */
     public $exceptions = array();
 
@@ -67,6 +70,11 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
                 return $this->json;
             }
         };
+    }
+
+    public function get_account_name($json)
+    {
+        return $this->accountName;
     }
 
     public function get_bank_accounts($api_context)

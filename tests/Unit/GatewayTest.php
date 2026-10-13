@@ -241,31 +241,31 @@ final class GatewayTest extends TestCase
         $this->assertFalse($this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')))->is_available(), 'Recreating the API context failed recently');
     }
 
-    public function testTheLiveSettingsFormShowsTheLiveCredentials()
+    public function testTheSettingsFormHasTheOAuthClientsOfBothModes()
     {
+        // The settings page shows those of the mode the test mode checkbox selects, also before it is saved.
         $fields = $this->createGateway($this->liveSettings())->get_form_fields();
 
         $this->assertSame(
-            array('enabled', 'testmode', 'title', 'description', 'monetary_account_bank_id', 'direct_gateway', 'oauth_client_id', 'oauth_client_secret', 'connection'),
+            array('enabled', 'account', 'testmode', 'connection', 'oauth_client_id', 'oauth_client_secret', 'test_oauth_client_id', 'test_oauth_client_secret', 'connect', 'receiving', 'monetary_account_bank_id', 'checkout', 'title', 'description', 'direct_gateway', 'enabled_payment_methods'),
             array_keys($fields)
         );
         $this->assertSame('password', $fields['oauth_client_secret']['type']);
+        $this->assertSame('password', $fields['test_oauth_client_secret']['type']);
+        $this->assertSame('new-password', $fields['oauth_client_secret']['custom_attributes']['autocomplete'], 'No login password filled in by the browser');
         $this->assertSame('title', $fields['connection']['type'], 'Shown, never saved');
-        $this->assertStringStartsWith('Not connected to bunq yet.', $fields['connection']['description']);
+        $this->assertSame('title', $fields['connect']['type'], 'Shown, never saved');
     }
 
-    public function testTheTestModeSettingsFormShowsTheTestCredentials()
+    public function testTheEnableCheckboxSaysTheConnectionIsNeededUntilThereIsOne()
     {
-        $fields = $this->createGateway($this->liveSettings(array('testmode' => 'yes')))->get_form_fields();
-
-        $this->assertSame(
-            array('enabled', 'testmode', 'title', 'description', 'monetary_account_bank_id', 'direct_gateway', 'test_oauth_client_id', 'test_oauth_client_secret', 'connection'),
-            array_keys($fields)
-        );
-        $this->assertSame('Connected to bunq.', $this->createGateway($this->liveSettings(array('testmode' => 'yes', 'test_api_context' => '{"test":1}')))->get_form_fields()['connection']['description']);
+        $this->assertStringContainsString('once your bunq account is connected', $this->createGateway($this->liveSettings())->get_form_fields()['enabled']['description']);
+        $this->assertSame('', $this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')))->get_form_fields()['enabled']['description']);
+        $this->assertSame('', $this->createGateway($this->liveSettings(array('testmode' => 'yes', 'test_api_context' => '{"test":1}')))->get_form_fields()['enabled']['description']);
+        $this->assertNotSame('', $this->createGateway($this->liveSettings(array('testmode' => 'yes', 'api_context' => '{"live":1}')))->get_form_fields()['enabled']['description'], 'Only the live mode is connected');
     }
 
-    public function testTheDirectGatewayAddsThePaymentMethodSelection()
+    public function testThePaymentMethodSelection()
     {
         $fields = $this->createGateway($this->liveSettings(array('direct_gateway' => 'yes')))->get_form_fields();
 
@@ -285,6 +285,18 @@ final class GatewayTest extends TestCase
         $this->assertSame(array(), Environment::$logs, 'The API context was not even loaded');
     }
 
+    public function testTheBankAccountSelectSaysSoWhenBunqRejectsTheSavedConnection()
+    {
+        Environment::$isAdmin = true;
+        $bunq = new FakeBunqApi();
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('api_context' => 'unusable-api-context')));
+
+        $fields = (new Gateway($bunq))->get_form_fields();
+
+        $this->assertSame(array('' => 'bunq rejected the saved connection. Connect again.'), $fields['monetary_account_bank_id']['options']);
+        $this->assertSame(array(), $bunq->callsTo('get_bank_accounts'));
+    }
+
     public function testTheCachedBankAccountsFillTheSelectInAdmin()
     {
         Environment::$isAdmin = true;
@@ -301,8 +313,8 @@ final class GatewayTest extends TestCase
 
         $fields = $this->createGateway($this->liveSettings())->get_form_fields();
 
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), $fields['monetary_account_bank_id']['options']);
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), get_transient(Gateway::BANK_ACCOUNTS_TRANSIENT));
+        $this->assertSame(array('' => 'Connect your bunq account first'), $fields['monetary_account_bank_id']['options']);
+        $this->assertSame(array('' => 'Connect your bunq account first'), get_transient(Gateway::BANK_ACCOUNTS_TRANSIENT));
         $this->assertSame(5 * MINUTE_IN_SECONDS, Environment::$transientTtls[Gateway::BANK_ACCOUNTS_TRANSIENT]);
     }
 
@@ -315,7 +327,7 @@ final class GatewayTest extends TestCase
 
         $fields = $this->createGateway($this->liveSettings())->get_form_fields();
 
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), $fields['monetary_account_bank_id']['options'], 'Fetched again');
+        $this->assertSame(array('' => 'Connect your bunq account first'), $fields['monetary_account_bank_id']['options'], 'Fetched again');
     }
 
     public function testTheRefreshLinkNeedsAValidNonceAndTheCapability()
@@ -333,47 +345,104 @@ final class GatewayTest extends TestCase
         $this->assertSame($cached, $this->createGateway($this->liveSettings())->get_form_fields()['monetary_account_bank_id']['options']);
     }
 
-    public function testTheSettingsPageOffersTheAuthorizationOnceTheClientIsSaved()
+    public function testConnectingSendsTheMerchantToBunqWithTheSavedClient()
     {
-        Environment::$isAdmin = true;
+        $gateway = $this->createGateway($this->liveSettings());
 
-        $html = $this->adminOptions($this->createGateway($this->liveSettings()));
+        $url = $gateway->get_connect_url();
 
-        $this->assertStringContainsString('OAuth Authorization Request', $html);
-        $this->assertStringContainsString('https://oauth.bunq.com/auth?', $html);
-        $this->assertStringContainsString('client_id=live-client-id', $html);
-        $this->assertStringContainsString(urlencode('http://shop.example/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq'), $html);
-        $this->assertStringNotContainsString('Refresh bank accounts', $html, 'Nothing to refresh without an API context');
+        $this->assertStringStartsWith('https://oauth.bunq.com/auth?', $url);
+        $this->assertStringContainsString('client_id=live-client-id', $url);
+        // Always the settings page URL the merchant registered, however the page was opened.
+        $this->assertStringContainsString('redirect_uri=' . urlencode('https://shop.example/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq') . '&', $url . '&');
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+        $this->assertSame($query['state'], get_transient('wc_bunq_gateway.oauth2state.0'), 'The state to verify on return');
     }
 
-    public function testTheSettingsPageUsesTheSandboxInTestMode()
+    public function testConnectingInTestModeUsesTheSandboxClient()
     {
-        Environment::$isAdmin = true;
+        $url = $this->createGateway($this->liveSettings(array('testmode' => 'yes')))->get_connect_url();
 
-        $html = $this->adminOptions($this->createGateway($this->liveSettings(array('testmode' => 'yes'))));
-
-        $this->assertStringContainsString('https://oauth.sandbox.bunq.com/auth?', $html);
-        $this->assertStringContainsString('client_id=test-client-id', $html);
+        $this->assertStringStartsWith('https://oauth.sandbox.bunq.com/auth?', $url);
+        $this->assertStringContainsString('client_id=test-client-id', $url);
     }
 
-    public function testTheSettingsPageOffersToRefreshTheBankAccountsOnceAuthorized()
+    public function testConnectingWithoutACompleteClientExplainsWhatIsMissing()
     {
-        Environment::$isAdmin = true;
+        $gateway = $this->createGateway($this->liveSettings(array('oauth_client_secret' => '')));
 
-        $html = $this->adminOptions($this->createGateway($this->liveSettings(array('api_context' => '{"live":1}'))));
-
-        $this->assertStringContainsString('Refresh bank accounts', $html);
-        $this->assertStringContainsString(Gateway::REFRESH_ACCOUNTS_ACTION . '=1', $html);
-        $this->assertStringContainsString('_wpnonce=', $html);
+        $this->assertNull($gateway->get_connect_url());
+        $this->assertStringContainsString('Enter the Client ID and Client Secret', get_transient(Gateway::LAST_ERROR_TRANSIENT));
+        $this->assertFalse(get_transient('wc_bunq_gateway.oauth2state.0'));
     }
 
-    public function testTheSettingsPageHidesTheAuthorizationWithoutAClient()
+    public function testOnlyTheConnectButtonGoesOnToBunqAfterSaving()
+    {
+        $gateway = $this->createGateway($this->liveSettings());
+        $this->postSettings(array());
+        $_POST['save'] = 'Save changes';
+        $gateway->process_admin_options();
+        $this->assertFalse(has_action('woocommerce_settings_saved', array($gateway, 'redirect_to_bunq')));
+
+        $_POST['save'] = Gateway::CONNECT_ACTION;
+        $gateway->process_admin_options();
+        $this->assertSame(10, has_action('woocommerce_settings_saved', array($gateway, 'redirect_to_bunq')));
+    }
+
+    public function testTheSettingsPageShowsTheConnectionOfEachMode()
     {
         Environment::$isAdmin = true;
+        $gateway = $this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')));
 
-        $html = $this->adminOptions($this->createGateway($this->liveSettings(array('oauth_client_secret' => ''))));
+        $html = $this->connectionHtml($gateway);
 
-        $this->assertStringNotContainsString('OAuth Authorization Request', $html);
+        $this->assertStringContainsString('data-bunq-mode="live" data-bunq-connected="1"', $html);
+        $this->assertStringContainsString('data-bunq-mode="sandbox" data-bunq-connected="0" hidden', $html, 'Shown once test mode is checked');
+        $this->assertStringContainsString('Connected to bunq.', $html);
+        $this->assertStringContainsString('Not connected to the bunq sandbox.', $html);
+        $this->assertStringContainsString(Gateway::DISCONNECT_ACTION . '=live&_wpnonce=nonce-bunq_disconnect_live', $html);
+        // The redirect URL to register in the bunq app.
+        $this->assertStringContainsString('value="https://shop.example/wp-admin/admin.php?page=wc-settings&amp;tab=checkout&amp;section=bunq" readonly', $html);
+        $this->assertStringContainsString('value="' . Gateway::CONNECT_ACTION . '"', $html);
+    }
+
+    public function testTheSettingsPageNamesTheConnectedAccountWithoutADoublePeriod()
+    {
+        $bunq = new FakeBunqApi();
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('api_context' => '{"live":1}')));
+        $gateway = new Gateway($bunq);
+
+        $bunq->accountName = 'Jansen';
+        $this->assertStringContainsString('Connected to bunq as <strong>Jansen</strong>.', $this->connectionHtml($gateway));
+
+        $bunq->accountName = 'Example Shop B.V.';
+        $html = $this->connectionHtml($gateway);
+        $this->assertStringContainsString('Connected to bunq as <strong>Example Shop B.V.</strong>', $html);
+        $this->assertStringNotContainsString('</strong>.', $html);
+    }
+
+    public function testTheSettingsPageWarnsWhenBunqRejectedTheConnection()
+    {
+        Environment::$isAdmin = true;
+        set_transient(Gateway::CONTEXT_FAILED_TRANSIENT, 1, 5 * MINUTE_IN_SECONDS);
+
+        $html = $this->connectionHtml($this->createGateway($this->liveSettings(array('api_context' => '{"live":1}'))));
+
+        $this->assertStringContainsString('dashicons-warning', $html);
+        $this->assertStringContainsString('bunq recently rejected the connection', $html);
+    }
+
+    public function testTheBankAccountSelectOffersARefreshOnceConnected()
+    {
+        Environment::$isAdmin = true;
+        set_transient(Gateway::BANK_ACCOUNTS_TRANSIENT, array('' => 'Select a bank account', '123' => 'NL00BUNQ0000000000 - Shop'), HOUR_IN_SECONDS);
+
+        $description = $this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')))->get_form_fields()['monetary_account_bank_id']['description'];
+        $this->assertStringContainsString('Refresh bank accounts', $description);
+        $this->assertStringContainsString(Gateway::REFRESH_ACCOUNTS_ACTION . '=1', $description);
+        $this->assertStringContainsString('_wpnonce=', $description);
+
+        $this->assertStringNotContainsString('Refresh bank accounts', $this->createGateway($this->liveSettings())->get_form_fields()['monetary_account_bank_id']['description']);
     }
 
     public function testTheSettingsPageShowsTheOutcomeOfTheLastAuthorizationOnce()
@@ -394,6 +463,43 @@ final class GatewayTest extends TestCase
         $this->assertFalse(get_transient(Gateway::LAST_ERROR_TRANSIENT));
         $this->assertFalse(get_transient(Gateway::LAST_SUCCESS_TRANSIENT));
         $this->assertStringNotContainsString('notice-error', $this->adminOptions($gateway));
+    }
+
+    public function testDisconnectingForgetsOnlyThatModesAuthorization()
+    {
+        $gateway = $this->createGateway($this->liveSettings(array('api_context' => '{"live":1}', 'test_api_context' => '{"test":1}')));
+        set_transient(Gateway::BANK_ACCOUNTS_TRANSIENT, array('123' => 'NL00'), HOUR_IN_SECONDS);
+        set_transient(Gateway::CONTEXT_FAILED_TRANSIENT, 1, 5 * MINUTE_IN_SECONDS);
+
+        $gateway->disconnect('sandbox');
+
+        $this->assertSame('', $this->credentials()['test_api_key']);
+        $this->assertSame('', $this->credentials()['test_api_context']);
+        $this->assertSame('live-api-key', $this->credentials()['api_key']);
+        $this->assertSame('{"live":1}', $this->credentials()['api_context']);
+        $this->assertSame('test-client-secret', get_option('woocommerce_bunq_settings')['test_oauth_client_secret'], 'Connecting again takes one click');
+        $this->assertFalse(get_transient(Gateway::BANK_ACCOUNTS_TRANSIENT));
+        $this->assertFalse(get_transient(Gateway::CONTEXT_FAILED_TRANSIENT));
+        $this->assertStringStartsWith('Disconnected from the bunq sandbox.', get_transient(Gateway::LAST_SUCCESS_TRANSIENT));
+    }
+
+    public function testTheDisconnectLinkNeedsTheNonceOfItsModeAndTheCapability()
+    {
+        $gateway = $this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')));
+        $_GET = array('page' => 'wc-settings', 'section' => 'bunq', Gateway::DISCONNECT_ACTION => 'live', '_wpnonce' => 'nonce');
+
+        Environment::$validNonce = false;
+        $this->assertDies(array($gateway, 'handle_disconnect'));
+
+        Environment::$validNonce = true;
+        Environment::$currentUserCan = false;
+        $this->assertDies(array($gateway, 'handle_disconnect'));
+
+        Environment::$currentUserCan = true;
+        $_GET[Gateway::DISCONNECT_ACTION] = 'everything';
+        $this->assertDies(array($gateway, 'handle_disconnect'));
+
+        $this->assertSame('{"live":1}', $this->credentials()['api_context'], 'Still connected');
     }
 
     public function testSavingTheSettingsKeepsTheAuthorizationWhileTheClientStays()
@@ -459,8 +565,8 @@ final class GatewayTest extends TestCase
 
     public function testTheFirstSaveOnAFreshInstallDoesNotWarnAboutTheMissingTestClient()
     {
-        // Outside test mode the test_* fields are not part of the form, so WooCommerce never fills their
-        // defaults: reading them directly raised "Undefined array key" on the first save.
+        // Up to version 1.7 the test_* fields were not part of the form outside test mode, so WooCommerce never
+        // filled their defaults: reading them directly raised "Undefined array key" on the first save.
         $gateway = $this->createGateway();
         $this->postSettings(array(
             'oauth_client_id' => 'live-client-id',
@@ -667,12 +773,33 @@ final class GatewayTest extends TestCase
         return array_values(array_column($payment_methods, 'id'));
     }
 
+    /**
+     * What admin_options() draws above the settings form (the form itself is WooCommerce's).
+     */
     private function adminOptions(Gateway $gateway)
     {
         ob_start();
         $gateway->admin_options();
 
         return ob_get_clean();
+    }
+
+    /**
+     * The connection status rows of the settings page.
+     */
+    private function connectionHtml(Gateway $gateway)
+    {
+        return $gateway->generate_title_html('connection', $gateway->get_form_fields()['connection']);
+    }
+
+    private function assertDies(callable $callback)
+    {
+        try {
+            $callback();
+            $this->fail('Expected the request to be refused');
+        } catch (\RuntimeException $exception) {
+            $this->addToAssertionCount(1);
+        }
     }
 
     /**
@@ -686,6 +813,15 @@ final class GatewayTest extends TestCase
             'woocommerce_bunq_description' => 'Pay with iDEAL, Credit Card or Bancontact',
             'woocommerce_bunq_monetary_account_bank_id' => '123',
         );
+
+        // The form has the OAuth clients of both modes: the browser posts the client ids as they are shown and the
+        // secrets empty (they are never shown).
+        $saved = get_option('woocommerce_bunq_settings', array());
+        foreach (array('oauth_client_id', 'test_oauth_client_id') as $key) {
+            $_POST['woocommerce_bunq_' . $key] = isset($saved[$key]) ? $saved[$key] : '';
+        }
+        $_POST['woocommerce_bunq_oauth_client_secret'] = '';
+        $_POST['woocommerce_bunq_test_oauth_client_secret'] = '';
 
         foreach ($fields as $key => $value) {
             $_POST['woocommerce_bunq_' . $key] = $value;

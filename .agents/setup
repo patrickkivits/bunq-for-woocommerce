@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Prepares an Amp orb (Debian 12) to run the unit and integration test suites, mirroring
 # .github/workflows/tests.yml: PHP with the plugin's extensions, Composer, the dev dependencies
-# from tests/composer.json, and a MariaDB 10.11 database for the WordPress test suite.
+# from tests/composer.json, and a MariaDB 10.11 database for the WordPress test suite. Also installs
+# the demo shop (.agents/demo-shop), which the demo-shop service in .amp/services.yaml connects to
+# the bunq sandbox and serves.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -61,8 +63,13 @@ CREATE DATABASE IF NOT EXISTS wordpress_tests;
 FLUSH PRIVILEGES;
 SQL
 
+  # Left running for the demo shop install; stop_mariadb stops it again.
+  mariadb_was_running=$was_running
+}
+
+stop_mariadb() {
   # Processes left running when setup exits are stopped anyway; .agents/resume starts MariaDB.
-  [ "$was_running" -eq 1 ] || sudo service mariadb stop
+  [ "${mariadb_was_running:-1}" -eq 1 ] || sudo service mariadb stop
 }
 
 install_test_dependencies() {
@@ -82,10 +89,20 @@ write_agent_guidance() {
 - Unit tests: `tests/vendor/bin/phpunit` (add `--exclude-group slow` while iterating).
 - Integration tests: `tests/vendor/bin/phpunit -c phpunit-integration.xml.dist`.
 - Coding standards: `tests/vendor/bin/phpcs` (WordPress Coding Standards, see `phpcs.xml.dist`).
+- Demo shop: `amp orb services ensure` starts the `demo-shop` service (.amp/services.yaml): WordPress +
+  WooCommerce in ~/bunq-demo-shop (database `bunq_demo`) with this checkout symlinked as the plugin, on
+  http://localhost:8080 and a public portal URL. On start it connects the shop to the bunq sandbox
+  (.agents/demo-shop/connect-sandbox.php: a sandbox company user, API context, OAuth client, bank account).
+  WP-CLI: `~/.local/bin/wp --path=$HOME/bunq-demo-shop`. Admin user `admin`, password in
+  ~/.config/bunq-demo-shop/admin-password; the portal is public, so never set a weak password.
+- The sandbox bunq.me payment pages (bunqme.triage.bunq.net) answer 403 from the orb: payments cannot be
+  completed in the orb's browser; payment requests and everything up to bunq.me work.
 MD
 }
 
 step "Install system packages" install_packages
 step "Configure MariaDB" configure_mariadb
 step "Install test dependencies" install_test_dependencies
+step "Install demo shop" .agents/demo-shop/install
+step "Stop MariaDB" stop_mariadb
 step "Write orb agent guidance" write_agent_guidance

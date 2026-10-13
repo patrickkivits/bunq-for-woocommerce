@@ -125,10 +125,8 @@ final class OAuthSecurityTest extends TestCase
 
         $message = $this->failedExchange(new Response(400, array(), $body));
 
-        $this->assertStringStartsWith('bunq token request failed (HTTP 400: ', $message);
-        $this->assertStringContainsString('Invalid hash \"[authorization code]\"', $message);
-        $this->assertStringContainsString('Invalid hash \"[client ID]\"', $message);
-        $this->assertStringContainsString('Invalid hash \"[client secret]\"', $message);
+        // Only the error descriptions, not the JSON around them.
+        $this->assertSame('bunq token request failed (HTTP 400: Invalid hash "[authorization code]".; Invalid hash "[client ID]".; Invalid hash "[client secret]".)', $message);
         $this->assertStringNotContainsString('my-client-secret', $message);
     }
 
@@ -153,7 +151,7 @@ final class OAuthSecurityTest extends TestCase
         $this->assertStringContainsString('[client secret]', get_transient(Gateway::LAST_ERROR_TRANSIENT));
         $this->assertStringNotContainsString('my-client-secret', get_transient(Gateway::LAST_ERROR_TRANSIENT));
         $this->assertStringNotContainsString('my-client-secret', json_encode(Environment::$logs));
-        $this->assertLogged('error', 'Invalid hash \"[client secret]\"');
+        $this->assertLogged('error', 'Invalid hash "[client secret]"');
     }
 
     public function testTheSavedSecretsAreKeptOutOfEveryLogMessage()

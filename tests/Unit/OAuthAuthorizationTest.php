@@ -45,13 +45,25 @@ final class OAuthAuthorizationTest extends TestCase
 
         $this->bunq = new FakeBunqApi();
         $this->oauth = new FakeOAuthClient();
-        set_transient(Gateway::BANK_ACCOUNTS_TRANSIENT, array('' => 'API key not valid or not setup yet'), 5 * MINUTE_IN_SECONDS);
+        set_transient(Gateway::BANK_ACCOUNTS_TRANSIENT, array('' => 'Connect your bunq account first'), 5 * MINUTE_IN_SECONDS);
         set_transient(Gateway::LAST_ERROR_TRANSIENT, 'An earlier error', 5 * MINUTE_IN_SECONDS);
 
         // bunq sends the merchant back to the settings page with the code and the state.
         $_SERVER['HTTPS'] = 'on';
         $_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq&code=authorization-code&state=returned-state';
         $_GET = array('page' => 'wc-settings', 'tab' => 'checkout', 'section' => 'bunq', 'code' => 'authorization-code', 'state' => 'returned-state');
+    }
+
+    public function testTheTokenIsRequestedWithTheRegisteredRedirectUrlHoweverThePageWasOpened()
+    {
+        // The redirect URL in the token request must match the one bunq sent the merchant to, which is the one
+        // registered in the bunq app; extra parameters on the page URL do not make it into either.
+        $_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-settings&tab=checkout&from=PAYMENTS_MENU_ITEM&section=bunq&code=authorization-code&state=returned-state';
+        $gateway = $this->gateway($this->liveSettings(array('api_key' => '', 'api_context' => '')));
+
+        $gateway->complete_oauth_authorization();
+
+        $this->assertSame('https://shop.example/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq', $this->oauth->exchanges[0][2]);
     }
 
     public function testTheAccessTokenBecomesTheApiKeyAndTheApiContextIsCreated()
@@ -95,12 +107,12 @@ final class OAuthAuthorizationTest extends TestCase
     public function testARejectedTokenExchangeIsShownOnTheSettingsPage()
     {
         $gateway = $this->gateway($this->liveSettings());
-        $this->oauth->exception = new \Exception('OAuth state mismatch. Please click "OAuth Authorization Request" again and complete the flow in one go.');
+        $this->oauth->exception = new \Exception('OAuth state mismatch. Please click "Connect to bunq" again and complete the flow in one go.');
 
         $redirect = $gateway->complete_oauth_authorization();
 
         $this->assertSame('https://shop.example/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq', $redirect);
-        $this->assertSame('OAuth state mismatch. Please click "OAuth Authorization Request" again and complete the flow in one go.', get_transient(Gateway::LAST_ERROR_TRANSIENT));
+        $this->assertSame('OAuth state mismatch. Please click "Connect to bunq" again and complete the flow in one go.', get_transient(Gateway::LAST_ERROR_TRANSIENT));
         $this->assertFalse(get_transient(Gateway::LAST_SUCCESS_TRANSIENT));
         $this->assertSame('live-api-key', $this->credentials()['api_key']);
         $this->assertSame(array(), $this->bunq->calls);

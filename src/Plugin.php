@@ -25,7 +25,7 @@ final class Plugin {
 	/**
 	 * The plugin version; matches the Version header of the main plugin file.
 	 */
-	const VERSION = '1.7.0';
+	const VERSION = '1.8.0';
 
 	/**
 	 * The text domain.
@@ -112,6 +112,7 @@ final class Plugin {
 		add_action( 'plugins_loaded', array( $this, 'define_legacy_classes' ) );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateway' ) );
 		add_action( 'admin_init', array( $this, 'handle_oauth_return' ) );
+		add_action( 'admin_init', array( $this, 'handle_disconnect' ) );
 		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( Gateway::class, 'hide_secrets_from_rest' ), 10, 2 );
 		// Not Gateway::ID: that would load the gateway class before WooCommerce, which it extends.
 		add_filter( 'woocommerce_gateway_bunq_settings_values', array( Gateway::class, 'keep_secrets_on_rest_update' ), 10, 2 );
@@ -182,6 +183,22 @@ final class Plugin {
 
 		if ( $gateway ) {
 			$gateway->handle_oauth_callback();
+		}
+	}
+
+	/**
+	 * Forget the bunq authorization when the merchant clicks "Disconnect" on the settings page (admin_init). Ends the
+	 * request with a redirect.
+	 */
+	public function handle_disconnect() {
+		if ( ! Gateway::is_disconnect_request() ) {
+			return;
+		}
+
+		$gateway = $this->gateway();
+
+		if ( $gateway ) {
+			$gateway->handle_disconnect();
 		}
 	}
 

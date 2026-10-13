@@ -83,8 +83,9 @@ final class SecurityTest extends TestCase
         $this->assertStringNotContainsString('the-client-secret', $html);
         $this->assertStringNotContainsString('the-api-key', $html);
         $this->assertStringNotContainsString(self::PRIVATE_KEY, $html);
-        $this->assertStringContainsString('Saved. Enter a new value to replace it.', $html);
-        $this->assertStringContainsString('Connected to bunq.', $html);
+        $this->assertStringContainsString('Saved. Leave empty to keep it', $html);
+        $this->assertStringContainsString('data-bunq-mode="live" data-bunq-connected="1"', $html);
+        $this->assertStringContainsString('class="bunq-default-submit"', $html, 'Enter saves instead of connecting');
     }
 
     public function testTheRestApiShowsNoSecret()

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# The demo shop service (.amp/services.yaml): connects the shop to the bunq sandbox, then serves it on $PORT.
+set -euo pipefail
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+site="${BUNQ_DEMO_DIR:-$HOME/bunq-demo-shop}"
+wp_cli="$HOME/.local/bin/wp"
+password_file="$HOME/.config/bunq-demo-shop/admin-password"
+
+wp() { "$wp_cli" --path="$site" "$@"; }
+
+sudo service mariadb status >/dev/null 2>&1 || sudo service mariadb start
+[ -f "$site/wp-config.php" ] || "$repo/.agents/demo-shop/install"
+
+# The portal is public: give the admin user a password of this orb's own, kept outside the document root.
+if [ ! -s "$password_file" ]; then
+  mkdir -p "$(dirname "$password_file")"
+  (umask 077 && openssl rand -hex 12 > "$password_file")
+  wp user update admin --user_pass="$(cat "$password_file")" --skip-email --quiet
+fi
+
+# bunq can be down or slow: serve the shop anyway.
+wp eval-file "$repo/.agents/demo-shop/connect-sandbox.php" || echo "Could not connect the demo shop to the bunq sandbox." >&2
+
+exec php -S "127.0.0.1:${PORT:-8080}" -t "$site"

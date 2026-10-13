@@ -17,6 +17,10 @@ function __($text, $domain = 'default') { return $text; }
 function esc_html__($text, $domain = 'default') { return $text; }
 function esc_html($text) { return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8'); }
 function esc_url($url) { return $url; }
+function esc_attr($text) { return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8'); }
+function esc_attr__($text, $domain = 'default') { return esc_attr($text); }
+function esc_attr_e($text, $domain = 'default') { echo esc_attr($text); }
+function esc_html_e($text, $domain = 'default') { echo esc_html($text); }
 function wp_kses_post($text) { return $text; }
 function wpautop($text) { return '<p>' . $text . '</p>' . "\n"; }
 function sanitize_text_field($value) { return trim(strip_tags((string) $value)); }
@@ -152,6 +156,28 @@ function wp_safe_redirect($location, $status = 302)
 
     return true;
 }
+
+function check_admin_referer($action = -1, $query_arg = '_wpnonce')
+{
+    if (!Environment::$validNonce) {
+        throw new \RuntimeException('check_admin_referer: invalid nonce for ' . $action);
+    }
+
+    return 1;
+}
+
+function wp_die($message = '', $title = '', $args = array())
+{
+    throw new \RuntimeException('wp_die: ' . $message);
+}
+
+function wp_enqueue_script($handle, $src = '', $deps = array(), $ver = false, $in_footer = false)
+{
+    Environment::$registeredScripts[$handle] = compact('src', 'deps', 'ver', 'in_footer');
+}
+
+function wp_enqueue_style($handle, $src = '', $deps = array(), $ver = false, $media = 'all') {}
+function wp_localize_script($handle, $object_name, $l10n) { return true; }
 
 function wp_register_script($handle, $src, $deps = array(), $ver = false, $in_footer = false)
 {

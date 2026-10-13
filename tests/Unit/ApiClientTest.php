@@ -121,10 +121,45 @@ final class ApiClientTest extends TestCase
         $this->assertSame('PRODUCTION', ApiClient::environment(false)->getChoiceString());
     }
 
+    public function testTheAccountNameIsReadFromTheStoredApiContext()
+    {
+        $api = new ApiClient();
+
+        // Authorized through OAuth: the user that granted access, not the OAuth app that asked for it.
+        $this->assertSame('Kivits Webshop', $api->get_account_name($this->apiContextJson(array('userApiKey' => array(
+            'id' => 42,
+            'requested_by_user' => array('user_payment_service_provider' => array('id' => 1, 'display_name' => 'bunq for WooCommerce')),
+            'granted_by_user' => array('user_company' => array('id' => 7, 'display_name' => 'Kivits Webshop')),
+        )))));
+        // A plain API key (the sandbox): the key's own user.
+        $this->assertSame('Sandbox B.V.', $api->get_account_name($this->apiContextJson(array('userCompany' => array('id' => 7, 'display_name' => 'Sandbox B.V.')))));
+
+        $this->assertNull($api->get_account_name($this->apiContextJson(array())));
+        $this->assertNull($api->get_account_name('not json'));
+    }
+
+    /**
+     * An API context as the bunq SDK stores it, with the given users in its session.
+     */
+    private function apiContextJson(array $users)
+    {
+        $key = openssl_pkey_new(array('private_key_bits' => 2048));
+        openssl_pkey_export($key, $private_key);
+        $public_key = openssl_pkey_get_details($key)['key'];
+
+        return json_encode(array(
+            'api_key' => 'api-key',
+            'environment_type' => 'SANDBOX',
+            'installation_context' => array('token' => 'installation-token', 'private_key_client' => $private_key, 'public_key_client' => $public_key, 'public_key_server' => $public_key),
+            'proxy_url' => null,
+            'session_context' => array_merge(array('token' => 'session-token', 'expiry_time' => '2099-01-01 00:00:00.000000', 'user_id' => 7), $users),
+        ));
+    }
+
     public function testBankAccountsWithoutAnApiContextExplainTheSetupIsIncomplete()
     {
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), (new ApiClient())->get_bank_accounts(false));
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), (new ApiClient())->get_bank_accounts(''));
+        $this->assertSame(array('' => 'Connect your bunq account first'), (new ApiClient())->get_bank_accounts(false));
+        $this->assertSame(array('' => 'Connect your bunq account first'), (new ApiClient())->get_bank_accounts(''));
         $this->assertSame(array(), Environment::$logs);
     }
 

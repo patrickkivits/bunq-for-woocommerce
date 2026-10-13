@@ -1,0 +1,68 @@
+/* The bunq gateway settings page. Everything else uses the WordPress and WooCommerce admin styles. */
+
+.bunq-default-submit {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.bunq-connection-status {
+	margin-top: 0;
+}
+
+.bunq-connection-status .dashicons {
+	vertical-align: text-bottom;
+}
+
+.bunq-status-connected {
+	color: #00a32a;
+}
+
+.bunq-status-warning {
+	color: #dba617;
+}
+
+.bunq-connection-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	align-items: center;
+}
+
+/* The redirect URL with its Copy button beside it, at every screen width. */
+.bunq-copy-field {
+	display: flex;
+	gap: 6px;
+	max-width: 820px;
+}
+
+.woocommerce table.form-table .bunq-copy-field input.bunq-redirect-url {
+	flex: 1 1 auto;
+	width: auto;
+	min-width: 0;
+	max-width: none;
+	margin: 0;
+}
+
+.bunq-copy-field .button {
+	flex: none;
+	margin: 0;
+}
+
+.bunq-redirect-row .success {
+	display: block;
+	margin-top: 4px;
+	color: #007017;
+}
+
+.bunq-redirect-row .success.hidden {
+	display: none;
+}
+
+/* The payment methods select can start hidden, so select2 cannot size its placeholder. */
+.bunq-payment-methods .select2-search--inline:only-child,
+.bunq-payment-methods .select2-search--inline:only-child .select2-search__field {
+	width: 100% !important;
+}

@@ -119,7 +119,7 @@ class OAuthClient {
 		// The state must be the one this user's authorization request stored: without that check anyone could make
 		// the shop exchange an authorization code of their own (CSRF).
 		if ( ! is_string( $expected_state ) || '' === $expected_state || ! is_string( $state ) || ! hash_equals( $expected_state, $state ) ) {
-			throw new Exception( 'OAuth state mismatch. Please click "OAuth Authorization Request" again and complete the flow in one go.' );
+			throw new Exception( 'OAuth state mismatch. Please click "Connect to bunq" again and complete the flow in one go.' );
 		}
 
 		// bunq echoes the submitted values in its error responses, and the HTTP client puts the request URL (which
@@ -151,7 +151,7 @@ class OAuthClient {
 			// Never rethrow the HTTP client's exception: its message contains the request URL with the client secret.
 			$response = $exception instanceof RequestException ? $exception->getResponse() : null;
 			$details  = $response
-				? 'HTTP ' . $response->getStatusCode() . ': ' . substr( (string) $response->getBody(), 0, 500 )
+				? 'HTTP ' . $response->getStatusCode() . ': ' . self::error_descriptions( (string) $response->getBody() )
 				: preg_replace( '#(https?://[^\s?]+)\?\S*#', '$1', $exception->getMessage() );
 
 			throw new Exception( Logger::redact( 'bunq token request failed (' . $details . ')' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
@@ -167,5 +167,27 @@ class OAuthClient {
 		Logger::add_secret( $body_decoded->access_token, 'API key' );
 
 		return $body_decoded->access_token;
+	}
+
+	/**
+	 * The error descriptions of a bunq error response ({"Error":[{"error_description":"..."}]}), or the start of the
+	 * response when it is not one.
+	 *
+	 * @param string $body Response body.
+	 * @return string
+	 */
+	private static function error_descriptions( $body ) {
+		$decoded      = json_decode( $body, true );
+		$descriptions = array();
+
+		if ( is_array( $decoded ) && isset( $decoded['Error'] ) && is_array( $decoded['Error'] ) ) {
+			foreach ( $decoded['Error'] as $error ) {
+				if ( is_array( $error ) && isset( $error['error_description'] ) && is_string( $error['error_description'] ) ) {
+					$descriptions[] = $error['error_description'];
+				}
+			}
+		}
+
+		return $descriptions ? implode( '; ', $descriptions ) : substr( $body, 0, 500 );
 	}
 }

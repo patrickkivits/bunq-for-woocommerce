@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Installs the demo shop: the latest WordPress with WooCommerce (from the test dependencies) and this plugin
+# symlinked, in $BUNQ_DEMO_DIR (default ~/bunq-demo-shop) on the bunq_demo database. Idempotent. Needs MariaDB
+# running. The shop is connected to the bunq sandbox when it starts (start, run by .amp/services.yaml).
+set -euo pipefail
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+site="${BUNQ_DEMO_DIR:-$HOME/bunq-demo-shop}"
+wp_cli="$HOME/.local/bin/wp"
+
+wp() { "$wp_cli" --path="$site" "$@"; }
+
+if [ ! -x "$wp_cli" ]; then
+  mkdir -p "$(dirname "$wp_cli")"
+  curl -fsSL -o "$wp_cli.tmp" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+  chmod +x "$wp_cli.tmp"
+  mv "$wp_cli.tmp" "$wp_cli"
+fi
+
+mkdir -p "$site"
+[ -f "$site/wp-load.php" ] || wp core download --skip-content --quiet
+
+sudo mariadb -e 'CREATE DATABASE IF NOT EXISTS bunq_demo'
+
+if [ ! -f "$site/wp-config.php" ]; then
+  wp config create --dbname=bunq_demo --dbuser=root --dbpass=root --dbhost=127.0.0.1 --skip-check --quiet --extra-php <<'PHP'
+// Demo shop: follow the host it is opened on (localhost or the orb portal); WP-CLI uses the portal URL the shop
+// service passes as PUBLIC_URL, so the bunq callback URL is registered on the public URL.
+if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
+	if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] ) {
+		$_SERVER['HTTPS'] = 'on';
+	}
+	$bunq_demo_url = ( empty( $_SERVER['HTTPS'] ) ? 'http' : 'https' ) . '://' . $_SERVER['HTTP_HOST'];
+} else {
+	$bunq_demo_url = getenv( 'PUBLIC_URL' ) ? rtrim( getenv( 'PUBLIC_URL' ), '/' ) : 'http://localhost:8080';
+}
+define( 'WP_HOME', $bunq_demo_url );
+define( 'WP_SITEURL', $bunq_demo_url );
+define( 'WP_ENVIRONMENT_TYPE', 'local' );
+PHP
+fi
+
+if ! wp core is-installed 2>/dev/null; then
+  # The admin password is replaced per orb when the shop starts.
+  wp core install --url=http://localhost:8080 --title='bunq demo shop' --admin_user=admin \
+    --admin_password="$(openssl rand -hex 16)" --admin_email=admin@example.com --skip-email --quiet
+fi
+wp core update-db --quiet
+
+mkdir -p "$site/wp-content/plugins" "$site/wp-content/themes"
+ln -sfn "$repo" "$site/wp-content/plugins/bunq-for-woocommerce"
+ln -sfn "$repo/tests/wp-content/plugins/woocommerce" "$site/wp-content/plugins/woocommerce"
+wp plugin activate woocommerce bunq-for-woocommerce --quiet
+
+# The core download leaves out the themes; without one the shop pages stay blank.
+# Downloaded with curl: downloads.wordpress.org refuses WordPress' own requests from this localhost site.
+if ! wp theme is-installed twentytwentyfive 2>/dev/null; then
+  curl -fsSL -o "$site/twentytwentyfive.zip" https://downloads.wordpress.org/theme/twentytwentyfive.zip
+  wp theme install "$site/twentytwentyfive.zip" --quiet
+  rm -f "$site/twentytwentyfive.zip"
+fi
+[ "$(wp option get stylesheet)" = twentytwentyfive ] || wp theme activate twentytwentyfive --quiet
+
+# A Dutch store that is open to customers, with one product to buy.
+wp option update woocommerce_default_country 'NL' --quiet
+wp option update woocommerce_currency 'EUR' --quiet
+wp option update woocommerce_coming_soon 'no' --quiet
+wp option update woocommerce_onboarding_profile '{"skipped":true}' --format=json --quiet
+wp eval '
+if ( ! wc_get_product_id_by_sku( "BUNQ-DEMO" ) ) {
+	$product = new WC_Product_Simple();
+	$product->set_props( array( "name" => "bunq demo product", "sku" => "BUNQ-DEMO", "regular_price" => "12.34", "virtual" => true, "status" => "publish" ) );
+	$product->save();
+}'
