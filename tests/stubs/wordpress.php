@@ -161,7 +161,15 @@ function wp_register_script($handle, $src, $deps = array(), $ver = false, $in_fo
 
 // --- Plugins ------------------------------------------------------------------------------------------------
 
-function plugin_basename($file) { return basename(dirname($file)) . '/' . basename($file); }
+// Like plugin_dir_url(): the plugin is installed as wp-content/plugins/bunq-for-woocommerce, whatever the checkout's
+// directory is called.
+function plugin_basename($file)
+{
+    $plugin_root = dirname(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
+
+    return 'bunq-for-woocommerce' . substr($file, strlen($plugin_root));
+}
+
 function plugin_dir_path($file) { return trailingslashit(dirname($file)); }
 
 function plugin_dir_url($file)
