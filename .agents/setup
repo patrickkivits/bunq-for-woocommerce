@@ -81,9 +81,6 @@ write_agent_guidance() {
   `wordpress_tests` database and root/root on 127.0.0.1, matching the defaults in `tests/wp-tests-config.php`.
 - Unit tests: `tests/vendor/bin/phpunit` (add `--exclude-group slow` while iterating).
 - Integration tests: `tests/vendor/bin/phpunit -c phpunit-integration.xml.dist`.
-- The integration bootstrap creates the symlink `tests/wp-content/plugins/bunq-for-woocommerce -> ../../..`; while it
-  exists the unit suite's directory scan loops through it and hangs. Run `rm -f tests/wp-content/plugins/bunq-for-woocommerce`
-  before running the unit tests after an integration run.
 - The orb checkout directory is `repo`, not `bunq-for-woocommerce`, so two unit tests that assert the plugin basename
   (PluginLoadingTest, RequirementsTest) fail here but pass in CI.
 MD

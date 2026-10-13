@@ -34,7 +34,7 @@ final class PluginLoadingTest extends TestCase
 
     public function testThePluginFileIsKnownToTheIncludes()
     {
-        $this->assertSame(realpath(dirname(__DIR__) . '/bunq-for-woocommerce.php'), realpath(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE));
+        $this->assertSame(realpath(dirname(__DIR__, 2) . '/bunq-for-woocommerce.php'), realpath(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE));
     }
 
     public function testTheVersionInThePluginHeaderIsARelease()
@@ -47,7 +47,7 @@ final class PluginLoadingTest extends TestCase
 
     public function testTheShippedTranslationsAreCompiled()
     {
-        foreach (glob(dirname(__DIR__) . '/languages/*.po') as $po) {
+        foreach (glob(dirname(__DIR__, 2) . '/languages/*.po') as $po) {
             $this->assertFileExists(substr($po, 0, -3) . '.mo', basename($po) . ' has no compiled .mo file');
         }
     }

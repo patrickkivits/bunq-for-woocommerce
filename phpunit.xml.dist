@@ -9,11 +9,10 @@
          beStrictAboutOutputDuringTests="true">
     <testsuites>
         <testsuite name="bunq for WooCommerce">
-            <directory>tests</directory>
-            <exclude>tests/vendor</exclude>
-            <exclude>tests/Integration</exclude>
-            <exclude>tests/wordpress</exclude>
-            <exclude>tests/wp-content</exclude>
+            <!-- Not "tests": PHPUnit walks a directory completely before applying excludes, and the integration
+                 bootstrap symlinks tests/wp-content/plugins/bunq-for-woocommerce back to the repository root,
+                 which would make that walk loop. -->
+            <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
     <!-- Tests in the "slow" group wait for the real sleep() calls of the rate limit handling (a few seconds).
