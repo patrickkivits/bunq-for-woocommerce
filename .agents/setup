@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Prepares an Amp orb (Debian 12) to run the unit and integration test suites, mirroring
+# .github/workflows/tests.yml: PHP with the plugin's extensions, Composer, the dev dependencies
+# from tests/composer.json, and a MariaDB 10.11 database for the WordPress test suite.
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+step() {
+  local name="$1"
+  shift
+  local start=$SECONDS
+  echo "==> $name"
+  "$@"
+  echo "<== $name ($((SECONDS - start))s)"
+}
+
+packages=(
+  php8.2-cli php8.2-curl php8.2-mbstring php8.2-xml php8.2-zip php8.2-mysql
+  unzip composer mariadb-server
+)
+
+install_packages() {
+  local missing=()
+  local pkg
+  for pkg in "${packages[@]}"; do
+    dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q 'install ok installed' || missing+=("$pkg")
+  done
+  if [ "${#missing[@]}" -eq 0 ]; then
+    echo "all packages already installed"
+    return
+  fi
+  export DEBIAN_FRONTEND=noninteractive
+  sudo -E apt-get install -y --no-install-recommends "${missing[@]}" \
+    || { sudo apt-get update && sudo -E apt-get install -y --no-install-recommends "${missing[@]}"; }
+}
+
+configure_mariadb() {
+  # Throwaway test database: trade durability for speed.
+  sudo tee /etc/mysql/mariadb.conf.d/99-amp-orb.cnf >/dev/null <<'CNF'
+[mariadbd]
+bind-address = 127.0.0.1
+skip-log-bin
+innodb_flush_log_at_trx_commit = 0
+innodb_doublewrite = 0
+innodb_flush_method = nosync
+sync_binlog = 0
+CNF
+
+  local was_running=0
+  sudo service mariadb status >/dev/null 2>&1 && was_running=1
+  [ "$was_running" -eq 1 ] || sudo service mariadb start
+
+  # Credentials match the WP_TESTS_DB_* defaults in tests/wp-tests-config.php (root/root on 127.0.0.1).
+  # root@localhost keeps unix_socket so `sudo mariadb` still works.
+  sudo mariadb <<'SQL'
+ALTER USER 'root'@'localhost' IDENTIFIED VIA unix_socket OR mysql_native_password USING PASSWORD('root');
+CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;
+CREATE DATABASE IF NOT EXISTS wordpress_tests;
+FLUSH PRIVILEGES;
+SQL
+
+  # Processes left running when setup exits are stopped anyway; .agents/resume starts MariaDB.
+  [ "$was_running" -eq 1 ] || sudo service mariadb stop
+}
+
+install_test_dependencies() {
+  # Only tests/ gets installed: the root vendor/ directory is committed and shipped in the plugin zip.
+  composer install --working-dir=tests --no-interaction --no-progress
+}
+
+write_agent_guidance() {
+  mkdir -p "$HOME/.config/amp"
+  cat > "$HOME/.config/amp/AGENTS.md" <<'MD'
+# Orb notes for bunq-for-woocommerce
+
+- PHP 8.2 (Debian) and Composer are installed; dev dependencies live in `tests/vendor` (`composer install --working-dir=tests`).
+- Never run `composer install`/`update` in the repository root: the root `vendor/` is committed and shipped.
+- MariaDB runs locally (started by `.agents/resume`; `sudo service mariadb start` if it is down) with the
+  `wordpress_tests` database and root/root on 127.0.0.1, matching the defaults in `tests/wp-tests-config.php`.
+- Unit tests: `tests/vendor/bin/phpunit` (add `--exclude-group slow` while iterating).
+- Integration tests: `tests/vendor/bin/phpunit -c phpunit-integration.xml.dist`.
+- The integration bootstrap creates the symlink `tests/wp-content/plugins/bunq-for-woocommerce -> ../../..`; while it
+  exists the unit suite's directory scan loops through it and hangs. Run `rm -f tests/wp-content/plugins/bunq-for-woocommerce`
+  before running the unit tests after an integration run.
+- The orb checkout directory is `repo`, not `bunq-for-woocommerce`, so two unit tests that assert the plugin basename
+  (PluginLoadingTest, RequirementsTest) fail here but pass in CI.
+MD
+}
+
+step "Install system packages" install_packages
+step "Configure MariaDB" configure_mariadb
+step "Install test dependencies" install_test_dependencies
+step "Write orb agent guidance" write_agent_guidance

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Starts the MariaDB test database after activation and whenever the orb wakes.
+set -euo pipefail
+
+if ! sudo service mariadb status >/dev/null 2>&1; then
+  sudo service mariadb start
+fi
