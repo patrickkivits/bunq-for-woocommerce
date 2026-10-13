@@ -1,0 +1,14 @@
+services:
+  demo-shop:
+    # WordPress + WooCommerce with this plugin, connected to the bunq sandbox (.agents/demo-shop).
+    command: .agents/demo-shop/start
+    port: 8080
+    env:
+      PHP_CLI_SERVER_WORKERS: "4"
+    health: /wp-login.php
+    portal:
+      title: Demo shop
+      description: WooCommerce with this plugin in bunq sandbox mode. Log in as "admin"; the password is in ~/.config/bunq-demo-shop/admin-password in the orb.
+    portals:
+      - url: /wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq
+        title: bunq settings
