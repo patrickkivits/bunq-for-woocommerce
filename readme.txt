@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,16 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 1.8.0 =
+* Redesigned settings page: a Connection row shows whether the shop is connected to bunq and to which account, the redirect URL to register in the bunq app has a Copy button, and the fields are grouped into bunq account, Receiving payments and Checkout.
+* "Connect to bunq" saves the settings and opens bunq's QR code in one step; it replaces the "OAuth Authorization Request" button.
+* New: Disconnect, which forgets the shop's access to bunq and keeps the OAuth client so connecting again takes one click.
+* The test mode checkbox switches the OAuth client and connection on the settings page right away, without saving first.
+* The OAuth redirect URL is always the plugin settings page URL (`/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq`), however the page was opened. Before, extra parameters on the page URL could make bunq reject the authorization.
+* The browser no longer fills in the WordPress login password in the Client Secret field.
+* Errors from bunq during the authorization show bunq's error descriptions instead of the raw response, and the bank account select says when bunq rejected the saved connection.
+* Updated Dutch, French and German translations.
+
 = 1.7.0 =
 * Security: only an administrator returning from bunq to the plugin settings page can complete the bunq authorization, and only with the state of the authorization they started. Before, the authorization could be completed by requests from anyone.
 * Security: the OAuth client secret, the client ID, the authorization code and the API key are kept out of the WooCommerce log, the PHP error log and the error shown on the settings page, also when bunq repeats them in an error.
@@ -158,6 +168,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.8.0 =
+Redesigned settings page with one-click "Connect to bunq". The redirect URL must be exactly the plugin settings page URL shown on the settings page: update it in the bunq app if you registered a different one. Settings and the bunq connection are kept.
 
 = 1.7.0 =
 Security release. Requires WordPress 4.7 or newer. Settings, the bunq connection, orders and pending payment checks are kept.
