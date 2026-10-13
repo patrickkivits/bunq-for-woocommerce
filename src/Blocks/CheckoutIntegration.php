@@ -100,6 +100,7 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 			'description'     => $this->gateway->description,
 			'payment_methods' => PaymentMethods::options( $this->gateway->get_allowed_payment_methods( $total ) ),
 			'direct_gateway'  => $this->gateway->direct_gateway,
+			'select_label'    => __( 'Payment method', 'bunq-for-woocommerce' ),
 			'supports'        => array_values( array_filter( $this->gateway->supports, array( $this->gateway, 'supports' ) ) ),
 		);
 	}

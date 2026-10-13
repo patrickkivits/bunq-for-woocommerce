@@ -85,6 +85,7 @@ final class BlockCheckoutTest extends TestCase
             'description' => 'Pay with bunq',
             'payment_methods' => array('ideal' => 'iDEAL'),
             'direct_gateway' => true,
+            'select_label' => 'Payment method',
             'supports' => array('products', 'refunds'),
         ), $method->get_payment_method_data());
     }
