@@ -1,7 +1,9 @@
 name: WordPress compatibility
 
 on:
+  # Branch pushes are covered by their pull request; running on both would test every PR commit twice.
   push:
+    branches: [master]
   pull_request:
 
 jobs:
