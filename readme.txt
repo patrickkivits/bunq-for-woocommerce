@@ -37,7 +37,7 @@ The plugin is developed by Patrick Kivits and is the WooCommerce integration bun
 This plugin connects your shop to [bunq](https://www.bunq.com), the bank that holds the merchant's account and processes the payments. Without bunq the plugin has no function. Depending on the "Test mode" setting it talks to bunq's production environment or to bunq's sandbox.
 
 **OAuth authorization** (oauth.bunq.com, api.oauth.bunq.com; sandbox: oauth.sandbox.bunq.com, api-oauth.sandbox.bunq.com)
-When the shop administrator clicks "OAuth Authorization Request" on the settings page, the browser is sent to bunq with the OAuth client ID and the settings page URL. When bunq sends the administrator back, the plugin sends the OAuth client ID, client secret, the authorization code and the settings page URL to bunq to obtain the API key.
+When the shop administrator clicks "Connect to bunq" on the settings page, the browser is sent to bunq with the OAuth client ID and the settings page URL. When bunq sends the administrator back, the plugin sends the OAuth client ID, client secret, the authorization code and the settings page URL to bunq to obtain the API key.
 
 **bunq API** (api.bunq.com; sandbox: public-api.sandbox.bunq.com)
 With the API key the plugin registers the shop's server with bunq (a generated public key; bunq sees the server's IP address) and then:
@@ -62,13 +62,25 @@ bunq's terms and privacy policy apply to this data:
 
 1. In your WordPress admin panel, navigate to **Plugins** > **Add New**, search for "bunq for WooCommerce", then install and activate it.
 2. Navigate to **WooCommerce** > **Settings** > **Payments** > **bunq**.
-3. In the bunq app, navigate to **Developers** > **OAuth** > **Add Redirect URL** and enter the **full URL** of the plugin settings page (e.g. `https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq`).
-4. In the bunq app, navigate to **Developers** > **OAuth** > **Show Client Details**.
-5. Enter the **Client ID** and **Client Secret** in the plugin settings and **Save changes**.
-6. Click **OAuth Authorization Request**. bunq shows a QR code: scan it with the bunq app, select the bank accounts the shop may use and confirm. bunq sends you back to the plugin settings.
-7. Select your **Bank account**, **Enable** the gateway and **Save changes**.
+3. Under **bunq account**, leave **Test mode** unchecked to receive real payments. To try the plugin first, check **Use the bunq sandbox** and use a bunq sandbox account in the steps below.
+4. Click **Copy** next to the **Redirect URL**. In the bunq app, navigate to **Developers** > **OAuth**, tap **Add Redirect URL** and paste it.
+5. In the bunq app, tap **Show Client Details** and copy the **Client ID** and **Client Secret** into the fields with the same name.
+6. Click **Connect to bunq**. The settings are saved and bunq shows a QR code: scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq sends you back to the settings page, where **Connection** now says "Connected to bunq as" followed by your name.
+7. Under **Receiving payments**, select the **Bank account** payments are paid into. Check **Enable bunq Gateway** at the top of the page and click **Save changes**.
 
-The bank account list is cached for an hour. Use **Refresh bank accounts** on the settings page after adding an account in the bunq app.
+Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
+
+= Managing the connection =
+
+Once the shop is connected, the settings page hides the Client ID and Client Secret and shows three actions next to **Connection**:
+
+* **Connect again**: scan a new QR code, for example after bunq rejected the connection.
+* **Change OAuth client**: shows the Client ID and Client Secret fields again to switch to another OAuth client.
+* **Disconnect**: the shop forgets its access to bunq. Remove the connection in the bunq app to revoke it at bunq as well.
+
+Live mode and the sandbox each have their own OAuth client and connection; the **Test mode** checkbox switches between them. The Client Secret is never shown again after saving it: leave the field empty to keep it.
+
+The bank account list is cached for an hour. Click **Refresh bank accounts** below the bank account select after adding an account in the bunq app.
 
 == Frequently Asked Questions ==
 
@@ -82,10 +94,10 @@ WooCommerce records the refund as soon as the draft is created, so an unapproved
 
 Everything the plugin does with bunq (callbacks received, payments matched, refunds, errors) is written to **WooCommerce** > **Status** > **Logs** (source: `bunq`).
 
-= The settings page still says "Not connected to bunq yet" after the authorization, or the bank account list says "API key not valid or not setup yet" =
+= The settings page still says "Not connected" after the authorization, or the bank account list says "bunq rejected the saved connection" =
 
 * The plugin shows the error returned by bunq at the top of the settings page right after the redirect back from bunq, with details in the WooCommerce log.
-* Make sure the redirect URL registered in the bunq app is **exactly** the plugin settings page URL, including `&section=bunq`.
+* Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
 * bunq ties the API key to the IP address the shop's server connects from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with "Incorrect API key or IP address".
 
 = Unpaid orders are cancelled before the customer paid =
@@ -94,7 +106,7 @@ By default WooCommerce holds stock for unpaid orders for 60 minutes and then can
 
 = Can I try it without real money? =
 
-Yes. Enable **Test mode** and use the OAuth client of a bunq sandbox account; the plugin then talks to bunq's sandbox.
+Yes. Check **Use the bunq sandbox** under **Test mode** and connect the OAuth client of a bunq sandbox account; the plugin then talks to bunq's sandbox. The live connection is kept: uncheck the box to switch back.
 
 = Which language does the payment page use? =
 

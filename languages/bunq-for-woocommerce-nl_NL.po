@@ -10,9 +10,113 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: bunq-for-woocommerce\n"
 
-#: src/Gateway/Gateway.php:140
+#: src/Bunq/ApiClient.php:224
+msgid "Connect your bunq account first"
+msgstr "Koppel eerst je bunq-rekening"
+
+#: src/Bunq/ApiClient.php:228
+msgid "Select a bank account"
+msgstr "Selecteer een bankrekening"
+
+#: src/Bunq/ApiClient.php:241
+msgid "(Joint)"
+msgstr "(Gezamenlijk)"
+
+#. translators: %s: error message from bunq
+#: src/Bunq/ApiClient.php:253
+msgid "Error: %s"
+msgstr "Fout: %s"
+
+#: src/Gateway/Gateway.php:146
 msgid "bunq payment gateway for WooCommerce"
 msgstr "bunq betaalgateway voor WooCommerce"
+
+#: src/Gateway/Gateway.php:265
+msgid "bunq authorization completed. Select your bank account and save the settings."
+msgstr "bunq-autorisatie voltooid. Selecteer je bankrekening en sla de instellingen op."
+
+#: src/Gateway/Gateway.php:332
+msgid "Payment method invalid"
+msgstr "Ongeldige betaalmethode"
+
+#: src/Gateway/Gateway.php:447
+msgid "You are not allowed to do this."
+msgstr "Je mag dit niet doen."
+
+#: src/Gateway/Gateway.php:478
+msgid "Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app."
+msgstr "Ontkoppeld van de bunq-sandbox. Verwijder de koppeling in de bunq-app om de toegang ook bij bunq in te trekken."
+
+#: src/Gateway/Gateway.php:479
+msgid "Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app."
+msgstr "Ontkoppeld van bunq. Verwijder de koppeling in de bunq-app om de toegang ook bij bunq in te trekken."
+
+#: src/Gateway/Gateway.php:497
+msgid "Enter the Client ID and Client Secret of your bunq OAuth client, then click \"Connect to bunq\"."
+msgstr "Vul de Client ID en Client Secret van je bunq OAuth-client in en klik daarna op \"Koppelen met bunq\"."
+
+#: src/Gateway/Gateway.php:687
+msgid "Saved. Leave empty to keep it, or paste a new secret to replace it."
+msgstr "Opgeslagen. Laat leeg om het te behouden, of plak een nieuw secret om het te vervangen."
+
+#: src/Gateway/Gateway.php:786
+msgid "bunq rejected the saved connection. Connect again."
+msgstr "bunq heeft de opgeslagen koppeling geweigerd. Koppel opnieuw."
+
+#: src/Gateway/Gateway.php:803
+msgid "Refresh bank accounts"
+msgstr "Bankrekeningen vernieuwen"
+
+#. translators: %s: bunq payment request id
+#: src/Gateway/Gateway.php:856
+msgid "bunq payment request %s created"
+msgstr "bunq-betaalverzoek %s aangemaakt"
+
+#: src/Gateway/Gateway.php:879
+msgid "The payment could not be started with bunq. Please try again or choose another payment method."
+msgstr "De betaling kon niet worden gestart bij bunq. Probeer het opnieuw of kies een andere betaalmethode."
+
+#: src/Gateway/Gateway.php:898
+msgid "This order has no bunq payment that can be refunded."
+msgstr "Deze bestelling heeft geen bunq-betaling die terugbetaald kan worden."
+
+#: src/Gateway/Gateway.php:902
+msgid "The refund amount must be greater than zero."
+msgstr "Het terugbetaalbedrag moet groter zijn dan nul."
+
+#: src/Gateway/Gateway.php:918
+msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
+msgstr "De bunq-betaling van deze bestelling heeft geen IBAN om naar terug te betalen (bijvoorbeeld een kaartbetaling). Betaal terug vanuit de bunq-app."
+
+#. translators: 1: order number, 2: shop name
+#: src/Gateway/Gateway.php:923
+msgid "Refund order %1$s %2$s"
+msgstr "Terugbetaling bestelling %1$s %2$s"
+
+#. translators: 1: refunded amount, 2: bunq draft payment id
+#: src/Gateway/Gateway.php:948
+msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
+msgstr "bunq-terugbetaling van %1$s aangemaakt als conceptbetaling %2$s. Keur deze goed in de bunq-app om het geld te versturen."
+
+#. translators: %s: error message from bunq
+#: src/Gateway/Gateway.php:963
+msgid "bunq refund failed: %s"
+msgstr "bunq-terugbetaling mislukt: %s"
+
+#. translators: %s: bunq payment id
+#: src/Gateway/Gateway.php:1052
+msgid "bunq payment %s received"
+msgstr "bunq-betaling %s ontvangen"
+
+#. translators: 1: bunq payment id, 2: amount received, 3: order total
+#: src/Gateway/Gateway.php:1075
+msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
+msgstr "bunq-betaling %1$s van %2$s ontvangen, maar het bestelbedrag is %3$s. Controleer de betaling voordat je de bestelling verwerkt."
+
+#. translators: 1: bunq payment request id, 2: status reported by bunq
+#: src/Gateway/Gateway.php:1097
+msgid "bunq payment request %1$s is %2$s"
+msgstr "bunq-betaalverzoek %1$s is %2$s"
 
 #: src/Gateway/PaymentMethods.php:28
 msgid "Credit or Debit Card"
@@ -30,200 +134,238 @@ msgstr "Bancontact"
 msgid "From a bunq account"
 msgstr "Vanaf een bunq-rekening"
 
-#: src/Gateway/Gateway.php:239
-msgid ""
-"bunq authorization completed. Select your bank account and save the "
-"settings."
-msgstr ""
-"bunq-autorisatie voltooid. Selecteer je bankrekening en sla de instellingen "
-"op."
+#: src/Gateway/SettingsFields.php:37
+msgid "Customers see bunq at checkout once your bunq account is connected."
+msgstr "Klanten zien bunq bij het afrekenen zodra je bunq-rekening is gekoppeld."
 
-#: src/Gateway/Gateway.php:306
-msgid "Payment method invalid"
-msgstr "Ongeldige betaalmethode"
+#: src/Gateway/SettingsFields.php:42
+msgid "bunq account"
+msgstr "bunq-rekening"
 
-#. translators: %s: link to the WooCommerce log page
-#: src/Gateway/Gateway.php:324
-msgid "Details are logged in %s (source: bunq)."
-msgstr "Details staan in het logboek in %s (bron: bunq)."
+#. translators: %s: link to the setup guide
+#: src/Gateway/SettingsFields.php:47
+msgid "Payments go straight to your own bunq account. Connect it with an OAuth client that you create in the bunq app. %s"
+msgstr "Betalingen komen direct op je eigen bunq-rekening binnen. Koppel die met een OAuth-client die je in de bunq-app aanmaakt. %s"
 
-#: src/Gateway/Gateway.php:325
-msgid "WooCommerce > Status > Logs"
-msgstr "WooCommerce > Status > Logboeken"
+#: src/Gateway/SettingsFields.php:48
+msgid "Setup guide"
+msgstr "Installatiehandleiding"
 
-#: src/Gateway/Gateway.php:346
-msgid "OAuth Authorization Request"
-msgstr "OAuth-autorisatieverzoek"
+#: src/Gateway/SettingsFields.php:67
+msgid "Receiving payments"
+msgstr "Betalingen ontvangen"
 
-#: src/Gateway/Gateway.php:351
-msgid "Refresh bank accounts"
-msgstr "Bankrekeningen vernieuwen"
+#: src/Gateway/SettingsFields.php:72
+msgid "Checkout"
+msgstr "Afrekenen"
 
-#: src/Gateway/SettingsFields.php:63
-msgid "Enable/Disable"
-msgstr "Inschakelen/uitschakelen"
-
-#: src/Gateway/SettingsFields.php:64
-msgid "Enable bunq Gateway"
-msgstr "bunq-gateway inschakelen"
-
-#: src/Gateway/SettingsFields.php:70
-msgid "Test mode"
-msgstr "Testmodus"
-
-#: src/Gateway/SettingsFields.php:71
-msgid "Enable Test Mode"
-msgstr "Testmodus inschakelen"
-
-#: src/Gateway/SettingsFields.php:73
-msgid "Place the payment gateway in test mode using test API keys."
-msgstr "Zet de betaalgateway in testmodus met test-API-sleutels."
-
-#: src/Gateway/SettingsFields.php:78
-msgid "Title"
-msgstr "Titel"
-
-#: src/Gateway/SettingsFields.php:80
-msgid "This controls the title which the user sees during checkout."
-msgstr "Dit bepaalt de titel die de klant ziet bij het afrekenen."
-
-#: src/Gateway/SettingsFields.php:81
-msgid "iDEAL, Credit Card or Bancontact"
-msgstr "iDEAL, creditcard of Bancontact"
-
-#: src/Gateway/SettingsFields.php:85
-msgid "Description"
-msgstr "Omschrijving"
-
-#: src/Gateway/SettingsFields.php:87
-msgid "This controls the description which the user sees during checkout."
-msgstr "Dit bepaalt de omschrijving die de klant ziet bij het afrekenen."
-
-#: src/Gateway/SettingsFields.php:88
-msgid "Pay with iDEAL, Credit Card or Bancontact"
-msgstr "Betaal met iDEAL, creditcard of Bancontact"
-
-#: src/Gateway/SettingsFields.php:91
-msgid "Bank account"
-msgstr "Bankrekening"
-
-#: src/Gateway/SettingsFields.php:96
-msgid "Direct Gateway"
-msgstr "Directe gateway"
-
-#: src/Gateway/SettingsFields.php:97
-msgid "Enable direct gateway"
-msgstr "Directe gateway inschakelen"
-
-#: src/Gateway/SettingsFields.php:100
-msgid ""
-"Allow your customers to directly select a payment method from the checkout "
-"page."
-msgstr "Laat klanten direct op de afrekenpagina een betaalmethode kiezen."
-
-#: src/Gateway/SettingsFields.php:32
+#: src/Gateway/SettingsFields.php:79
 msgid "Payment methods"
 msgstr "Betaalmethoden"
 
-#: src/Gateway/SettingsFields.php:114
-msgid "Test OAuth Client ID"
-msgstr "Test OAuth Client ID"
+#: src/Gateway/SettingsFields.php:83
+msgid "The payment methods customers can choose from. Leave empty to offer all of them."
+msgstr "De betaalmethoden waaruit klanten kunnen kiezen. Laat leeg om ze allemaal aan te bieden."
 
-#: src/Gateway/SettingsFields.php:118
-msgid "Test OAuth Client Secret"
-msgstr "Test OAuth Client Secret"
+#: src/Gateway/SettingsFields.php:86
+msgid "All payment methods"
+msgstr "Alle betaalmethoden"
 
-#: src/Gateway/SettingsFields.php:132
-msgid "OAuth Client ID"
-msgstr "OAuth Client ID"
+#: src/Gateway/SettingsFields.php:103
+msgid "Enable/Disable"
+msgstr "Inschakelen/uitschakelen"
 
-#: src/Gateway/SettingsFields.php:136
-msgid "OAuth Client Secret"
-msgstr "OAuth Client Secret"
+#: src/Gateway/SettingsFields.php:104
+msgid "Enable bunq Gateway"
+msgstr "bunq-gateway inschakelen"
 
-#. translators: %s: bunq payment request id
-#: src/Gateway/Gateway.php:667
-msgid "bunq payment request %s created"
-msgstr "bunq-betaalverzoek %s aangemaakt"
+#: src/Gateway/SettingsFields.php:110
+msgid "Test mode"
+msgstr "Testmodus"
 
-#: src/Gateway/Gateway.php:690
-msgid ""
-"The payment could not be started with bunq. Please try again or choose "
-"another payment method."
+#: src/Gateway/SettingsFields.php:111
+msgid "Use the bunq sandbox"
+msgstr "De bunq-sandbox gebruiken"
+
+#: src/Gateway/SettingsFields.php:113
+msgid "Try payments without real money. The sandbox has its own OAuth client and connection."
+msgstr "Probeer betalingen zonder echt geld. De sandbox heeft een eigen OAuth-client en koppeling."
+
+#: src/Gateway/SettingsFields.php:117
+msgid "Title"
+msgstr "Titel"
+
+#: src/Gateway/SettingsFields.php:119
+msgid "This controls the title which the user sees during checkout."
+msgstr "Dit bepaalt de titel die de klant ziet bij het afrekenen."
+
+#: src/Gateway/SettingsFields.php:120
+msgid "iDEAL, Credit Card or Bancontact"
+msgstr "iDEAL, creditcard of Bancontact"
+
+#: src/Gateway/SettingsFields.php:124
+msgid "Description"
+msgstr "Omschrijving"
+
+#: src/Gateway/SettingsFields.php:126
+msgid "This controls the description which the user sees during checkout."
+msgstr "Dit bepaalt de omschrijving die de klant ziet bij het afrekenen."
+
+#: src/Gateway/SettingsFields.php:127
+msgid "Pay with iDEAL, Credit Card or Bancontact"
+msgstr "Betaal met iDEAL, creditcard of Bancontact"
+
+#: src/Gateway/SettingsFields.php:131
+msgid "Bank account"
+msgstr "Bankrekening"
+
+#: src/Gateway/SettingsFields.php:133
+msgid "Payments are paid into this bunq account."
+msgstr "Betalingen worden op deze bunq-rekening gestort."
+
+#: src/Gateway/SettingsFields.php:137
+msgid "Direct Gateway"
+msgstr "Directe gateway"
+
+#: src/Gateway/SettingsFields.php:138
+msgid "Enable direct gateway"
+msgstr "Directe gateway inschakelen"
+
+#: src/Gateway/SettingsFields.php:141
+msgid "Allow your customers to directly select a payment method from the checkout page."
+msgstr "Laat klanten direct op de afrekenpagina een betaalmethode kiezen."
+
+#: src/Gateway/SettingsFields.php:155
+msgid "Sandbox Client ID"
+msgstr "Sandbox Client ID"
+
+#: src/Gateway/SettingsFields.php:155
+msgid "Client ID"
+msgstr "Client ID"
+
+#: src/Gateway/SettingsFields.php:173
+msgid "Sandbox Client Secret"
+msgstr "Sandbox Client Secret"
+
+#: src/Gateway/SettingsFields.php:173
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#: src/Gateway/SettingsPage.php:42
+msgid "Redirect URL copied to the clipboard."
+msgstr "Redirect-URL naar het klembord gekopieerd."
+
+#: src/Gateway/SettingsPage.php:43
+msgid "Save the settings to choose from the bank accounts of the other mode."
+msgstr "Sla de instellingen op om uit de bankrekeningen van de andere modus te kiezen."
+
+#: src/Gateway/SettingsPage.php:44
+msgid "Disconnect the shop from bunq? Customers can no longer pay with bunq until you connect again."
+msgstr "De winkel ontkoppelen van bunq? Klanten kunnen pas weer met bunq betalen als je opnieuw koppelt."
+
+#: src/Gateway/SettingsPage.php:61
+msgid "bunq could not be connected:"
+msgstr "bunq kon niet worden gekoppeld:"
+
+#. translators: %s: link to the WooCommerce log page
+#: src/Gateway/SettingsPage.php:66
+msgid "Details are logged in %s (source: bunq)."
+msgstr "Details staan in het logboek in %s (bron: bunq)."
+
+#: src/Gateway/SettingsPage.php:67
+msgid "WooCommerce > Status > Logs"
+msgstr "WooCommerce > Status > Logboeken"
+
+#: src/Gateway/SettingsPage.php:113
+msgid "Redirect URL"
+msgstr "Redirect-URL"
+
+#: src/Gateway/SettingsPage.php:118
+msgid "Copy"
+msgstr "Kopiëren"
+
+#: src/Gateway/SettingsPage.php:120
+msgid "Copied!"
+msgstr "Gekopieerd!"
+
+#. translators: 1: menu path in the bunq app, 2: action in the bunq app, 3: action in the bunq app
+#: src/Gateway/SettingsPage.php:125
+msgid "In the bunq app, go to %1$s, tap %2$s and enter this URL. Then tap %3$s and copy the Client ID and Client Secret into the fields below."
+msgstr "Ga in de bunq-app naar %1$s, tik op %2$s en vul deze URL in. Tik daarna op %3$s en kopieer de Client ID en Client Secret naar de velden hieronder."
+
+#: src/Gateway/SettingsPage.php:126
+msgid "Developers › OAuth"
 msgstr ""
-"De betaling kon niet worden gestart bij bunq. Probeer het opnieuw of kies "
-"een andere betaalmethode."
 
-#: src/Gateway/Gateway.php:709
-msgid "This order has no bunq payment that can be refunded."
-msgstr "Deze bestelling heeft geen bunq-betaling die terugbetaald kan worden."
-
-#: src/Gateway/Gateway.php:713
-msgid "The refund amount must be greater than zero."
-msgstr "Het terugbetaalbedrag moet groter zijn dan nul."
-
-#: src/Gateway/Gateway.php:729
-msgid ""
-"The bunq payment for this order has no IBAN to refund to (for example a card"
-" payment). Refund it from the bunq app instead."
+#: src/Gateway/SettingsPage.php:127
+msgid "Add Redirect URL"
 msgstr ""
-"De bunq-betaling van deze bestelling heeft geen IBAN om naar terug te "
-"betalen (bijvoorbeeld een kaartbetaling). Betaal terug vanuit de bunq-app."
 
-#. translators: 1: order number, 2: shop name
-#: src/Gateway/Gateway.php:734
-msgid "Refund order %1$s %2$s"
-msgstr "Terugbetaling bestelling %1$s %2$s"
-
-#. translators: 1: refunded amount, 2: bunq draft payment id
-#: src/Gateway/Gateway.php:759
-msgid ""
-"bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq "
-"app to send the money."
+#: src/Gateway/SettingsPage.php:128
+msgid "Show Client Details"
 msgstr ""
-"bunq-terugbetaling van %1$s aangemaakt als conceptbetaling %2$s. Keur deze "
-"goed in de bunq-app om het geld te versturen."
 
-#. translators: %s: error message from bunq
-#: src/Gateway/Gateway.php:774
-msgid "bunq refund failed: %s"
-msgstr "bunq-terugbetaling mislukt: %s"
+#: src/Gateway/SettingsPage.php:150
+msgid "Connect to bunq"
+msgstr "Koppelen met bunq"
 
-#. translators: %s: bunq payment id
-#: src/Gateway/Gateway.php:863
-msgid "bunq payment %s received"
-msgstr "bunq-betaling %s ontvangen"
+#: src/Gateway/SettingsPage.php:151
+msgid "Saves your settings and opens bunq, which shows a QR code. Scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq then sends you back here."
+msgstr "Slaat je instellingen op en opent bunq, dat een QR-code toont. Scan die met de bunq-app, kies de bankrekeningen die de winkel mag gebruiken en keur goed. bunq stuurt je daarna terug naar deze pagina."
 
-#. translators: 1: bunq payment id, 2: amount received, 3: order total
-#: src/Gateway/Gateway.php:886
-msgid ""
-"bunq payment %1$s of %2$s received, but the order total is %3$s. Check the "
-"payment before processing the order."
-msgstr ""
-"bunq-betaling %1$s van %2$s ontvangen, maar het bestelbedrag is %3$s. "
-"Controleer de betaling voordat je de bestelling verwerkt."
+#: src/Gateway/SettingsPage.php:170
+msgid "Connection"
+msgstr "Koppeling"
 
-#. translators: 1: bunq payment request id, 2: status reported by bunq
-#: src/Gateway/Gateway.php:908
-msgid "bunq payment request %1$s is %2$s"
-msgstr "bunq-betaalverzoek %1$s is %2$s"
+#. translators: %s: name of the bunq user that granted access
+#: src/Gateway/SettingsPage.php:183
+msgid "Connected to the bunq sandbox as %s."
+msgstr "Gekoppeld aan de bunq-sandbox als %s."
 
-#: src/Bunq/ApiClient.php:199
-msgid "API key not valid or not setup yet"
-msgstr "API-sleutel ongeldig of nog niet ingesteld"
+#. translators: %s: name of the bunq user that granted access
+#: src/Gateway/SettingsPage.php:186
+msgid "Connected to bunq as %s."
+msgstr "Gekoppeld aan bunq als %s."
 
-#: src/Bunq/ApiClient.php:203
-msgid "Select a bank account"
-msgstr "Selecteer een bankrekening"
+#: src/Gateway/SettingsPage.php:196
+msgid "Connected to the bunq sandbox."
+msgstr "Gekoppeld aan de bunq-sandbox."
 
-#: src/Bunq/ApiClient.php:216
-msgid "(Joint)"
-msgstr "(Gezamenlijk)"
+#: src/Gateway/SettingsPage.php:196
+msgid "Connected to bunq."
+msgstr "Gekoppeld aan bunq."
 
-#. translators: %s: error message from bunq
-#: src/Bunq/ApiClient.php:228
-msgid "Error: %s"
-msgstr "Fout: %s"
+#: src/Gateway/SettingsPage.php:201
+msgid "bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it."
+msgstr "bunq heeft de koppeling onlangs geweigerd, daarom wordt bunq niet aangeboden bij het afrekenen. Koppel opnieuw om dit te herstellen."
+
+#: src/Gateway/SettingsPage.php:204
+msgid "Connect again"
+msgstr "Opnieuw koppelen"
+
+#: src/Gateway/SettingsPage.php:205
+msgid "Change OAuth client"
+msgstr "OAuth-client wijzigen"
+
+#: src/Gateway/SettingsPage.php:206
+msgid "Disconnect"
+msgstr "Ontkoppelen"
+
+#: src/Gateway/SettingsPage.php:209
+msgid "Not connected to the bunq sandbox."
+msgstr "Niet gekoppeld aan de bunq-sandbox."
+
+#: src/Gateway/SettingsPage.php:209
+msgid "Not connected to bunq."
+msgstr "Niet gekoppeld aan bunq."
+
+#: src/Gateway/SettingsPage.php:213
+msgid "Click \"Connect to bunq\" below and scan the QR code with the bunq app."
+msgstr "Klik hieronder op \"Koppelen met bunq\" en scan de QR-code met de bunq-app."
+
+#: src/Gateway/SettingsPage.php:214
+msgid "Register the redirect URL in the bunq app and enter the Client ID and Client Secret of your OAuth client below."
+msgstr "Registreer de redirect-URL in de bunq-app en vul hieronder de Client ID en Client Secret van je OAuth-client in."
 
 #. translators: %s: bunq payment request id
 #: src/Orders/PaymentMonitor.php:298
@@ -233,23 +375,3 @@ msgstr "bunq-betaalverzoek %s geannuleerd"
 #: src/Requirements.php:122
 msgid "cannot be activated due to incompatible environment."
 msgstr "kan niet worden geactiveerd omdat de omgeving niet compatibel is."
-
-#: src/Gateway/Gateway.php:505
-msgid "Saved. Enter a new value to replace it."
-msgstr "Opgeslagen. Vul een nieuwe waarde in om deze te vervangen."
-
-#: src/Gateway/SettingsFields.php:43
-msgid "bunq connection"
-msgstr "bunq-koppeling"
-
-#: src/Gateway/SettingsFields.php:46
-msgid "Connected to bunq."
-msgstr "Gekoppeld aan bunq."
-
-#: src/Gateway/SettingsFields.php:47
-msgid ""
-"Not connected to bunq yet. Save the OAuth Client ID and Client Secret, then "
-"click \"OAuth Authorization Request\"."
-msgstr ""
-"Nog niet gekoppeld aan bunq. Sla de OAuth Client ID en Client Secret op en "
-"klik daarna op \"OAuth-autorisatieverzoek\"."

@@ -46,27 +46,35 @@ Upload the new `bunq-for-woocommerce.zip` the same way. WordPress recognises the
 ## Configuration
 
 1. In your WordPress admin panel, navigate to **WooCommerce** > **Settings** > **Payments** > **bunq**.
-2. In the bunq app, navigate to **Developers** > **OAuth** > **Add Redirect URL**.
-3. Enter the **full URL** of the plugin page (e.g. https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq).
-4. In the bunq app, navigate to **Developers** > **OAuth** > **Show Client Details**.
-5. Enter the **Client ID** and **Client Secret** in the plugin settings and **Save changes**.
-6. Click the **OAuth Authorization Request** to authorize the plugin in the bunq app.
+2. Under **bunq account**, leave **Test mode** unchecked to receive real payments. To try the plugin first, check **Use the bunq sandbox** and use a bunq sandbox account in the steps below.
+3. Click **Copy** next to the **Redirect URL**. In the bunq app, navigate to **Developers** > **OAuth**, tap **Add Redirect URL** and paste it.
+4. In the bunq app, tap **Show Client Details** and copy the **Client ID** and **Client Secret** into the fields with the same name.
 
-<img width="228" src="https://user-images.githubusercontent.com/727174/92739792-8a00ef00-f37d-11ea-8b28-4f8d02b145d4.png">
+<img width="700" alt="The bunq account section before connecting: Test mode, Connection, Redirect URL with a Copy button, Client ID, Client Secret and the Connect to bunq button" src=".github/images/settings-connect.png">
 
-7. This will redirect you to the bunq website.
+5. Click **Connect to bunq**. This saves the settings and opens bunq, which shows a QR code.
+6. Scan the QR code with the bunq app, choose the bank accounts the shop may use and approve.
 
-<img width="629" src="https://user-images.githubusercontent.com/727174/92740458-0d224500-f37e-11ea-8e6a-cb896762f0fc.png">
+<img width="250" alt="bunq asks to scan a QR code with the bunq app" src=".github/images/bunq-qr-code.png">
 
-8. Scan the QR code with the bunq app to select the bank accounts you want to access.
+7. bunq sends you back to the settings page, where **Connection** now says *Connected to bunq as* followed by your name.
+8. Under **Receiving payments**, select the **Bank account** payments are paid into. Check **Enable bunq Gateway** at the top of the page and click **Save changes**.
 
-<img width="100%" src="https://user-images.githubusercontent.com/727174/92741238-afdac380-f37e-11ea-95bd-9d5f93fabbf9.jpg">
+<img width="700" alt="The bunq account section once connected, with Connect again, Change OAuth client and Disconnect, and the bank account select" src=".github/images/settings-connected.png">
 
-9. After confirmation in the bunq app, the bunq website will redirect you back to the plugin settings.
+Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
 
-10. Select your **Bank account** and **Enable** the plugin and **Save changes**.
+### Managing the connection
 
-The bank account list is cached for an hour. Use **Refresh bank accounts** on the settings page after adding an account in the bunq app.
+Once the shop is connected, the settings page hides the Client ID and Client Secret and shows three actions next to **Connection**:
+
+- **Connect again**: scan a new QR code, for example after bunq rejected the connection.
+- **Change OAuth client**: shows the Client ID and Client Secret fields again to switch to another OAuth client.
+- **Disconnect**: the shop forgets its access to bunq. Remove the connection in the bunq app to revoke it at bunq as well.
+
+Live mode and the sandbox each have their own OAuth client and connection; the **Test mode** checkbox switches between them. The Client Secret is never shown again after saving it: leave the field empty to keep it.
+
+The bank account list is cached for an hour. Click **Refresh bank accounts** below the bank account select after adding an account in the bunq app.
 
 ## Refunds
 
@@ -78,11 +86,11 @@ WooCommerce records the refund as soon as the draft is created, so an unapproved
 
 Everything the plugin does with bunq (callbacks received, payments matched, refunds, errors) is written to **WooCommerce** > **Status** > **Logs** (source: `bunq`). Look there first when an order does not change status.
 
-If the settings page still says *Not connected to bunq yet* after the OAuth authorization, or the **Bank account** dropdown shows *API key not valid or not setup yet*:
+If the settings page still says *Not connected* after connecting, or the **Bank account** dropdown shows *bunq rejected the saved connection*:
 
-1. The plugin shows the error returned by bunq as a notice at the top of the plugin settings page right after the redirect back from bunq.
+1. The plugin shows the error returned by bunq at the top of the plugin settings page right after the redirect back from bunq.
 2. Full details are written to **WooCommerce** > **Status** > **Logs** (source: `bunq`).
-3. Make sure the redirect URL registered in the bunq app is **exactly** the plugin settings page URL, including `&section=bunq`.
+3. Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
 4. Every attempt whitelists the IP address the request was sent from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with *Incorrect API key or IP address*.
 
 ## Optional configuration

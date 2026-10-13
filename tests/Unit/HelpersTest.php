@@ -112,25 +112,4 @@ final class HelpersTest extends TestCase
             Environment::$logs[0]['message']
         );
     }
-
-    public function testCurrentUrlUsesTheRequestHostAndUri()
-    {
-        $_SERVER['HTTP_HOST'] = 'shop.example';
-        $_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-settings&section=bunq';
-
-        $this->assertSame('http://shop.example/wp-admin/admin.php?page=wc-settings&section=bunq', Url::current());
-    }
-
-    public function testCurrentUrlIsHttpsBehindSsl()
-    {
-        $_SERVER['HTTP_HOST'] = 'shop.example';
-        $_SERVER['REQUEST_URI'] = '/';
-
-        Environment::$isSsl = true;
-        $this->assertSame('https://shop.example/', Url::current());
-
-        Environment::$isSsl = false;
-        $_SERVER['HTTPS'] = 'on';
-        $this->assertSame('https://shop.example/', Url::current());
-    }
 }

@@ -51,20 +51,17 @@ final class GatewayTest extends TestCase
         $this->assertFalse($this->createGateway($this->liveSettings(array('api_context' => 'saved-api-context')))->is_available(), 'Recreating the API context failed recently');
     }
 
-    public function testTheSettingsFormShowsTheOAuthClientOfTheActiveMode()
+    public function testTheSettingsFormHasTheOAuthClientsOfBothModesAndNoApiContext()
     {
-        $live = array_keys($this->createGateway($this->liveSettings())->get_form_fields());
-        $this->assertContains('oauth_client_id', $live);
-        $this->assertContains('oauth_client_secret', $live);
-        $this->assertNotContains('api_context', $live, 'Never a settings field');
-        $this->assertNotContains('test_oauth_client_id', $live);
-        $this->assertNotContains('enabled_payment_methods', $live);
+        $fields = array_keys($this->createGateway($this->liveSettings())->get_form_fields());
 
-        $test = array_keys($this->createGateway($this->liveSettings(array('testmode' => 'yes', 'direct_gateway' => 'yes')))->get_form_fields());
-        $this->assertContains('test_oauth_client_id', $test);
-        $this->assertNotContains('test_api_context', $test);
-        $this->assertNotContains('oauth_client_id', $test);
-        $this->assertContains('enabled_payment_methods', $test);
+        $this->assertContains('oauth_client_id', $fields);
+        $this->assertContains('oauth_client_secret', $fields);
+        $this->assertContains('test_oauth_client_id', $fields);
+        $this->assertContains('test_oauth_client_secret', $fields);
+        $this->assertContains('enabled_payment_methods', $fields);
+        $this->assertNotContains('api_context', $fields, 'Never a settings field');
+        $this->assertNotContains('test_api_context', $fields);
     }
 
     public function testBankAccountsAreOnlyLookedUpOnTheAdminSide()
@@ -77,8 +74,8 @@ final class GatewayTest extends TestCase
         $this->assertTrue(is_admin());
 
         $fields = $this->createGateway($this->liveSettings())->get_form_fields();
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), $fields['monetary_account_bank_id']['options']);
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), get_transient(Gateway::BANK_ACCOUNTS_TRANSIENT));
+        $this->assertSame(array('' => 'Connect your bunq account first'), $fields['monetary_account_bank_id']['options']);
+        $this->assertSame(array('' => 'Connect your bunq account first'), get_transient(Gateway::BANK_ACCOUNTS_TRANSIENT));
     }
 
     public function testSavingTheSettingsThroughWooCommerceKeepsTheAuthorizationWhileTheClientStays()
@@ -127,8 +124,8 @@ final class GatewayTest extends TestCase
 
     public function testTheFirstSaveOnAFreshInstallDoesNotWarnAboutTheOtherModesClient()
     {
-        // Only the fields of the active mode are in the form, so WooCommerce never fills the other mode's
-        // defaults; reading them directly raised "Undefined array key" on the first save.
+        // Up to version 1.7 only the fields of the active mode were in the form, so WooCommerce never filled the
+        // other mode's defaults; reading them directly raised "Undefined array key" on the first save.
         $gateway = $this->createGateway();
         $this->postSettings(array(
             'oauth_client_id' => 'live-client-id',
@@ -334,6 +331,15 @@ final class GatewayTest extends TestCase
             'woocommerce_bunq_description' => 'Pay with iDEAL, Credit Card or Bancontact',
             'woocommerce_bunq_monetary_account_bank_id' => '123',
         );
+
+        // The form has the OAuth clients of both modes: the browser posts the client ids as they are shown and the
+        // secrets empty (they are never shown).
+        $saved = get_option('woocommerce_bunq_settings', array());
+        foreach (array('oauth_client_id', 'test_oauth_client_id') as $key) {
+            $_POST['woocommerce_bunq_' . $key] = isset($saved[$key]) ? $saved[$key] : '';
+        }
+        $_POST['woocommerce_bunq_oauth_client_secret'] = '';
+        $_POST['woocommerce_bunq_test_oauth_client_secret'] = '';
 
         foreach ($fields as $key => $value) {
             $_POST['woocommerce_bunq_' . $key] = $value;

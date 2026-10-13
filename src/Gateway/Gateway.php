@@ -38,6 +38,12 @@ class Gateway extends WC_Payment_Gateway {
 	const CONTEXT_FAILED_TRANSIENT = 'wc_bunq_gateway.context_failed';
 	const LOCK_TRANSIENT_PREFIX    = 'wc_bunq_gateway.lock.';
 	const REFRESH_ACCOUNTS_ACTION  = 'bunq_refresh_accounts';
+	const DISCONNECT_ACTION        = 'bunq_disconnect';
+
+	/**
+	 * The value of the "save" button that saves the settings and then starts the authorization at bunq.
+	 */
+	const CONNECT_ACTION = 'bunq_connect';
 
 	/**
 	 * The checkout field with the payment method the customer chose (direct gateway).
@@ -205,14 +211,34 @@ class Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * The settings page of the gateway. Also the redirect URI of the OAuth client: the merchant registers exactly this
+	 * URL in the bunq app, so it must not depend on how the page was opened.
+	 *
+	 * @return string
+	 */
+	public static function settings_url() {
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . self::ID );
+	}
+
+	/**
+	 * The mode name of the test mode setting.
+	 *
+	 * @param bool $testmode Whether test mode is enabled.
+	 * @return string "sandbox" or "live".
+	 */
+	public static function mode( $testmode ) {
+		return $testmode ? 'sandbox' : 'live';
+	}
+
+	/**
 	 * Exchange the code bunq returned for an access token and create the bunq API context with it. The outcome is
 	 * shown on the settings page (admin_options()).
 	 *
 	 * @return string The settings page URL to return to.
 	 */
 	public function complete_oauth_authorization() {
-		// Strip the OAuth parameters so the redirect URI matches the one registered at bunq.
-		$oauth_redirect_uri = remove_query_arg( array( 'code', 'state' ), Url::current() );
+		// The redirect URI the authorization was requested with (get_connect_url()), as registered at bunq.
+		$oauth_redirect_uri = self::settings_url();
 
 		// Buffer any output (e.g. PHP deprecation notices from the SDK) so the redirect header can still be sent.
 		ob_start();
@@ -312,44 +338,193 @@ class Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * The settings form, with the outcome of the last authorization and the authorization and refresh buttons.
+	 * The settings form, below the outcome of the last authorization. The connection status and the buttons are drawn
+	 * by generate_title_html().
 	 */
 	public function admin_options() {
+		$notices = array();
+
 		$last_error = get_transient( self::LAST_ERROR_TRANSIENT );
 		if ( $last_error ) {
 			delete_transient( self::LAST_ERROR_TRANSIENT );
-			echo '<div class="notice notice-error"><p><strong>bunq for WooCommerce:</strong> ' . esc_html( $last_error ) . '</p>'
-				. '<p>' . sprintf(
-					/* translators: %s: link to the WooCommerce log page */
-					esc_html__( 'Details are logged in %s (source: bunq).', 'bunq-for-woocommerce' ),
-					'<a href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) . '">' . esc_html__( 'WooCommerce > Status > Logs', 'bunq-for-woocommerce' ) . '</a>'
-				) . '</p></div>';
+			$notices['error'] = $last_error;
 		}
 
 		$last_success = get_transient( self::LAST_SUCCESS_TRANSIENT );
 		if ( $last_success ) {
 			delete_transient( self::LAST_SUCCESS_TRANSIENT );
-			echo '<div class="notice notice-success"><p><strong>bunq for WooCommerce:</strong> ' . esc_html( $last_success ) . '</p></div>';
+			$notices['success'] = $last_success;
 		}
+
+		SettingsPage::enqueue_assets();
+
+		echo SettingsPage::notices_html( $notices ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while drawn.
 
 		parent::admin_options();
-		$this->init_settings();
+	}
 
-		$testmode            = 'yes' === $this->get_option( 'testmode' );
-		$oauth_client_id     = $testmode ? $this->get_option( 'test_oauth_client_id' ) : $this->get_option( 'oauth_client_id' );
-		$oauth_client_secret = $testmode ? $this->get_option( 'test_oauth_client_secret' ) : $this->get_option( 'oauth_client_secret' );
+	/**
+	 * Draw the "title" fields that have a view (SettingsFields::get()): the connection status rows, the connect button
+	 * and the bunq account heading. The others are section headings.
+	 *
+	 * @param string $key  Field key.
+	 * @param array  $data Field definition.
+	 * @return string
+	 */
+	public function generate_title_html( $key, $data ) {
+		$view = isset( $data['view'] ) ? $data['view'] : '';
 
-		$settings_url = remove_query_arg( array( 'code', 'state', self::REFRESH_ACCOUNTS_ACTION, '_wpnonce' ), Url::current() );
+		if ( 'connection' === $view ) {
+			$testmode = 'yes' === $this->get_option( 'testmode' );
 
-		if ( $oauth_client_id && $oauth_client_secret ) {
-			$url = $this->oauth->get_authorization_url( $oauth_client_id, $oauth_client_secret, $settings_url, $testmode );
-			echo '<a href="' . esc_url( $url ) . '" class="button-secondary">' . esc_html__( 'OAuth Authorization Request', 'bunq-for-woocommerce' ) . '</a> ';
+			return SettingsPage::connection_html(
+				array(
+					'live'    => $this->get_connection( 'live' ),
+					'sandbox' => $this->get_connection( 'sandbox' ),
+				),
+				self::mode( $testmode )
+			);
 		}
 
-		if ( $this->get_setting( 'api_context' ) ) {
-			$refresh_url = wp_nonce_url( add_query_arg( self::REFRESH_ACCOUNTS_ACTION, '1', $settings_url ), self::REFRESH_ACCOUNTS_ACTION );
-			echo '<a href="' . esc_url( $refresh_url ) . '" class="button-secondary">' . esc_html__( 'Refresh bank accounts', 'bunq-for-woocommerce' ) . '</a>';
+		if ( 'account' === $view ) {
+			return SettingsPage::account_heading_html( parent::generate_title_html( $key, $data ) );
 		}
+
+		if ( 'connect' === $view ) {
+			return SettingsPage::connect_html();
+		}
+
+		return parent::generate_title_html( $key, $data );
+	}
+
+	/**
+	 * The state of a mode's connection with bunq, for the settings page.
+	 *
+	 * @param string $mode "live" or "sandbox".
+	 * @return array {
+	 *     @type bool        $connected     Whether there is an API context.
+	 *     @type bool        $failed        Whether bunq recently rejected it.
+	 *     @type bool        $client_saved  Whether the OAuth client id and secret are saved.
+	 *     @type string|null $account_name  The bunq user that granted access.
+	 *     @type string      $disconnect_url Where the "Disconnect" link goes.
+	 * }
+	 */
+	public function get_connection( $mode ) {
+		$prefix      = 'sandbox' === $mode ? 'test_' : '';
+		$credentials = $this->get_credentials();
+		$api_context = isset( $credentials[ $prefix . 'api_context' ] ) ? (string) $credentials[ $prefix . 'api_context' ] : '';
+		$active      = self::mode( 'yes' === $this->get_option( 'testmode' ) ) === $mode;
+
+		return array(
+			'connected'      => '' !== $api_context,
+			'failed'         => '' !== $api_context && $active && (bool) get_transient( self::CONTEXT_FAILED_TRANSIENT ),
+			'client_saved'   => '' !== (string) $this->get_option( $prefix . 'oauth_client_id' ) && '' !== (string) $this->get_option( $prefix . 'oauth_client_secret' ),
+			'account_name'   => '' !== $api_context ? $this->api->get_account_name( $api_context ) : null,
+			'disconnect_url' => wp_nonce_url( add_query_arg( self::DISCONNECT_ACTION, $mode, self::settings_url() ), self::DISCONNECT_ACTION . '_' . $mode ),
+		);
+	}
+
+	/**
+	 * Whether this request is the "Disconnect" link of the settings page.
+	 *
+	 * @return bool
+	 */
+	public static function is_disconnect_request() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Verified in handle_disconnect().
+		return is_admin() && isset( $_GET[ self::DISCONNECT_ACTION ] )
+			&& isset( $_GET['page'] ) && 'wc-settings' === $_GET['page']
+			&& isset( $_GET['section'] ) && self::ID === $_GET['section'];
+		// phpcs:enable
+	}
+
+	/**
+	 * Handle the "Disconnect" link and send the merchant back to the settings page. Ends the request.
+	 */
+	public function handle_disconnect() {
+		$mode = isset( $_GET[ self::DISCONNECT_ACTION ] ) ? sanitize_key( wp_unslash( $_GET[ self::DISCONNECT_ACTION ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
+
+		if ( ! in_array( $mode, array( 'live', 'sandbox' ), true ) || ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do this.', 'bunq-for-woocommerce' ), 403 );
+		}
+
+		check_admin_referer( self::DISCONNECT_ACTION . '_' . $mode );
+
+		$this->disconnect( $mode );
+
+		wp_safe_redirect( self::settings_url() );
+		exit;
+	}
+
+	/**
+	 * Forget a mode's authorization (API key and API context). The OAuth client stays, so that connecting again
+	 * takes one click.
+	 *
+	 * @param string $mode "live" or "sandbox".
+	 */
+	public function disconnect( $mode ) {
+		$prefix = 'sandbox' === $mode ? 'test_' : '';
+
+		$this->set_credential( $prefix . 'api_context', '' );
+		$this->set_credential( $prefix . 'api_key', '' );
+		delete_transient( self::BANK_ACCOUNTS_TRANSIENT );
+		delete_transient( self::CONTEXT_FAILED_TRANSIENT );
+		delete_transient( self::LAST_ERROR_TRANSIENT );
+
+		Logger::log( 'Disconnected from bunq ' . ( 'sandbox' === $mode ? 'sandbox' : 'production' ), 'info' );
+
+		set_transient(
+			self::LAST_SUCCESS_TRANSIENT,
+			'sandbox' === $mode
+				? __( 'Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app.', 'bunq-for-woocommerce' )
+				: __( 'Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app.', 'bunq-for-woocommerce' ),
+			5 * MINUTE_IN_SECONDS
+		);
+	}
+
+	/**
+	 * Where the "Connect to bunq" button leads once the settings are saved: the authorization page at bunq for the
+	 * saved OAuth client of the active mode.
+	 *
+	 * @return string|null Null when the OAuth client is incomplete; the error is shown on the settings page.
+	 */
+	public function get_connect_url() {
+		$testmode      = 'yes' === $this->get_option( 'testmode' );
+		$prefix        = $testmode ? 'test_' : '';
+		$client_id     = (string) $this->get_option( $prefix . 'oauth_client_id' );
+		$client_secret = (string) $this->get_option( $prefix . 'oauth_client_secret' );
+
+		if ( '' === $client_id || '' === $client_secret ) {
+			set_transient( self::LAST_ERROR_TRANSIENT, __( 'Enter the Client ID and Client Secret of your bunq OAuth client, then click "Connect to bunq".', 'bunq-for-woocommerce' ), 5 * MINUTE_IN_SECONDS );
+
+			return null;
+		}
+
+		return $this->oauth->get_authorization_url( $client_id, $client_secret, self::settings_url(), $testmode );
+	}
+
+	/**
+	 * Send the merchant to bunq after "Connect to bunq" saved the settings (woocommerce_settings_saved). Ends the
+	 * request, unless the OAuth client is incomplete.
+	 */
+	public function redirect_to_bunq() {
+		$url = $this->get_connect_url();
+
+		if ( ! $url ) {
+			return;
+		}
+
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		add_filter(
+			'allowed_redirect_hosts',
+			function ( $hosts ) use ( $host ) {
+				$hosts[] = $host;
+
+				return $hosts;
+			}
+		);
+
+		wp_safe_redirect( $url );
+		exit;
 	}
 
 	/**
@@ -397,13 +572,19 @@ class Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Save the settings. Forgets the authorization of a mode whose OAuth client was removed.
+	 * Save the settings. Forgets the authorization of a mode whose OAuth client was removed, and goes on to bunq when
+	 * the settings were saved with "Connect to bunq".
 	 */
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		// Only the fields of the active mode are in the form, so the other mode's keys can be absent until they have
-		// been saved once: a missing key counts as "not set".
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verified the settings nonce.
+		if ( isset( $_POST['save'] ) && self::CONNECT_ACTION === $_POST['save'] ) {
+			add_action( 'woocommerce_settings_saved', array( $this, 'redirect_to_bunq' ) );
+		}
+
+		// Up to version 1.7 only the active mode's fields were in the form, so the other mode's keys can be absent in
+		// the saved settings: a missing key counts as "not set".
 		if ( empty( $this->settings['test_oauth_client_id'] ) || empty( $this->settings['test_oauth_client_secret'] ) ) {
 			$this->set_credential( 'test_api_context', '' );
 			$this->set_credential( 'test_api_key', '' );
@@ -502,7 +683,8 @@ class Gateway extends WC_Payment_Gateway {
 		$saved = isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : '';
 
 		if ( '' !== (string) $saved ) {
-			$data['placeholder'] = __( 'Saved. Enter a new value to replace it.', 'bunq-for-woocommerce' );
+			$data['placeholder'] = '••••••••••••••••';
+			$data['description'] = __( 'Saved. Leave empty to keep it, or paste a new secret to replace it.', 'bunq-for-woocommerce' );
 		}
 
 		$this->settings[ $key ] = '';
@@ -598,7 +780,10 @@ class Gateway extends WC_Payment_Gateway {
 			$bank_accounts = get_transient( self::BANK_ACCOUNTS_TRANSIENT );
 
 			if ( ! $bank_accounts ) {
-				$bank_accounts = $this->api->get_bank_accounts( $this->load_api_context() );
+				$loaded        = $this->load_api_context();
+				$bank_accounts = $loaded || ! $this->get_setting( 'api_context' )
+					? $this->api->get_bank_accounts( $loaded )
+					: array( '' => __( 'bunq rejected the saved connection. Connect again.', 'bunq-for-woocommerce' ) );
 
 				// A real account list is kept for an hour; an error or "not set up yet" result only briefly, so it does
 				// not stick around after the merchant fixed the cause.
@@ -606,13 +791,17 @@ class Gateway extends WC_Payment_Gateway {
 			}
 		}
 
-		// The settings that decide which other fields there are fall back to the defaults of these.
+		// The test mode setting decides about the others; it falls back to the default of its field.
 		$this->form_fields = SettingsFields::base( $bank_accounts );
-		$direct_gateway    = 'yes' === $this->get_option( 'direct_gateway' );
-		$testmode          = 'yes' === $this->get_option( 'testmode' );
 		$connected         = (bool) $this->get_setting( 'api_context' );
 
-		$this->form_fields = SettingsFields::get( $bank_accounts, $direct_gateway, $testmode, $connected );
+		$this->form_fields = SettingsFields::get( $bank_accounts, $connected );
+
+		if ( $connected ) {
+			$refresh_url = wp_nonce_url( add_query_arg( self::REFRESH_ACCOUNTS_ACTION, '1', self::settings_url() ), self::REFRESH_ACCOUNTS_ACTION );
+
+			$this->form_fields['monetary_account_bank_id']['description'] .= ' <a href="' . esc_url( $refresh_url ) . '">' . esc_html__( 'Refresh bank accounts', 'bunq-for-woocommerce' ) . '</a>';
+		}
 	}
 
 	/**

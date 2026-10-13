@@ -156,6 +156,31 @@ class ApiClient {
 	}
 
 	/**
+	 * The name of the bunq user that granted the shop access, read from a stored API context without calling bunq.
+	 *
+	 * @param string $json The stored API context.
+	 * @return string|null Null when the context does not tell.
+	 */
+	public function get_account_name( $json ) {
+		try {
+			$session = ApiContext::fromJson( $json )->getSessionContext();
+
+			// Authorized through OAuth: the user that granted access; with a plain API key: the key's own user.
+			if ( $session->getUserApiKeyOrNull() ) {
+				$user = $session->getUserApiKeyOrNull()->getGrantedByUser()->getReferencedObject();
+			} else {
+				$user = $session->getUserCompanyOrNull() ? $session->getUserCompanyOrNull() : $session->getUserPersonOrNull();
+			}
+
+			$name = $user ? $user->getDisplayName() : null;
+
+			return is_string( $name ) && '' !== $name ? $name : null;
+		} catch ( Throwable $exception ) {
+			return null;
+		}
+	}
+
+	/**
 	 * Create a bunq.me payment request.
 	 *
 	 * @param string   $amount                   Amount.
@@ -196,7 +221,7 @@ class ApiClient {
 	 */
 	public function get_bank_accounts( $api_context ) {
 		if ( ! $api_context ) {
-			return array( '' => __( 'API key not valid or not setup yet', 'bunq-for-woocommerce' ) );
+			return array( '' => __( 'Connect your bunq account first', 'bunq-for-woocommerce' ) );
 		}
 
 		try {

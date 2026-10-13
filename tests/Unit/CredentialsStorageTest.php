@@ -106,6 +106,15 @@ final class CredentialsStorageTest extends TestCase
             'woocommerce_bunq_monetary_account_bank_id' => '123',
         );
 
+        // The form has the OAuth clients of both modes: the browser posts the client ids as they are shown and the
+        // secrets empty (they are never shown).
+        $saved = get_option('woocommerce_bunq_settings', array());
+        foreach (array('oauth_client_id', 'test_oauth_client_id') as $key) {
+            $_POST['woocommerce_bunq_' . $key] = isset($saved[$key]) ? $saved[$key] : '';
+        }
+        $_POST['woocommerce_bunq_oauth_client_secret'] = '';
+        $_POST['woocommerce_bunq_test_oauth_client_secret'] = '';
+
         foreach ($fields as $key => $value) {
             $_POST['woocommerce_bunq_' . $key] = $value;
         }
