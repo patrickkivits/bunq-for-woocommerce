@@ -8,6 +8,32 @@
 
     const Description = () => createElement( 'p', null, decodeEntities( settings.description || '' ) );
 
+    // The markup of WooCommerce's own block checkout selects (such as Country/Region), so that WooCommerce's styles,
+    // and a theme's styles for WooCommerce's fields, apply to this one as well.
+    const PaymentMethodSelect = ( selectProps ) => createElement( 'div', { className: 'wc-blocks-components-select' },
+        createElement( 'div', { className: 'wc-blocks-components-select__container' },
+            createElement( 'label', { htmlFor: 'wc_bunq_gateway_payment_method', className: 'wc-blocks-components-select__label' },
+                decodeEntities( settings.select_label || 'Payment method' )
+            ),
+            createElement( 'select', Object.assign( {
+                id: 'wc_bunq_gateway_payment_method',
+                className: 'wc-blocks-components-select__select',
+                size: 1,
+            }, selectProps ),
+                paymentMethods.map( ( option ) => createElement( 'option', { key: option.id, value: option.id }, option.description ) )
+            ),
+            createElement( 'svg', {
+                viewBox: '0 0 24 24',
+                xmlns: 'http://www.w3.org/2000/svg',
+                width: 24,
+                height: 24,
+                className: 'wc-blocks-components-select__expand',
+                'aria-hidden': true,
+                focusable: false,
+            }, createElement( 'path', { d: 'M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z' } ) )
+        )
+    );
+
     // Checkout: lets the customer pick a payment method and hands the choice to process_payment().
     const Content = ( props ) => {
         // Hooks first, unconditionally (rules of hooks); the branches below only decide what to render.
@@ -40,14 +66,11 @@
 
         return createElement( 'div', { className: 'payment-methods' },
             Description(),
-            createElement( 'select', {
-                id: 'wc_bunq_gateway_payment_method',
+            PaymentMethodSelect( {
                 name: 'wc_bunq_gateway_payment_method',
                 value: paymentMethod,
                 onChange: ( event ) => setPaymentMethod( event.target.value ),
-            },
-                paymentMethods.map( ( option ) => createElement( 'option', { key: option.id, value: option.id }, option.description ) )
-            )
+            } )
         );
     };
 
@@ -59,9 +82,7 @@
 
         return createElement( 'div', { className: 'payment-methods' },
             Description(),
-            createElement( 'select', { id: 'wc_bunq_gateway_payment_method', disabled: true },
-                paymentMethods.map( ( option ) => createElement( 'option', { key: option.id, value: option.id }, option.description ) )
-            )
+            PaymentMethodSelect( { disabled: true } )
         );
     };
 

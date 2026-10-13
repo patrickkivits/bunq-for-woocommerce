@@ -10,6 +10,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: bunq-for-woocommerce\n"
 
+#: src/Blocks/CheckoutIntegration.php:103
+msgid "Payment method"
+msgstr "Moyen de paiement"
+
 #: src/Bunq/ApiClient.php:224
 msgid "Connect your bunq account first"
 msgstr "Connectez d’abord votre compte bunq"
