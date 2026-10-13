@@ -122,6 +122,7 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * The OAuth redirect URL is always the plugin settings page URL (`/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bunq`), however the page was opened. Before, extra parameters on the page URL could make bunq reject the authorization.
 * The browser no longer fills in the WordPress login password in the Client Secret field.
 * Errors from bunq during the authorization show bunq's error descriptions instead of the raw response, and the bank account select says when bunq rejected the saved connection.
+* The payment method select of the direct gateway in the block checkout looks like the other checkout fields in every theme and has a "Payment method" label.
 * Updated Dutch, French and German translations.
 
 = 1.7.0 =
