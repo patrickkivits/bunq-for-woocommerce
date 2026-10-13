@@ -2,10 +2,14 @@
 
 namespace BunqTest;
 
+use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
+use PatrickKivits\BunqForWooCommerce\Plugin;
+
 /**
- * Gateway double that records what payment-status.php asks of it instead of talking to bunq.
+ * Gateway double that records what the payment monitor asks of it instead of talking to bunq.
  */
-final class RecordingGateway extends \WC_Bunq_Gateway
+final class RecordingGateway extends Gateway
 {
     /** @var string What check_payment_status() reports. */
     public $outcome = 'pending';
@@ -57,40 +61,40 @@ final class PaymentStatusTest extends TestCase
 
     public function testTheHooksAreRegistered()
     {
-        $this->assertSame(5, has_action('template_redirect', 'bunq_check_payment_on_return'), 'Before WooCommerce clears the cart at priority 20');
-        $this->assertSame(10, has_action('wc_bunq_check_payment', 'bunq_scheduled_payment_check'));
-        $this->assertSame(10, has_action('woocommerce_order_status_cancelled', 'bunq_cancel_payment_request_for_order'));
-        $this->assertSame(10, has_action('wc_bunq_cancel_payment_request', 'bunq_cancel_payment_request_now'));
+        $this->assertSame(5, has_action('template_redirect', array($this->monitor(), 'check_on_return')), 'Before WooCommerce clears the cart at priority 20');
+        $this->assertSame(10, has_action('wc_bunq_check_payment', array($this->monitor(), 'run_scheduled_check')));
+        $this->assertSame(10, has_action('woocommerce_order_status_cancelled', array($this->monitor(), 'queue_cancellation')));
+        $this->assertSame(10, has_action('wc_bunq_cancel_payment_request', array($this->monitor(), 'cancel_payment_request')));
     }
 
     public function testTheRegisteredGatewayIsUsed()
     {
-        $this->assertSame($this->gateway, bunq_get_gateway());
+        $this->assertSame($this->gateway, Plugin::instance()->gateway());
 
         Environment::$gateways = array();
-        $this->assertNull(bunq_get_gateway());
+        $this->assertNull(Plugin::instance()->gateway());
 
         Environment::$gateways = array('bunq' => new \WC_Payment_Gateway());
-        $this->assertNull(bunq_get_gateway(), 'Another gateway registered under our id is not ours');
+        $this->assertNull(Plugin::instance()->gateway(), 'Another gateway registered under our id is not ours');
     }
 
     public function testAnOrderAwaitsPaymentWhenItIsAnUnpaidBunqOrderWithAPaymentRequest()
     {
-        $this->assertTrue(bunq_order_awaits_payment($this->unpaidOrder()));
-        $this->assertTrue(bunq_order_awaits_payment($this->unpaidOrder(array('status' => 'failed'))));
+        $this->assertTrue(PaymentMonitor::order_awaits_payment($this->unpaidOrder()));
+        $this->assertTrue(PaymentMonitor::order_awaits_payment($this->unpaidOrder(array('status' => 'failed'))));
 
-        $this->assertFalse(bunq_order_awaits_payment(false));
-        $this->assertFalse(bunq_order_awaits_payment(null));
-        $this->assertFalse(bunq_order_awaits_payment($this->unpaidOrder(array('payment_method' => 'paypal'))));
-        $this->assertFalse(bunq_order_awaits_payment($this->unpaidOrder(array('status' => 'processing'))));
-        $this->assertFalse(bunq_order_awaits_payment($this->unpaidOrder(array('status' => 'cancelled'))));
-        $this->assertFalse(bunq_order_awaits_payment($this->unpaidOrder(array('meta' => array()))));
-        $this->assertFalse(bunq_order_awaits_payment($this->unpaidOrder(array('meta' => array('bunq_payment_request_id' => 'abc')))));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment(false));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment(null));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment($this->unpaidOrder(array('payment_method' => 'paypal'))));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment($this->unpaidOrder(array('status' => 'processing'))));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment($this->unpaidOrder(array('status' => 'cancelled'))));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment($this->unpaidOrder(array('meta' => array()))));
+        $this->assertFalse(PaymentMonitor::order_awaits_payment($this->unpaidOrder(array('meta' => array('bunq_payment_request_id' => 'abc')))));
     }
 
     public function testTheCheckDelaysGrowUpToTwoDays()
     {
-        $delays = bunq_payment_check_delays();
+        $delays = PaymentMonitor::check_delays();
 
         $this->assertSame(10 * MINUTE_IN_SECONDS, $delays[0]);
         $this->assertSame(2 * DAY_IN_SECONDS, end($delays));
@@ -102,8 +106,8 @@ final class PaymentStatusTest extends TestCase
 
     public function testACheckIsQueuedWithTheDelayOfTheAttempt()
     {
-        bunq_schedule_payment_check('42');
-        bunq_schedule_payment_check(42, 3);
+        PaymentMonitor::schedule_check('42');
+        PaymentMonitor::schedule_check(42, 3);
 
         $this->assertCount(2, Environment::$scheduledActions);
 
@@ -120,7 +124,7 @@ final class PaymentStatusTest extends TestCase
 
     public function testNoCheckIsQueuedAfterTheLastAttempt()
     {
-        bunq_schedule_payment_check(42, count(bunq_payment_check_delays()));
+        PaymentMonitor::schedule_check(42, count(PaymentMonitor::check_delays()));
 
         $this->assertSame(array(), Environment::$scheduledActions);
     }
@@ -129,7 +133,7 @@ final class PaymentStatusTest extends TestCase
     {
         $order = $this->unpaidOrder();
 
-        bunq_scheduled_payment_check($order->get_id(), 1);
+        $this->monitor()->run_scheduled_check($order->get_id(), 1);
 
         $this->assertSame(array($order->get_id()), $this->gateway->checked_orders);
         $this->assertCount(1, Environment::$scheduledActions);
@@ -142,7 +146,7 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder();
         $this->gateway->outcome = 'paid';
 
-        bunq_scheduled_payment_check($order->get_id(), 1);
+        $this->monitor()->run_scheduled_check($order->get_id(), 1);
 
         $this->assertSame(array($order->get_id()), $this->gateway->checked_orders);
         $this->assertSame(array(), Environment::$scheduledActions);
@@ -153,7 +157,7 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder();
         $this->gateway->check_exception = new \RuntimeException('bunq is down');
 
-        bunq_scheduled_payment_check($order->get_id(), 0);
+        $this->monitor()->run_scheduled_check($order->get_id(), 0);
 
         $this->assertLogged('error', 'RuntimeException: bunq is down');
         $this->assertCount(1, Environment::$scheduledActions);
@@ -164,8 +168,8 @@ final class PaymentStatusTest extends TestCase
     {
         $order = $this->unpaidOrder(array('status' => 'processing'));
 
-        bunq_scheduled_payment_check($order->get_id(), 0);
-        bunq_scheduled_payment_check(999, 0);
+        $this->monitor()->run_scheduled_check($order->get_id(), 0);
+        $this->monitor()->run_scheduled_check(999, 0);
 
         $this->assertSame(array(), $this->gateway->checked_orders);
         $this->assertSame(array(), Environment::$scheduledActions);
@@ -176,7 +180,7 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder();
         Environment::$gateways = array();
 
-        bunq_scheduled_payment_check($order->get_id(), 0);
+        $this->monitor()->run_scheduled_check($order->get_id(), 0);
 
         $this->assertSame(array(), Environment::$scheduledActions);
     }
@@ -186,7 +190,7 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder();
         $this->onOrderReceivedPage($order, $order->get_order_key());
 
-        bunq_check_payment_on_return();
+        $this->monitor()->check_on_return();
 
         $this->assertSame(array($order->get_id()), $this->gateway->checked_orders);
         $this->assertLogged('debug', 'Check on return for order #' . $order->get_order_number() . ': pending');
@@ -197,10 +201,10 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder();
 
         $this->onOrderReceivedPage($order, 'wrong-key');
-        bunq_check_payment_on_return();
+        $this->monitor()->check_on_return();
 
         $this->onOrderReceivedPage($order, null);
-        bunq_check_payment_on_return();
+        $this->monitor()->check_on_return();
 
         $this->assertSame(array(), $this->gateway->checked_orders);
     }
@@ -211,7 +215,7 @@ final class PaymentStatusTest extends TestCase
         $this->onOrderReceivedPage($order, $order->get_order_key());
         Environment::$wcEndpoint = 'order-pay';
 
-        bunq_check_payment_on_return();
+        $this->monitor()->check_on_return();
 
         $this->assertSame(array(), $this->gateway->checked_orders);
     }
@@ -221,7 +225,7 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder(array('status' => 'processing'));
         $this->onOrderReceivedPage($order, $order->get_order_key());
 
-        bunq_check_payment_on_return();
+        $this->monitor()->check_on_return();
 
         $this->assertSame(array(), $this->gateway->checked_orders);
     }
@@ -232,7 +236,7 @@ final class PaymentStatusTest extends TestCase
         $this->onOrderReceivedPage($order, $order->get_order_key());
         $this->gateway->check_exception = new \RuntimeException('bunq is down');
 
-        bunq_check_payment_on_return();
+        $this->monitor()->check_on_return();
 
         $this->assertLogged('error', 'RuntimeException: bunq is down');
     }
@@ -241,7 +245,7 @@ final class PaymentStatusTest extends TestCase
     {
         $order = $this->unpaidOrder();
 
-        bunq_cancel_payment_request_for_order($order->get_id(), $order);
+        $this->monitor()->queue_cancellation($order->get_id(), $order);
 
         $this->assertSame(array(
             array('hook' => 'wc_bunq_cancel_payment_request', 'args' => array($order->get_id()), 'group' => 'bunq'),
@@ -252,7 +256,7 @@ final class PaymentStatusTest extends TestCase
     {
         $order = $this->unpaidOrder();
 
-        bunq_cancel_payment_request_for_order($order->get_id());
+        $this->monitor()->queue_cancellation($order->get_id());
 
         $this->assertCount(1, Environment::$asyncActions);
     }
@@ -263,10 +267,10 @@ final class PaymentStatusTest extends TestCase
         $no_request = $this->unpaidOrder(array('meta' => array()));
         $already_final = $this->unpaidOrder(array('meta' => array('bunq_payment_request_id' => 55, 'bunq_payment_request_status' => 'EXPIRED')));
 
-        bunq_cancel_payment_request_for_order($other_method->get_id(), $other_method);
-        bunq_cancel_payment_request_for_order($no_request->get_id(), $no_request);
-        bunq_cancel_payment_request_for_order($already_final->get_id(), $already_final);
-        bunq_cancel_payment_request_for_order(999);
+        $this->monitor()->queue_cancellation($other_method->get_id(), $other_method);
+        $this->monitor()->queue_cancellation($no_request->get_id(), $no_request);
+        $this->monitor()->queue_cancellation($already_final->get_id(), $already_final);
+        $this->monitor()->queue_cancellation(999);
 
         $this->assertSame(array(), Environment::$asyncActions);
     }
@@ -296,7 +300,7 @@ final class PaymentStatusTest extends TestCase
     {
         $order = $this->unpaidOrder();
 
-        bunq_cancel_payment_request_now($order->get_id());
+        $this->monitor()->cancel_payment_request($order->get_id());
 
         $this->assertSame(array(55), $this->gateway->cancelled_requests);
         $this->assertSame('CANCELLED', $order->get_meta('bunq_payment_request_status'));
@@ -310,9 +314,9 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder(array('meta' => array('bunq_payment_request_id' => 55, 'bunq_payment_request_status' => 'EXPIRED')));
         $other_method = $this->unpaidOrder(array('payment_method' => 'paypal'));
 
-        bunq_cancel_payment_request_now($order->get_id());
-        bunq_cancel_payment_request_now($other_method->get_id());
-        bunq_cancel_payment_request_now(999);
+        $this->monitor()->cancel_payment_request($order->get_id());
+        $this->monitor()->cancel_payment_request($other_method->get_id());
+        $this->monitor()->cancel_payment_request(999);
 
         $this->assertSame(array(), $this->gateway->cancelled_requests);
         $this->assertSame('EXPIRED', $order->get_meta('bunq_payment_request_status'));
@@ -323,7 +327,7 @@ final class PaymentStatusTest extends TestCase
         $order = $this->unpaidOrder();
         $this->gateway->cancel_exception = new \RuntimeException('bunq is down');
 
-        bunq_cancel_payment_request_now($order->get_id());
+        $this->monitor()->cancel_payment_request($order->get_id());
 
         $this->assertLogged('warning', 'RuntimeException: bunq is down');
         $this->assertSame('', $order->get_meta('bunq_payment_request_status'));
@@ -343,5 +347,10 @@ final class PaymentStatusTest extends TestCase
         Environment::$wcEndpoint = 'order-received';
         $GLOBALS['wp'] = (object) array('query_vars' => array('order-received' => (string) $order->get_id()));
         $_GET = $key === null ? array() : array('key' => $key);
+    }
+
+    private function monitor()
+    {
+        return Plugin::instance()->payment_monitor();
     }
 }

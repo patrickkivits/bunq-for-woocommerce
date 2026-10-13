@@ -81,6 +81,7 @@ write_agent_guidance() {
   `wordpress_tests` database and root/root on 127.0.0.1, matching the defaults in `tests/wp-tests-config.php`.
 - Unit tests: `tests/vendor/bin/phpunit` (add `--exclude-group slow` while iterating).
 - Integration tests: `tests/vendor/bin/phpunit -c phpunit-integration.xml.dist`.
+- Coding standards: `tests/vendor/bin/phpcs` (WordPress Coding Standards, see `phpcs.xml.dist`).
 MD
 }
 

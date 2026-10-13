@@ -29,6 +29,7 @@ final class Environment
     public static $loadedTextdomains = array();
     public static $redirects = array();
     public static $isAdmin = false;
+    public static $doingAjax = false;
     public static $isSsl = false;
     public static $currentUserId = 0;
     public static $currentUserCan = true;
@@ -59,6 +60,15 @@ final class Environment
         self::$loadedTextdomains = array();
         self::$redirects = array();
         self::$isAdmin = false;
+        self::$doingAjax = false;
+        $GLOBALS['pagenow'] = 'index.php';
+
+        // Secrets the logger learned in an earlier test (the plugin is not loaded yet on the first reset).
+        if (class_exists(\PatrickKivits\BunqForWooCommerce\Logger::class)) {
+            $secrets = new \ReflectionProperty(\PatrickKivits\BunqForWooCommerce\Logger::class, 'secrets');
+            $secrets->setAccessible(true);
+            $secrets->setValue(null, array());
+        }
         self::$isSsl = false;
         self::$currentUserId = 0;
         self::$currentUserCan = true;

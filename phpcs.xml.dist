@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<ruleset name="bunq for WooCommerce">
+    <description>WordPress Coding Standards for the plugin code; tests and development scripts follow their own style.</description>
+
+    <file>.</file>
+    <exclude-pattern>/vendor/*</exclude-pattern>
+    <exclude-pattern>/tests/*</exclude-pattern>
+    <exclude-pattern>/.github/*</exclude-pattern>
+    <exclude-pattern>/.amp/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg name="basepath" value="."/>
+    <arg name="parallel" value="8"/>
+    <arg value="sp"/>
+
+    <!-- The minimum versions from the plugin header. -->
+    <config name="testVersion" value="7.3-"/>
+    <config name="minimum_wp_version" value="4.7"/>
+
+    <rule ref="WordPress">
+        <!-- src/ follows PSR-4 (one class per file, named after the class), as WooCommerce's own src/ does. -->
+        <exclude name="WordPress.Files.FileName"/>
+        <!-- Also demands @throws for exceptions the function catches itself (process_payment(), process_refund()). -->
+        <exclude name="Squiz.Commenting.FunctionCommentThrowTag"/>
+    </rule>
+
+    <rule ref="WordPress.WP.Capabilities">
+        <properties>
+            <property name="custom_capabilities" type="array">
+                <element value="manage_woocommerce"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="bunq-for-woocommerce"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="PatrickKivits\BunqForWooCommerce"/>
+                <element value="bunq_for_woocommerce"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="PHPCompatibilityWP"/>
+</ruleset>

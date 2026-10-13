@@ -3,8 +3,8 @@
 namespace BunqTest;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use WC_Bunq_Gateway;
-use WC_Bunq_WooCommerce_Block_Checkout;
+use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 
 /**
  * The payment method integration for the WooCommerce block checkout.
@@ -18,7 +18,7 @@ final class BlockCheckoutTest extends TestCase
         do_action('woocommerce_blocks_payment_method_type_registration', $registry);
 
         $this->assertArrayHasKey('bunq', $registry->registered);
-        $this->assertInstanceOf(WC_Bunq_WooCommerce_Block_Checkout::class, $registry->registered['bunq']);
+        $this->assertInstanceOf(CheckoutIntegration::class, $registry->registered['bunq']);
     }
 
     public function testTheRegisteredGatewayInstanceIsReused()
@@ -26,7 +26,7 @@ final class BlockCheckoutTest extends TestCase
         $gateway = $this->createGateway($this->liveSettings());
         $this->registerGateway($gateway);
 
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
 
         $this->assertSame($gateway, $this->gatewayOf($method));
@@ -34,36 +34,36 @@ final class BlockCheckoutTest extends TestCase
 
     public function testAGatewayIsCreatedWhenWooCommerceHasNoneRegistered()
     {
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
 
-        $this->assertInstanceOf(WC_Bunq_Gateway::class, $this->gatewayOf($method));
+        $this->assertInstanceOf(Gateway::class, $this->gatewayOf($method));
     }
 
     public function testTheMethodIsActiveWhenTheGatewayIsAvailable()
     {
         $this->registerGateway($this->createGateway($this->liveSettings(array('api_context' => '{"live":1}'))));
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
         $this->assertTrue($method->is_active());
 
         $this->registerGateway($this->createGateway($this->liveSettings()));
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
         $this->assertFalse($method->is_active());
     }
 
     public function testTheCheckoutScriptIsRegisteredWithItsDependencies()
     {
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
 
         $this->assertSame(array('wc-bunq-blocks-integration'), $method->get_payment_method_script_handles());
 
         $script = Environment::$registeredScripts['wc-bunq-blocks-integration'];
-        $this->assertSame('https://shop.example/wp-content/plugins/bunq-for-woocommerce/includes/block/checkout.js', $script['src']);
+        $this->assertSame('https://shop.example/wp-content/plugins/bunq-for-woocommerce/assets/js/block-checkout.js', $script['src']);
         $this->assertSame(array('wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'), $script['deps']);
-        $this->assertSame((string) filemtime(dirname(__DIR__, 2) . '/includes/block/checkout.js'), $script['ver'], 'Cache busting by modification time');
+        $this->assertSame((string) filemtime(dirname(__DIR__, 2) . '/assets/js/block-checkout.js'), $script['ver'], 'Cache busting by modification time');
         $this->assertTrue($script['in_footer']);
     }
 
@@ -76,7 +76,7 @@ final class BlockCheckoutTest extends TestCase
             'enabled_payment_methods' => array('ideal', 'card'),
         ))));
         WC()->cart = (object) array('total' => '0.50');
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
 
         $this->assertSame(array(
@@ -92,7 +92,7 @@ final class BlockCheckoutTest extends TestCase
     public function testEveryEnabledPaymentMethodIsOfferedWithoutACart()
     {
         $this->registerGateway($this->createGateway($this->liveSettings(array('direct_gateway' => 'yes'))));
-        $method = new WC_Bunq_WooCommerce_Block_Checkout();
+        $method = new CheckoutIntegration();
         $method->initialize();
 
         $data = $method->get_payment_method_data();
@@ -100,9 +100,9 @@ final class BlockCheckoutTest extends TestCase
         $this->assertSame(array('card', 'ideal', 'bancontact', 'bunq-transfer'), array_keys($data['payment_methods']));
     }
 
-    private function gatewayOf(WC_Bunq_WooCommerce_Block_Checkout $method)
+    private function gatewayOf(CheckoutIntegration $method)
     {
-        $property = new \ReflectionProperty(WC_Bunq_WooCommerce_Block_Checkout::class, 'gateway');
+        $property = new \ReflectionProperty(CheckoutIntegration::class, 'gateway');
         $property->setAccessible(true);
 
         return $property->getValue($method);

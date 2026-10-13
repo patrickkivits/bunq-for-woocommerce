@@ -1,5 +1,7 @@
 # bunq for WooCommerce
 
+> `readme.txt` is the readme for the WordPress.org plugin directory; keep its `Stable tag` equal to the plugin version and its changelog up to date with every release.
+
 Contributors: patrickkivits\
 Donate link: https://bunq.me/patrickkivits \
 Tags: woocommerce, psp, payment gateway, bunq, ideal, credit card, bancontact\
@@ -27,7 +29,7 @@ https://bunq-for-woocommerce.patrickkivits.com/
 - HTTPS/SSL certificate (for callbacks/payment processing to work)
 - PHP version: >= 7.3 (up to and including 8.5)
 - PHP extensions: openssl, curl, json, mbstring
-- Wordpress version: >= 3.8
+- WordPress version: >= 4.7
 - WooCommerce version: >= 2.2
 
 ## Installation
@@ -76,7 +78,7 @@ WooCommerce records the refund as soon as the draft is created, so an unapproved
 
 Everything the plugin does with bunq (callbacks received, payments matched, refunds, errors) is written to **WooCommerce** > **Status** > **Logs** (source: `bunq`). Look there first when an order does not change status.
 
-If the **Live API Context** stays empty after the OAuth authorization, or the **Bank account** dropdown shows *API key not valid or not setup yet*:
+If the settings page still says *Not connected to bunq yet* after the OAuth authorization, or the **Bank account** dropdown shows *API key not valid or not setup yet*:
 
 1. The plugin shows the error returned by bunq as a notice at the top of the plugin settings page right after the redirect back from bunq.
 2. Full details are written to **WooCommerce** > **Status** > **Logs** (source: `bunq`).
@@ -101,6 +103,23 @@ The bunq.me payment page itself is hosted by bunq and follows the language of th
 
 ## Development
 
+The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForWooCommerce`), loaded through the committed Composer autoloader (PSR-4). `bunq-for-woocommerce.php` only defines the plugin file constant, loads the autoloader and boots `Plugin`, which registers every hook:
+
+| Class | Responsibility |
+| --- | --- |
+| `Plugin` | Hooks into WordPress and WooCommerce, shares the bunq API client within a request |
+| `Requirements` | Checks WordPress, WooCommerce, PHP and OpenSSL; deactivates the plugin when they do not suffice |
+| `Gateway\Gateway` | The WooCommerce payment gateway: settings, checkout, payments, refunds, payment status |
+| `Gateway\CallbackHandler` | The callback bunq sends to `/wc-api/wc_bunq_gateway/` |
+| `Gateway\PaymentMethods`, `Gateway\SettingsFields` | The bunq.me payment methods and the settings form |
+| `Orders\PaymentMonitor` | Payment checks on return and from Action Scheduler; cancels the bunq payment request of cancelled orders |
+| `Blocks\CheckoutIntegration` | The block checkout payment method (script in `assets/js/block-checkout.js`) |
+| `Bunq\ApiClient`, `Bunq\OAuthClient` | Every call to bunq (rate limited and retried) and the OAuth authorization |
+
+Secrets: the API keys and API contexts (which hold the private key and the session token) live in the `bunq_for_woocommerce_credentials` option, which is not autoloaded and is never a settings field, so the settings page and the WooCommerce REST API neither show nor accept them. The OAuth client secret is a settings field that is never rendered back. Everything logged or shown as an error goes through `Logger`, which masks every value registered with `Logger::add_secret()`; register any new secret there. The OAuth return is only handled for a user with `manage_woocommerce` on the settings page (`Gateway::is_oauth_return()`), with the state that user's authorization request stored.
+
+The class names of earlier versions (`WC_Bunq_Gateway`, `WC_Bunq_WooCommerce_Block_Checkout`) still resolve to these classes. After adding a class, nothing needs to be regenerated; after changing the `autoload` section of `composer.json`, run `composer dump-autoload` in the repository root.
+
 There are two test suites, both installed from `tests/composer.json` so that nothing lands in the committed `vendor/` directory that ships in the plugin zip:
 
 ```
@@ -122,7 +141,15 @@ docker run -d --name bunq-wc-tests -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATA
 tests/vendor/bin/phpunit -c phpunit-integration.xml.dist
 ```
 
-The WooCommerce version under test is the one pinned in `tests/composer.lock`; update it with `composer update --working-dir=tests wpackagist-plugin/woocommerce`. Both suites run on every push through GitHub Actions.
+The unit and integration suites share `tests/FakeBunqApi.php`, which stands in for bunq so the payment, payment status, refund and API context flows run without a bunq account.
+
+The code follows the [WordPress Coding Standards](https://github.com/WordPress/WordPress-Coding-Standards) and stays compatible with PHP 7.3 (configured in `phpcs.xml.dist`):
+
+```
+tests/vendor/bin/phpcs
+```
+
+The WooCommerce version under test is the one pinned in `tests/composer.lock`; update it with `composer update --working-dir=tests wpackagist-plugin/woocommerce`. The suites and the coding standards check run on every push through GitHub Actions.
 
 ## Disclaimer
 

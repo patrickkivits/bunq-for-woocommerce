@@ -2,7 +2,7 @@
 
 namespace BunqTest\Integration;
 
-use WC_Bunq_Gateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 
 abstract class TestCase extends \WP_UnitTestCase
 {
@@ -70,7 +70,7 @@ abstract class TestCase extends \WP_UnitTestCase
      * Save gateway settings and instantiate the gateway the way WooCommerce does.
      *
      * @param array|null $settings The woocommerce_bunq_settings option; null for a shop that never saved them.
-     * @return WC_Bunq_Gateway
+     * @return Gateway
      */
     protected function createGateway(?array $settings = null)
     {
@@ -78,11 +78,22 @@ abstract class TestCase extends \WP_UnitTestCase
             update_option('woocommerce_bunq_settings', $settings);
         }
 
-        return new WC_Bunq_Gateway();
+        return new Gateway();
     }
 
     /**
-     * A complete settings array as saved by a shop that finished the setup in live mode.
+     * The stored API keys and API contexts (kept apart from the settings since 1.7.0).
+     *
+     * @return array
+     */
+    protected function credentials()
+    {
+        return get_option(\PatrickKivits\BunqForWooCommerce\Gateway\Gateway::CREDENTIALS_OPTION, array());
+    }
+
+    /**
+     * A complete settings array as saved by a shop that finished the setup in live mode. The API keys and contexts
+     * are among them the way versions before 1.7.0 stored them; the gateway moves them to their own option.
      */
     protected function liveSettings(array $overrides = array())
     {
@@ -105,9 +116,9 @@ abstract class TestCase extends \WP_UnitTestCase
     }
 
     /**
-     * Make this instance the one WooCommerce hands out for the bunq gateway (used by bunq_get_gateway()).
+     * Make this instance the one WooCommerce hands out for the bunq gateway (used by Plugin::gateway()).
      */
-    protected function useGateway(WC_Bunq_Gateway $gateway)
+    protected function useGateway(Gateway $gateway)
     {
         $gateways = WC()->payment_gateways();
 

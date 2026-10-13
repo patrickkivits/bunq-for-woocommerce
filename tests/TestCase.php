@@ -14,7 +14,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * Instantiate the gateway the way WooCommerce does, optionally with saved settings.
      *
      * @param array|null $settings The saved woocommerce_bunq_settings option; null for a shop that never saved them.
-     * @return \WC_Bunq_Gateway
+     * @return \PatrickKivits\BunqForWooCommerce\Gateway\Gateway
      */
     protected function createGateway(?array $settings = null)
     {
@@ -22,19 +22,30 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             update_option('woocommerce_bunq_settings', $settings);
         }
 
-        return new \WC_Bunq_Gateway();
+        return new \PatrickKivits\BunqForWooCommerce\Gateway\Gateway();
     }
 
     /**
      * Make WooCommerce hand out this gateway instance (WC()->payment_gateways()->payment_gateways()).
      */
-    protected function registerGateway(\WC_Bunq_Gateway $gateway)
+    protected function registerGateway(\PatrickKivits\BunqForWooCommerce\Gateway\Gateway $gateway)
     {
         Environment::$gateways['bunq'] = $gateway;
     }
 
     /**
-     * A complete settings array as saved by a shop that finished the setup in live mode.
+     * The stored API keys and API contexts (kept apart from the settings since 1.7.0).
+     *
+     * @return array
+     */
+    protected function credentials()
+    {
+        return get_option(\PatrickKivits\BunqForWooCommerce\Gateway\Gateway::CREDENTIALS_OPTION, array());
+    }
+
+    /**
+     * A complete settings array as saved by a shop that finished the setup in live mode. The API keys and contexts
+     * are among them the way versions before 1.7.0 stored them; the gateway moves them to their own option.
      *
      * @param array $overrides
      * @return array

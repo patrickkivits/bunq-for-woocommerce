@@ -13,10 +13,16 @@ $root = dirname(__DIR__, 2);
 $domain = 'bunq-for-woocommerce';
 $functions = ['__', '_e', 'esc_html__', 'esc_html_e', 'esc_attr__', 'esc_attr_e'];
 
-$files = array_merge(
-    [$root.'/bunq-for-woocommerce.php', $root.'/uninstall.php'],
-    glob($root.'/includes/*.php')
-);
+$files = [$root.'/bunq-for-woocommerce.php', $root.'/uninstall.php'];
+$sources = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/src', FilesystemIterator::SKIP_DOTS));
+$src_files = [];
+foreach ($sources as $source) {
+    if ($source->getExtension() === 'php') {
+        $src_files[] = $source->getPathname();
+    }
+}
+sort($src_files);
+$files = array_merge($files, $src_files);
 
 $entries = [];
 

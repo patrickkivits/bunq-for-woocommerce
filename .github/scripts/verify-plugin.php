@@ -11,6 +11,12 @@
  * this file runs, so everything the plugin registers at load time is in place.
  */
 
+use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
+use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
+use PatrickKivits\BunqForWooCommerce\Plugin;
+use PatrickKivits\BunqForWooCommerce\Requirements;
+
 if ( ! function_exists( 'is_plugin_active' ) ) {
     require_once ABSPATH . 'wp-admin/includes/plugin.php';
 }
@@ -37,12 +43,14 @@ WP_CLI::log( sprintf(
 $check( defined( 'WC_VERSION' ), 'WooCommerce is loaded' );
 $check( is_plugin_active( 'bunq-for-woocommerce/bunq-for-woocommerce.php' ), 'bunq for WooCommerce is active' );
 
-// The plugin deactivates itself on admin_init when this returns false.
-$check( function_exists( 'bunq_requirements_check' ), 'bunq_requirements_check() is defined' );
-$check( function_exists( 'bunq_requirements_check' ) && bunq_requirements_check(), 'bunq_requirements_check() passes' );
+// The plugin's classes are autoloaded from src/.
+$check( class_exists( Plugin::class ), 'Plugin class is autoloaded' );
 
-// The gateway class is declared inside the plugins_loaded hook.
-$check( class_exists( 'WC_Bunq_Gateway' ), 'WC_Bunq_Gateway class is declared' );
+// The plugin deactivates itself on admin_init when this fails.
+$check( ( new Requirements( BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE ) )->check(), 'the requirements check passes' );
+
+$check( class_exists( Gateway::class ), 'Gateway class is autoloaded' );
+$check( class_exists( 'WC_Bunq_Gateway' ) && is_a( 'WC_Bunq_Gateway', Gateway::class, true ), 'the WC_Bunq_Gateway class name of earlier versions still works' );
 
 // The gateway is registered with WooCommerce and can be instantiated.
 $gateways = WC()->payment_gateways()->payment_gateways();
@@ -51,7 +59,7 @@ $gateway  = isset( $gateways['bunq'] ) ? $gateways['bunq'] : null;
 $check( $gateway instanceof WC_Payment_Gateway, 'gateway "bunq" is registered with WooCommerce' );
 
 if ( $gateway ) {
-    $check( $gateway instanceof WC_Bunq_Gateway, 'gateway "bunq" is an instance of WC_Bunq_Gateway' );
+    $check( $gateway instanceof Gateway, 'gateway "bunq" is an instance of ' . Gateway::class );
     $check( 'bunq' === $gateway->get_method_title(), 'gateway method title is "bunq"' );
     $check( in_array( 'products', (array) $gateway->supports, true ), 'gateway supports "products"' );
     $check( in_array( 'refunds', (array) $gateway->supports, true ), 'gateway supports "refunds"' );
@@ -69,10 +77,11 @@ if ( $gateway ) {
 }
 
 // Payment confirmation outside the callback and cleanup of cancelled orders.
-$check( function_exists( 'bunq_schedule_payment_check' ), 'bunq_schedule_payment_check() is defined' );
-$check( false !== has_action( 'template_redirect', 'bunq_check_payment_on_return' ), 'payment check on the order-received page is hooked' );
-$check( false !== has_action( 'wc_bunq_check_payment', 'bunq_scheduled_payment_check' ), 'scheduled payment check is hooked' );
-$check( false !== has_action( 'woocommerce_order_status_cancelled', 'bunq_cancel_payment_request_for_order' ), 'cancelled orders cancel the bunq payment request' );
+$monitor = Plugin::instance()->payment_monitor();
+$check( false !== has_action( 'template_redirect', array( $monitor, 'check_on_return' ) ), 'payment check on the order-received page is hooked' );
+$check( false !== has_action( PaymentMonitor::CHECK_ACTION, array( $monitor, 'run_scheduled_check' ) ), 'scheduled payment check is hooked' );
+$check( false !== has_action( 'woocommerce_order_status_cancelled', array( $monitor, 'queue_cancellation' ) ), 'cancelled orders cancel the bunq payment request' );
+$check( false !== has_action( PaymentMonitor::CANCEL_ACTION, array( $monitor, 'cancel_payment_request' ) ), 'queued cancellations are hooked' );
 $check( function_exists( 'as_schedule_single_action' ), 'Action Scheduler is available' );
 
 // Translations ship with the plugin and load from its languages/ folder. Since WordPress 6.7
@@ -126,8 +135,8 @@ if ( class_exists( 'Automattic\WooCommerce\Blocks\Package' )
     if ( did_action( 'woocommerce_blocks_payment_method_type_registration' ) ) {
         $check( $registry->is_registered( 'bunq' ), 'block checkout payment method "bunq" is registered' );
         $check(
-            $registry->is_registered( 'bunq' ) && $registry->get_registered( 'bunq' ) instanceof WC_Bunq_WooCommerce_Block_Checkout,
-            'block checkout payment method is an instance of WC_Bunq_WooCommerce_Block_Checkout'
+            $registry->is_registered( 'bunq' ) && $registry->get_registered( 'bunq' ) instanceof CheckoutIntegration,
+            'block checkout payment method is an instance of ' . CheckoutIntegration::class
         );
     } else {
         WP_CLI::log( '  skip block payment method registration did not run in this context' );

@@ -2,6 +2,13 @@
 
 namespace BunqTest;
 
+use PatrickKivits\BunqForWooCommerce\Logger;
+use PatrickKivits\BunqForWooCommerce\Support\Money;
+use PatrickKivits\BunqForWooCommerce\Support\Url;
+
+/**
+ * URL and money helpers and the logger.
+ */
 final class HelpersTest extends TestCase
 {
     /**
@@ -9,7 +16,7 @@ final class HelpersTest extends TestCase
      */
     public function testLocalUrlsAreRecognised($url)
     {
-        $this->assertTrue(bunq_helper_is_local_url($url), $url);
+        $this->assertTrue(Url::is_local($url), $url);
     }
 
     public function localUrls()
@@ -33,7 +40,7 @@ final class HelpersTest extends TestCase
      */
     public function testPublicUrlsAreNotLocal($url)
     {
-        $this->assertFalse(bunq_helper_is_local_url($url), $url);
+        $this->assertFalse(Url::is_local($url), $url);
     }
 
     public function publicUrls()
@@ -53,8 +60,8 @@ final class HelpersTest extends TestCase
      */
     public function testAmountsAreComparedAsDecimals($a, $b, $expected)
     {
-        $this->assertSame($expected, bunq_helper_amounts_match($a, $b));
-        $this->assertSame($expected, bunq_helper_amounts_match($b, $a));
+        $this->assertSame($expected, Money::amounts_match($a, $b));
+        $this->assertSame($expected, Money::amounts_match($b, $a));
     }
 
     public function amounts()
@@ -73,19 +80,19 @@ final class HelpersTest extends TestCase
 
     public function testFormattedErrorIsTheTrimmedMessage()
     {
-        $this->assertSame('bunq said no', bunq_helper_format_error(new \RuntimeException("  bunq said no \n")));
+        $this->assertSame('bunq said no', Logger::format_error(new \RuntimeException("  bunq said no \n")));
     }
 
     public function testFormattedErrorFallsBackToTheExceptionClass()
     {
-        $this->assertSame('RuntimeException', bunq_helper_format_error(new \RuntimeException('')));
-        $this->assertSame('RuntimeException', bunq_helper_format_error(new \RuntimeException('   ')));
+        $this->assertSame('RuntimeException', Logger::format_error(new \RuntimeException('')));
+        $this->assertSame('RuntimeException', Logger::format_error(new \RuntimeException('   ')));
     }
 
     public function testMessagesAreLoggedToTheWooCommerceLogUnderTheBunqSource()
     {
-        bunq_helper_log('something happened');
-        bunq_helper_log('for the record', 'info');
+        Logger::log('something happened');
+        Logger::log('for the record', 'info');
 
         $this->assertSame(array(
             array('level' => 'error', 'message' => 'something happened', 'source' => 'bunq'),
@@ -96,7 +103,7 @@ final class HelpersTest extends TestCase
     public function testThrowablesAreLoggedWithTheirClassAndLocation()
     {
         $exception = new \RuntimeException('bunq is down');
-        bunq_helper_log($exception, 'warning');
+        Logger::log($exception, 'warning');
 
         $this->assertCount(1, Environment::$logs);
         $this->assertSame('warning', Environment::$logs[0]['level']);
@@ -111,7 +118,7 @@ final class HelpersTest extends TestCase
         $_SERVER['HTTP_HOST'] = 'shop.example';
         $_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-settings&section=bunq';
 
-        $this->assertSame('http://shop.example/wp-admin/admin.php?page=wc-settings&section=bunq', bunq_helper_get_current_url());
+        $this->assertSame('http://shop.example/wp-admin/admin.php?page=wc-settings&section=bunq', Url::current());
     }
 
     public function testCurrentUrlIsHttpsBehindSsl()
@@ -120,18 +127,10 @@ final class HelpersTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/';
 
         Environment::$isSsl = true;
-        $this->assertSame('https://shop.example/', bunq_helper_get_current_url());
+        $this->assertSame('https://shop.example/', Url::current());
 
         Environment::$isSsl = false;
         $_SERVER['HTTPS'] = 'on';
-        $this->assertSame('https://shop.example/', bunq_helper_get_current_url());
-    }
-
-    public function testRemoveUrlParameter()
-    {
-        $this->assertSame(
-            'https://shop.example/wp-admin/admin.php?page=wc-settings&section=bunq',
-            bunq_helper_remove_url_parameter('code', 'https://shop.example/wp-admin/admin.php?page=wc-settings&code=abc&section=bunq')
-        );
+        $this->assertSame('https://shop.example/', Url::current());
     }
 }

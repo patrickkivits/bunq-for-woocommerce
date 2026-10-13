@@ -133,6 +133,7 @@ function delete_transient($key)
 // --- Request, user and site ---------------------------------------------------------------------------------
 
 function is_admin() { return Environment::$isAdmin; }
+function wp_doing_ajax() { return Environment::$doingAjax; }
 function is_ssl() { return Environment::$isSsl; }
 function current_user_can($capability) { return Environment::$currentUserCan; }
 function get_current_user_id() { return Environment::$currentUserId; }
@@ -323,6 +324,17 @@ function as_schedule_single_action($timestamp, $hook, $args = array(), $group = 
     return count(Environment::$scheduledActions);
 }
 
+function as_next_scheduled_action($hook, $args = null, $group = '')
+{
+    foreach (Environment::$scheduledActions as $action) {
+        if ($action['hook'] === $hook && ($args === null || $action['args'] === $args) && ($group === '' || $action['group'] === $group)) {
+            return $action['timestamp'];
+        }
+    }
+
+    return false;
+}
+
 function as_enqueue_async_action($hook, $args = array(), $group = '')
 {
     Environment::$asyncActions[] = compact('hook', 'args', 'group');
@@ -373,6 +385,8 @@ class WooCommerce
 {
     /** @var object|null Cart with a "total" property, null when there is none (admin, empty cart). */
     public $cart = null;
+    /** @var string Base of the URLs api_request_url() hands out. */
+    public $home_url = 'https://shop.example';
     private $payment_gateways;
 
     public function payment_gateways()
@@ -382,7 +396,7 @@ class WooCommerce
 
     public function api_request_url($request)
     {
-        return 'https://shop.example/wc-api/' . $request . '/';
+        return $this->home_url . '/wc-api/' . $request . '/';
     }
 }
 
@@ -564,15 +578,25 @@ class WC_Payment_Gateway
 
         foreach ($this->get_form_fields() as $key => $field) {
             $post_key = $this->plugin_id . $this->id . '_' . $key;
+            $value = isset($_POST[$post_key]) ? $_POST[$post_key] : null;
 
-            if ($field['type'] === 'checkbox') {
-                $this->settings[$key] = isset($_POST[$post_key]) ? 'yes' : 'no';
+            if ($field['type'] === 'title') {
+                continue;
+            } elseif ($field['type'] === 'checkbox') {
+                $this->settings[$key] = $value !== null ? 'yes' : 'no';
+            } elseif (is_callable(array($this, 'validate_' . $field['type'] . '_field'))) {
+                $this->settings[$key] = $this->{'validate_' . $field['type'] . '_field'}($key, $value);
             } else {
-                $this->settings[$key] = isset($_POST[$post_key]) ? $_POST[$post_key] : '';
+                $this->settings[$key] = $value !== null ? $value : '';
             }
         }
 
         return update_option($this->get_option_key(), $this->settings, 'yes');
+    }
+
+    public function validate_password_field($key, $value)
+    {
+        return trim(stripslashes($value === null ? '' : $value));
     }
 
     public function is_available()

@@ -1,13 +1,16 @@
 <?php
 /**
  * PHPUnit bootstrap: loads the WordPress/WooCommerce stand-ins and then the plugin itself, the way WordPress
- * would (the plugin file, followed by the plugins_loaded and woocommerce_blocks_loaded actions).
+ * would (the plugin file, followed by the woocommerce_blocks_loaded action).
  */
 
 // The bunq SDK still declares implicitly nullable parameters, which PHP 8.4+ reports as deprecated whenever one
 // of its classes is compiled. That is the SDK's concern, not the plugin's, so deprecations are left out here just
 // as they are in the compatibility workflows.
 error_reporting(E_ALL & ~E_DEPRECATED);
+
+// The plugin's files refuse to run outside WordPress.
+define('ABSPATH', __DIR__ . '/');
 
 require __DIR__ . '/Environment.php';
 require __DIR__ . '/stubs/wordpress.php';
@@ -22,8 +25,9 @@ BunqTest\Environment::$options['wc_bunq_gateway.requirements'] = md5(PHP_VERSION
 
 require dirname(__DIR__) . '/bunq-for-woocommerce.php';
 
-do_action('plugins_loaded');            // declares WC_Bunq_Gateway
-do_action('woocommerce_blocks_loaded');  // loads the block checkout integration
+do_action('woocommerce_blocks_loaded');  // registers the block checkout integration
+
+require __DIR__ . '/FakeBunqApi.php';
 
 BunqTest\Environment::$bootHooks = BunqTest\Environment::$hooks;
 BunqTest\Environment::reset();

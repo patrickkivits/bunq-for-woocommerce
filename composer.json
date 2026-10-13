@@ -13,5 +13,10 @@
         "ext-curl": "*",
         "ext-json": "*",
         "ext-mbstring": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "PatrickKivits\\BunqForWooCommerce\\": "src/"
+        }
     }
 }

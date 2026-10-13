@@ -5,8 +5,10 @@ namespace BunqTest\Integration;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WC_Bunq_Gateway;
-use WC_Bunq_WooCommerce_Block_Checkout;
+use PatrickKivits\BunqForWooCommerce\Plugin;
+use PatrickKivits\BunqForWooCommerce\Requirements;
+use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 
 /**
  * What the plugin registers with a real WordPress and WooCommerce once it is loaded.
@@ -15,10 +17,10 @@ final class PluginTest extends TestCase
 {
     public function testTheRequirementsAreMet()
     {
-        $this->assertTrue(bunq_requirements_check());
+        $this->assertTrue((new Requirements(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE))->check());
         $this->assertSame(
             md5(PHP_VERSION . '|' . OPENSSL_VERSION_TEXT),
-            get_option(BUNQ_REQUIREMENTS_OPTION),
+            get_option(Requirements::OPTION),
             'The successful OpenSSL check is remembered for this PHP build'
         );
     }
@@ -28,7 +30,7 @@ final class PluginTest extends TestCase
         $gateways = WC()->payment_gateways()->payment_gateways();
 
         $this->assertArrayHasKey('bunq', $gateways);
-        $this->assertInstanceOf(WC_Bunq_Gateway::class, $gateways['bunq']);
+        $this->assertInstanceOf(Gateway::class, $gateways['bunq']);
         $this->assertSame('bunq', $gateways['bunq']->get_method_title());
         $this->assertTrue($gateways['bunq']->supports('products'));
         $this->assertTrue($gateways['bunq']->supports('refunds'));
@@ -68,16 +70,18 @@ final class PluginTest extends TestCase
         $registry = Package::container()->get(PaymentMethodRegistry::class);
 
         $this->assertTrue($registry->is_registered('bunq'));
-        $this->assertInstanceOf(WC_Bunq_WooCommerce_Block_Checkout::class, $registry->get_registered('bunq'));
+        $this->assertInstanceOf(CheckoutIntegration::class, $registry->get_registered('bunq'));
     }
 
     public function testThePaymentConfirmationHooksAreInPlace()
     {
-        $this->assertSame(5, has_action('template_redirect', 'bunq_check_payment_on_return'), 'Before WooCommerce clears the cart at priority 20');
-        $this->assertSame(10, has_action('wc_bunq_check_payment', 'bunq_scheduled_payment_check'));
-        $this->assertSame(10, has_action('woocommerce_order_status_cancelled', 'bunq_cancel_payment_request_for_order'));
-        $this->assertSame(10, has_action('wc_bunq_cancel_payment_request', 'bunq_cancel_payment_request_now'));
-        $this->assertSame(10, has_action('woocommerce_api_wc_bunq_gateway', array(WC()->payment_gateways()->payment_gateways()['bunq'], 'bunq_callback')));
+        $monitor = Plugin::instance()->payment_monitor();
+
+        $this->assertSame(5, has_action('template_redirect', array($monitor, 'check_on_return')), 'Before WooCommerce clears the cart at priority 20');
+        $this->assertSame(10, has_action('wc_bunq_check_payment', array($monitor, 'run_scheduled_check')));
+        $this->assertSame(10, has_action('woocommerce_order_status_cancelled', array($monitor, 'queue_cancellation')));
+        $this->assertSame(10, has_action('wc_bunq_cancel_payment_request', array($monitor, 'cancel_payment_request')));
+        $this->assertSame(10, has_action('woocommerce_api_wc_bunq_gateway', array(WC()->payment_gateways()->payment_gateways()['bunq'], 'handle_callback')));
     }
 
     public function testActionSchedulerIsAvailableForTheBackgroundChecks()

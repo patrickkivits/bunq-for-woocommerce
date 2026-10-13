@@ -7,6 +7,26 @@ on:
   pull_request:
 
 jobs:
+  coding-standards:
+    name: Coding standards
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      # PHP_CodeSniffer with the WordPress Coding Standards and PHPCompatibilityWP, configured in phpcs.xml.dist.
+      - name: Install PHP_CodeSniffer
+        run: composer install --working-dir=tests --no-interaction --no-progress
+
+      - name: Check the coding standards
+        run: tests/vendor/bin/phpcs
+
   unit:
     name: Unit tests on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest

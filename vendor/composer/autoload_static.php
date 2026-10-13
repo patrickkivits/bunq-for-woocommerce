@@ -26,6 +26,7 @@ class ComposerStaticInit631b13ccd7c890d95819b40a853d06cf
         array (
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
+            'PatrickKivits\\BunqForWooCommerce\\' => 33,
         ),
         'L' => 
         array (
@@ -56,6 +57,10 @@ class ComposerStaticInit631b13ccd7c890d95819b40a853d06cf
         'Psr\\Http\\Client\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
+        ),
+        'PatrickKivits\\BunqForWooCommerce\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'League\\OAuth2\\Client\\' => 
         array (

@@ -3,17 +3,18 @@
 namespace BunqTest;
 
 use bunq\Exception\TooManyRequestsException;
+use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 
 /**
- * The bunq helpers in includes/bunq.php that do not need a bunq session.
+ * The bunq API client, as far as it works without a bunq session.
  */
-final class BunqFunctionsTest extends TestCase
+final class ApiClientTest extends TestCase
 {
     public function testRetryReturnsTheResultOfTheCallback()
     {
         $calls = 0;
 
-        $result = bunq_retry(function () use (&$calls) {
+        $result = (new ApiClient())->retry(function () use (&$calls) {
             $calls++;
 
             return 'ok';
@@ -30,7 +31,7 @@ final class BunqFunctionsTest extends TestCase
         $exception = new \RuntimeException('bunq is down');
 
         try {
-            bunq_retry(function () use (&$calls, $exception) {
+            (new ApiClient())->retry(function () use (&$calls, $exception) {
                 $calls++;
                 throw $exception;
             });
@@ -50,7 +51,7 @@ final class BunqFunctionsTest extends TestCase
 
         $start = microtime(true);
         try {
-            bunq_retry(function () use (&$calls, $exception) {
+            (new ApiClient())->retry(function () use (&$calls, $exception) {
                 $calls++;
                 throw $exception;
             }, 1);
@@ -72,7 +73,7 @@ final class BunqFunctionsTest extends TestCase
         $calls = 0;
 
         $start = microtime(true);
-        $result = bunq_retry(function () use (&$calls) {
+        $result = (new ApiClient())->retry(function () use (&$calls) {
             $calls++;
             if ($calls === 1) {
                 throw new TooManyRequestsException('Too many requests', 429, 'response-id');
@@ -98,7 +99,7 @@ final class BunqFunctionsTest extends TestCase
         $calls = 0;
 
         try {
-            bunq_retry(function () use (&$calls) {
+            (new ApiClient())->retry(function () use (&$calls) {
                 $calls++;
                 throw new TooManyRequestsException('Too many requests', 429, 'response-id');
             }, 2);
@@ -116,21 +117,21 @@ final class BunqFunctionsTest extends TestCase
 
     public function testEnvironmentFollowsTheTestModeSetting()
     {
-        $this->assertSame('SANDBOX', bunq_environment(true)->getChoiceString());
-        $this->assertSame('PRODUCTION', bunq_environment(false)->getChoiceString());
+        $this->assertSame('SANDBOX', ApiClient::environment(true)->getChoiceString());
+        $this->assertSame('PRODUCTION', ApiClient::environment(false)->getChoiceString());
     }
 
     public function testBankAccountsWithoutAnApiContextExplainTheSetupIsIncomplete()
     {
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), bunq_get_bank_accounts(false));
-        $this->assertSame(array('' => 'API key not valid or not setup yet'), bunq_get_bank_accounts(''));
+        $this->assertSame(array('' => 'API key not valid or not setup yet'), (new ApiClient())->get_bank_accounts(false));
+        $this->assertSame(array('' => 'API key not valid or not setup yet'), (new ApiClient())->get_bank_accounts(''));
         $this->assertSame(array(), Environment::$logs);
     }
 
     public function testLoadingAnApiContextFromInvalidJsonFailsAndIsLogged()
     {
-        $this->assertFalse(bunq_load_api_context_from_json('not json'));
-        $this->assertFalse(bunq_load_api_context_from_json(''));
+        $this->assertFalse((new ApiClient())->load_api_context_from_json('not json'));
+        $this->assertFalse((new ApiClient())->load_api_context_from_json(''));
 
         $this->assertCount(1, Environment::$logs, 'Only the invalid JSON is logged; an empty context is a normal state');
         $this->assertSame('error', Environment::$logs[0]['level']);
@@ -143,7 +144,7 @@ final class BunqFunctionsTest extends TestCase
      */
     public function testPaymentDescriptionOnlyKeepsWhatSepaAllows($description, $expected)
     {
-        $this->assertSame($expected, bunq_sanitize_payment_description($description));
+        $this->assertSame($expected, ApiClient::sanitize_payment_description($description));
     }
 
     public function descriptions()

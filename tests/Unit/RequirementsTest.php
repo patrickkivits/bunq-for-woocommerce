@@ -2,31 +2,35 @@
 
 namespace BunqTest;
 
+use PatrickKivits\BunqForWooCommerce\Requirements;
+
 final class RequirementsTest extends TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
-        update_option(BUNQ_REQUIREMENTS_OPTION, $this->fingerprint());
+        update_option(Requirements::OPTION, $this->fingerprint());
     }
 
     public function testPassesInASupportedEnvironment()
     {
-        $this->assertTrue(bunq_requirements_check());
+        $this->assertTrue($this->requirements()->check());
     }
 
     public function testFailsOnAnOldWordPress()
     {
-        Environment::$blogInfo['version'] = '3.7.1';
+        Environment::$blogInfo['version'] = '4.6.1';
+        $this->assertFalse($this->requirements()->check());
 
-        $this->assertFalse(bunq_requirements_check());
+        Environment::$blogInfo['version'] = '4.7';
+        $this->assertTrue($this->requirements()->check(), 'wp_generate_uuid4() and wp_parse_url() with a component exist since 4.7');
     }
 
     public function testFailsWithoutWooCommerce()
     {
         Environment::$options['active_plugins'] = array('akismet/akismet.php');
 
-        $this->assertFalse(bunq_requirements_check());
+        $this->assertFalse($this->requirements()->check());
     }
 
     public function testActivePluginsCanBeFiltered()
@@ -36,30 +40,30 @@ final class RequirementsTest extends TestCase
             return array_merge($plugins, array('woocommerce/woocommerce.php'));
         });
 
-        $this->assertTrue(bunq_requirements_check());
+        $this->assertTrue($this->requirements()->check());
     }
 
     public function testProvesOpenSslWorksOnceAndRemembersTheOutcome()
     {
-        delete_option(BUNQ_REQUIREMENTS_OPTION);
+        delete_option(Requirements::OPTION);
 
-        $this->assertTrue(bunq_requirements_check());
-        $this->assertSame($this->fingerprint(), get_option(BUNQ_REQUIREMENTS_OPTION));
+        $this->assertTrue($this->requirements()->check());
+        $this->assertSame($this->fingerprint(), get_option(Requirements::OPTION));
     }
 
     public function testTheRememberedOutcomeIsTiedToThePhpAndOpenSslBuild()
     {
-        update_option(BUNQ_REQUIREMENTS_OPTION, md5('another build'));
+        update_option(Requirements::OPTION, md5('another build'));
 
-        $this->assertTrue(bunq_requirements_check());
-        $this->assertSame($this->fingerprint(), get_option(BUNQ_REQUIREMENTS_OPTION), 'Checked again and stored for this build');
+        $this->assertTrue($this->requirements()->check());
+        $this->assertSame($this->fingerprint(), get_option(Requirements::OPTION), 'Checked again and stored for this build');
     }
 
     public function testDisablingThePluginDeactivatesItAndHidesTheActivationNotice()
     {
         $_GET['activate'] = 'true';
 
-        bunq_requirements_disable_plugin();
+        $this->requirements()->disable_plugin();
 
         $this->assertSame(array('bunq-for-woocommerce/bunq-for-woocommerce.php'), Environment::$deactivatedPlugins);
         $this->assertArrayNotHasKey('activate', $_GET);
@@ -69,7 +73,7 @@ final class RequirementsTest extends TestCase
     {
         Environment::$currentUserCan = false;
 
-        bunq_requirements_disable_plugin();
+        $this->requirements()->disable_plugin();
 
         $this->assertSame(array(), Environment::$deactivatedPlugins);
     }
@@ -78,7 +82,7 @@ final class RequirementsTest extends TestCase
     {
         Environment::$pluginActive = false;
 
-        bunq_requirements_disable_plugin();
+        $this->requirements()->disable_plugin();
 
         $this->assertSame(array(), Environment::$deactivatedPlugins);
     }
@@ -86,12 +90,17 @@ final class RequirementsTest extends TestCase
     public function testTheNoticeExplainsTheEnvironmentIsIncompatible()
     {
         ob_start();
-        bunq_requirements_show_notice();
+        $this->requirements()->show_notice();
         $notice = ob_get_clean();
 
         $this->assertStringContainsString('class="error"', $notice);
         $this->assertStringContainsString('bunq for WooCommerce', $notice);
         $this->assertStringContainsString('cannot be activated due to incompatible environment.', $notice);
+    }
+
+    private function requirements()
+    {
+        return new Requirements(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
     }
 
     private function fingerprint()

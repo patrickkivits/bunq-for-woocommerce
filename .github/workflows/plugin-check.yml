@@ -1,0 +1,34 @@
+name: Plugin Check
+
+# Runs the official WordPress.org Plugin Check (https://wordpress.org/plugins/plugin-check/), the automated part of
+# the plugin directory review, against the files the release zip contains. Errors and warnings fail the job and
+# show up as annotations on the pull request.
+
+on:
+  # Branch pushes are covered by their pull request; running on both would test every PR commit twice.
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  plugin-check:
+    name: Plugin Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same as the release zip: git archive leaves out everything marked export-ignore in .gitattributes. The
+      # directory name is the plugin slug Plugin Check uses.
+      - name: Build the plugin as released
+        run: |
+          mkdir -p build
+          git archive --format=tar --prefix=bunq-for-woocommerce/ HEAD | tar -x -C build
+
+      # Installs the latest WordPress with wp-env, the plugins named in the Requires Plugins header (WooCommerce)
+      # and Plugin Check itself.
+      - name: Run Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: ./build/bunq-for-woocommerce
+          strict: true

@@ -76,4 +76,5 @@ require $wp_phpunit_dir . '/includes/bootstrap.php';
 // they are in the unit suite and the compatibility workflows.
 error_reporting( E_ALL & ~E_DEPRECATED );
 
+require dirname( __DIR__ ) . '/FakeBunqApi.php';
 require __DIR__ . '/TestCase.php';

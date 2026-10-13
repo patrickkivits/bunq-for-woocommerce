@@ -40,6 +40,20 @@ jobs:
             exit 1
           fi
 
+      - name: Check that readme.txt describes this version
+        run: |
+          stable=$(sed -n 's/^Stable tag: *//p' readme.txt | tr -d '\r')
+          header=$(sed -n 's/^ \* Version: *//p' "$SLUG.php" | head -n1)
+          echo "readme.txt Stable tag: $stable, plugin header: $header"
+          if [ "$stable" != "$header" ]; then
+            echo "::error::readme.txt Stable tag ($stable) does not match the plugin version ($header)"
+            exit 1
+          fi
+          if ! grep -q "^= $header =" readme.txt; then
+            echo "::error::readme.txt has no changelog entry for $header"
+            exit 1
+          fi
+
       - name: Build the zip with a fixed top-level folder
         run: |
           # The committed vendor/ directory is included. Development files are
