@@ -72,8 +72,10 @@ stop_mariadb() {
   [ "${mariadb_was_running:-1}" -eq 1 ] || sudo service mariadb stop
 }
 
-install_test_dependencies() {
-  # Only tests/ gets installed: the root vendor/ directory is committed and shipped in the plugin zip.
+install_dependencies() {
+  # The plugin's own dependencies (vendor/, not committed; the release zip ships them) and the dev dependencies
+  # from tests/composer.json, kept apart so they never end up in vendor/.
+  composer install --no-dev --no-interaction --no-progress
   composer install --working-dir=tests --no-interaction --no-progress
 }
 
@@ -83,7 +85,9 @@ write_agent_guidance() {
 # Orb notes for bunq-for-woocommerce
 
 - PHP 8.2 (Debian) and Composer are installed; dev dependencies live in `tests/vendor` (`composer install --working-dir=tests`).
-- Never run `composer install`/`update` in the repository root: the root `vendor/` is committed and shipped.
+- The plugin's own dependencies live in the root `vendor/`, which is not committed: `composer install --no-dev`
+  restores it. Never add dev dependencies to the root `composer.json`; the release zip ships the root `vendor/`.
+- `.github/scripts/build-plugin.sh HEAD <dir>` builds the plugin as released (zip contents) in `<dir>/bunq-for-woocommerce`.
 - MariaDB runs locally (started by `.agents/resume`; `sudo service mariadb start` if it is down) with the
   `wordpress_tests` database and root/root on 127.0.0.1, matching the defaults in `tests/wp-tests-config.php`.
 - Unit tests: `tests/vendor/bin/phpunit` (add `--exclude-group slow` while iterating).
@@ -102,7 +106,7 @@ MD
 
 step "Install system packages" install_packages
 step "Configure MariaDB" configure_mariadb
-step "Install test dependencies" install_test_dependencies
+step "Install dependencies" install_dependencies
 step "Install demo shop" .agents/demo-shop/install
 step "Stop MariaDB" stop_mariadb
 step "Write orb agent guidance" write_agent_guidance

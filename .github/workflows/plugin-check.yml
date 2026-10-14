@@ -18,12 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Same as the release zip: git archive leaves out everything marked export-ignore in .gitattributes. The
-      # directory name is the plugin slug Plugin Check uses.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      # Same as the release zip: the tracked files without the development files, plus the dependencies in
+      # vendor/. The directory name is the plugin slug Plugin Check uses.
       - name: Build the plugin as released
-        run: |
-          mkdir -p build
-          git archive --format=tar --prefix=bunq-for-woocommerce/ HEAD | tar -x -C build
+        run: .github/scripts/build-plugin.sh HEAD build
 
       # Installs the latest WordPress with wp-env, the plugins named in the Requires Plugins header (WooCommerce)
       # and Plugin Check itself.

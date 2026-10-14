@@ -54,7 +54,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: mysqli, openssl, curl, json, mbstring, zip
-          tools: wp-cli
+          tools: wp-cli, composer:v2
           coverage: none
 
       - name: Install WordPress ${{ matrix.wordpress }}
@@ -94,10 +94,10 @@ jobs:
           fi
           wp plugin list --name=woocommerce
 
-      # The files of the release zip (git archive honours the export-ignore attributes in .gitattributes).
+      # The files of the release zip, including the dependencies in vendor/.
       - name: Install and activate bunq for WooCommerce
         run: |
-          git archive --format=tar --prefix=bunq-for-woocommerce/ HEAD | tar -x -C "$WP_PATH/wp-content/plugins"
+          .github/scripts/build-plugin.sh HEAD "$WP_PATH/wp-content/plugins"
           wp plugin activate bunq-for-woocommerce
           wp plugin list --name=bunq-for-woocommerce
           test "$(wp plugin list --name=bunq-for-woocommerce --field=status)" = "active"
@@ -108,7 +108,7 @@ jobs:
       # WP_DEBUG_LOG collects every PHP notice raised while WordPress, WooCommerce and
       # the plugin were installed and loaded. Only entries raised by the plugin's own
       # code fail the job: WordPress/WooCommerce notices are not ours, nor are those of
-      # the vendored dependencies.
+      # the dependencies in vendor/.
       - name: Check the debug log for notices raised by the plugin
         if: always()
         run: |

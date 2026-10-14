@@ -23,15 +23,20 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: openssl, curl, json, mbstring
           coverage: none
+          tools: composer:v2
 
-      - name: Syntax check plugin and vendored dependencies
+      # The dependencies the release zip ships in vendor/.
+      - name: Install the dependencies
+        run: composer install --no-dev --no-interaction --no-progress
+
+      - name: Syntax check plugin and dependencies
         run: |
           find . -name '*.php' -not -path './.git/*' -print0 \
             | xargs -0 -n1 -P4 php -l \
             | { ! grep -v 'No syntax errors'; }
 
       # Any notice, including deprecations, fails the step.
-      - name: Load the plugin's API client and the vendored dependencies at runtime
+      - name: Load the plugin's API client and the dependencies at runtime
         run: |
           php -d error_reporting=E_ALL -d display_errors=1 -r '
             set_error_handler(function ($level, $message, $file, $line) {

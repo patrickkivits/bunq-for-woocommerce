@@ -54,28 +54,42 @@ jobs:
             exit 1
           fi
 
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
       - name: Build the zip with a fixed top-level folder
         run: |
-          # The committed vendor/ directory is included. Development files are
-          # left out by git archive through the export-ignore attributes in
-          # .gitattributes, the single place that lists them.
-          git archive --format=zip --prefix="$SLUG/" -o "$SLUG.zip" "$TAG"
+          # Development files are left out by git archive through the export-ignore attributes in .gitattributes,
+          # the single place that lists them; vendor/ is not committed but installed from composer.lock. Same as
+          # .github/scripts/build-plugin.sh, spelled out because tags from before that script are rebuilt too.
+          mkdir -p "build/$SLUG"
+          git archive --format=tar "$TAG" | tar -x -C "build/$SLUG"
+          composer install --working-dir="build/$SLUG" --no-dev --optimize-autoloader --no-interaction --no-progress
+          (cd build && zip -qrX "../$SLUG.zip" "$SLUG")
           unzip -l "$SLUG.zip" | head -n 20
 
-      - name: Check that the zip holds every tracked file and nothing else
+      - name: Check that the zip holds every tracked file, the dependencies and nothing else
         run: |
-          # Every file tracked at the tag that is not marked export-ignore must
-          # be in the zip under the fixed folder; anything else is a leak.
+          # Every file tracked at the tag that is not marked export-ignore must be in the zip under the fixed
+          # folder; apart from those only the installed vendor/ directory may be in it (older tags still track it).
           git ls-tree -r --name-only "$TAG" \
             | git check-attr --stdin export-ignore \
             | awk -F': ' '$3 != "set" { print $1 }' \
+            | grep -v '^vendor/' \
             | sed "s|^|$SLUG/|" | sort > expected.txt
-          unzip -Z1 "$SLUG.zip" | grep -v '/$' | sort > actual.txt
+          unzip -Z1 "$SLUG.zip" | grep -v '/$' | grep -v "^$SLUG/vendor/" | sort > actual.txt
           if ! diff -u expected.txt actual.txt; then
             echo "::error::Zip content differs from the tracked files ('-' missing from zip, '+' unexpected in zip)"
             exit 1
           fi
-          echo "$(wc -l < actual.txt) files verified"
+          if ! unzip -Z1 "$SLUG.zip" | grep -qx "$SLUG/vendor/autoload.php"; then
+            echo "::error::The zip has no vendor/autoload.php"
+            exit 1
+          fi
+          echo "$(wc -l < actual.txt) tracked files and $(unzip -Z1 "$SLUG.zip" | grep -v '/$' | grep -c "^$SLUG/vendor/") dependency files verified"
 
       - name: Attach the zip to the release
         env:
