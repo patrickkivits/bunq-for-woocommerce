@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.8.1
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,7 +114,7 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
-= Unreleased =
+= 1.9.0 =
 * The plugin talks to the bunq API with its own client instead of the bunq PHP SDK. The plugin zip is about 98,000 lines of code smaller, PHP 8.4 and newer no longer report deprecations from it, and `opcache.save_comments=0` no longer breaks the connection with bunq.
 * Fewer calls to bunq: loading the connection no longer lists the bank accounts on every request, and the default bank account is only looked up when no bank account is selected.
 * When bunq ends a session early, the plugin opens a new one and repeats the rejected call. When bunq refuses a new session as well (for example after the server's IP address changed), it reconnects with the saved access before any call went through, and not again for five minutes after a failed attempt.
@@ -182,6 +182,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.9.0 =
+The plugin no longer uses the bunq PHP SDK, so opcache.save_comments=0 no longer breaks the connection with bunq. Settings and the bunq connection are kept; no need to connect again.
 
 = 1.8.1 =
 Explains what to ask your host when connecting to bunq fails with "Installation::getToken(): Return value must be of type ... Token, array returned" (opcache.save_comments=0).

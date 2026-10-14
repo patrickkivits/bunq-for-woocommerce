@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
- * Version: 1.8.1
+ * Version: 1.9.0
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
  * Requires at least: 4.7
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
 
-// The plugin's classes (src/) and its dependencies, both through the committed Composer autoloader.
+// The plugin's classes (src/) and its dependencies, both through the Composer autoloader.
 require_once __DIR__ . '/vendor/autoload.php';
 
 PatrickKivits\BunqForWooCommerce\Plugin::instance()->boot();
