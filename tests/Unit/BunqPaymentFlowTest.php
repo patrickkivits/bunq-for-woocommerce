@@ -139,7 +139,7 @@ final class BunqPaymentFlowTest extends TestCase
         $this->assertSame(456, $order->get_meta('bunq_monetary_account_id'), 'The account the money landed on, for refunds');
         $this->assertSame(array('bunq payment 777 received'), $order->notes);
         $this->assertLogged('info', 'bunqme-tab 55: payment 777 received for order #' . $order->get_order_number());
-        $this->assertFalse(get_transient('wc_bunq_gateway.lock.' . $order->get_id()), 'The lock is released');
+        $this->assertArrayNotHasKey('wc_bunq_gateway.lock.' . $order->get_id(), Environment::$options, 'The lock is released');
     }
 
     /**
@@ -239,7 +239,7 @@ final class BunqPaymentFlowTest extends TestCase
         $this->assertSame('pending', $order->get_status());
         $this->assertSame(array(), $order->notes);
         $this->assertSame(0, $order->save_count);
-        $this->assertFalse(get_transient('wc_bunq_gateway.lock.' . $order->get_id()));
+        $this->assertArrayNotHasKey('wc_bunq_gateway.lock.' . $order->get_id(), Environment::$options, 'The lock is released');
     }
 
     public function testAFailedLookupLeavesTheOrderAloneAndReleasesTheLock()
@@ -256,7 +256,7 @@ final class BunqPaymentFlowTest extends TestCase
         }
 
         $this->assertSame('pending', $order->get_status());
-        $this->assertFalse(get_transient('wc_bunq_gateway.lock.' . $order->get_id()));
+        $this->assertArrayNotHasKey('wc_bunq_gateway.lock.' . $order->get_id(), Environment::$options, 'The lock is released');
     }
 
     public function testAScheduledCheckCompletesAPaidOrderAndStopsChecking()

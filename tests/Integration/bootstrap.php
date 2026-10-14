@@ -60,6 +60,9 @@ tests_add_filter( 'init', function () {
 
     WC_Install::install();
 
+    // WooCommerce's own order tables (HPOS), for the tests that switch to them; the install keeps orders in posts.
+    wc_get_container()->get( Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::class )->create_database_tables();
+
     // Reload the capabilities after the install, see https://core.trac.wordpress.org/ticket/28374.
     $GLOBALS['wp_roles'] = null;
     wp_roles();

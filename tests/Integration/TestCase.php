@@ -2,6 +2,8 @@
 
 namespace BunqTest\Integration;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 
 abstract class TestCase extends \WP_UnitTestCase
@@ -24,6 +26,16 @@ abstract class TestCase extends \WP_UnitTestCase
 
         // Fresh gateway instances built from this test's (rolled back, so empty) settings.
         WC()->payment_gateways()->init();
+    }
+
+    /**
+     * Store orders in WooCommerce's own order tables (HPOS, created in bootstrap.php) for the rest of the test, the
+     * default of new shops. The test suite installs WooCommerce with the posts table.
+     */
+    protected function useHighPerformanceOrderStorage()
+    {
+        update_option(CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes');
+        $this->assertTrue(OrderUtil::custom_orders_table_usage_is_enabled());
     }
 
     public function recordLog($message, $level, $context)

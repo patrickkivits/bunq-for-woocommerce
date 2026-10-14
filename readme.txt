@@ -114,6 +114,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= Unreleased =
+* When bunq's callback and the customer's return to the shop checked the same order at the same moment, both could record the payment: the bunq payment id and account were stored twice on the order, the "bunq payment received" note was added twice and the payment completion (status change, emails) ran twice. Only one check of an order runs at a time now, and a check that finds the payment already recorded leaves the order alone.
+
 = 1.9.0 =
 * The plugin talks to the bunq API with its own client instead of the bunq PHP SDK. The plugin zip is about 98,000 lines of code smaller, PHP 8.4 and newer no longer report deprecations from it, and `opcache.save_comments=0` no longer breaks the connection with bunq.
 * Fewer calls to bunq: loading the connection no longer lists the bank accounts on every request, and the default bank account is only looked up when no bank account is selected.

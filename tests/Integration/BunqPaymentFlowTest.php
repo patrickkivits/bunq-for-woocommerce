@@ -59,6 +59,31 @@ final class BunqPaymentFlowTest extends TestCase
         $this->assertSame(array('bunq payment 777 received'), $this->bunqOrderNotes($order));
     }
 
+    /**
+     * @dataProvider orderStorages
+     */
+    public function testTwoChecksOfTheSameOrderRecordThePaymentOnce($highPerformanceOrderStorage)
+    {
+        if ($highPerformanceOrderStorage) {
+            $this->useHighPerformanceOrderStorage();
+        }
+        $order = $this->createOrder(array('price' => '24.95'));
+        $this->bunqReports('ACTIVE', array(FakeBunqApi::payment(777, '24.95', 'EUR', 456)));
+
+        // The callback and the customer's return load the order at the same time; the return checks once the
+        // callback is done.
+        $callback = wc_get_order($order->get_id());
+        $return = wc_get_order($order->get_id());
+
+        $this->assertSame('paid', $this->gateway->check_payment_status($callback));
+        $this->assertSame('settled', $this->gateway->check_payment_status($return));
+
+        $order = wc_get_order($order->get_id());
+        $this->assertSame(array('777'), $this->metaValues($order, 'bunq_payment_id'));
+        $this->assertSame(array('456'), $this->metaValues($order, 'bunq_monetary_account_id'));
+        $this->assertSame(array('bunq payment 777 received'), $this->bunqOrderNotes($order));
+    }
+
     public function testAPaymentOfAnotherAmountPutsTheOrderOnHold()
     {
         $order = $this->createOrder(array('price' => '24.95'));
@@ -144,6 +169,21 @@ final class BunqPaymentFlowTest extends TestCase
         $this->assertWPError($refund);
         $this->assertStringContainsString('has no IBAN to refund to', $refund->get_error_message());
         $this->assertSame(array(), wc_get_order($order->get_id())->get_refunds());
+    }
+
+    public function orderStorages()
+    {
+        return array('posts' => array(false), 'HPOS' => array(true));
+    }
+
+    /**
+     * @return string[] Every value stored for the meta key, so a duplicate shows.
+     */
+    private function metaValues(\WC_Order $order, $key)
+    {
+        return array_map(function ($meta) {
+            return (string) $meta->value;
+        }, array_values($order->get_meta($key, false)));
     }
 
     private function bunqReports($status, array $payments = array())

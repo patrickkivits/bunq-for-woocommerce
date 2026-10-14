@@ -3,6 +3,7 @@
 namespace BunqTest\Integration;
 
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Orders\OrderLock;
 
 /**
  * The payment gateway on top of the real WooCommerce settings API, cart, orders and notices, up to the point
@@ -289,10 +290,34 @@ final class GatewayTest extends TestCase
     {
         $gateway = $this->createGateway($this->liveSettings());
         $order = $this->createOrder();
-        set_transient('wc_bunq_gateway.lock.' . $order->get_id(), 1, 30);
+        $this->assertTrue(OrderLock::acquire($order->get_id(), 30), 'Another check holds the lock');
+        $this->assertFalse(OrderLock::acquire($order->get_id(), 30), 'The lock is taken only once');
 
         $this->assertSame('pending', $gateway->check_payment_status($order));
         $this->assertSame(array(), $this->logs, 'bunq was not contacted');
+        $this->assertNotFalse(as_next_scheduled_action('bunq_for_woocommerce_follow_up_check', array($order->get_id()), 'bunq'), 'The order is checked again shortly');
+    }
+
+    public function testALockLeftBehindByARequestThatDiedExpires()
+    {
+        $order = $this->createOrder();
+        add_option('wc_bunq_gateway.lock.' . $order->get_id(), (time() - 1) . ' token-of-a-request-that-died', '', 'no');
+
+        $this->assertTrue(OrderLock::acquire($order->get_id(), 30));
+    }
+
+    public function testARequestOnlyReleasesItsOwnLock()
+    {
+        global $wpdb;
+        $order = $this->createOrder();
+        $name = 'wc_bunq_gateway.lock.' . $order->get_id();
+
+        $this->assertTrue(OrderLock::acquire($order->get_id(), 30));
+        // This request ran past the expiry and another one took the lock over.
+        $wpdb->update($wpdb->options, array('option_value' => (time() + 30) . ' token-of-another-request'), array('option_name' => $name));
+        OrderLock::release($order->get_id());
+
+        $this->assertFalse(OrderLock::acquire($order->get_id(), 30), 'The lock of the other request stays');
     }
 
     public function testTheCheckLockIsReleasedWhenBunqCannotBeReached()
@@ -307,7 +332,7 @@ final class GatewayTest extends TestCase
             $this->assertStringContainsString('bunq API context is not available', $exception->getMessage());
         }
 
-        $this->assertFalse(get_transient('wc_bunq_gateway.lock.' . $order->get_id()));
+        $this->assertTrue(OrderLock::acquire($order->get_id(), 30), 'The lock was released');
         $this->assertSame('pending', wc_get_order($order->get_id())->get_status());
     }
 
