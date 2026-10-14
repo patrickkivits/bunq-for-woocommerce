@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -116,6 +116,11 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 1.8.1 =
+* Servers whose PHP OPcache removes code comments (`opcache.save_comments=0`) could not connect to bunq: the bunq SDK needs those comments to read bunq's responses, and connecting failed with "Installation::getToken(): Return value must be of type bunq\Model\Core\Token, array returned". The settings page now explains that the hosting provider has to set `opcache.save_comments=1`, before sending you to bunq and in the bank account select.
+* `opcache.save_comments=1` is listed in the requirements.
+* Updated Dutch, French and German translations.
+
 = 1.8.0 =
 * Redesigned settings page: a Connection row shows whether the shop is connected to bunq and to which account, the redirect URL to register in the bunq app has a Copy button, and the fields are grouped into bunq account, Receiving payments and Checkout.
 * "Connect to bunq" saves the settings and opens bunq's QR code in one step; it replaces the "OAuth Authorization Request" button.
@@ -171,6 +176,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.8.1 =
+Explains what to ask your host when connecting to bunq fails with "Installation::getToken(): Return value must be of type ... Token, array returned" (opcache.save_comments=0).
 
 = 1.8.0 =
 Redesigned settings page with one-click "Connect to bunq". The redirect URL must be exactly the plugin settings page URL shown on the settings page: update it in the bunq app if you registered a different one. Settings and the bunq connection are kept.
