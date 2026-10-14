@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,7 +114,7 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
-= Unreleased =
+= 1.9.1 =
 * When bunq's callback and the customer's return to the shop checked the same order at the same moment, both could record the payment: the bunq payment id and account were stored twice on the order, the "bunq payment received" note was added twice and the payment completion (status change, emails) ran twice. Only one check of an order runs at a time now, and a check that finds the payment already recorded leaves the order alone.
 
 = 1.9.0 =
@@ -185,6 +185,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.9.1 =
+Fixes a bunq payment being recorded twice on an order (payment id, note, status change and emails) when bunq's callback and the customer's return arrived at the same moment.
 
 = 1.9.0 =
 The plugin no longer uses the bunq PHP SDK, so opcache.save_comments=0 no longer breaks the connection with bunq. Settings and the bunq connection are kept; no need to connect again.
