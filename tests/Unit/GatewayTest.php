@@ -376,20 +376,6 @@ final class GatewayTest extends TestCase
         $this->assertFalse(get_transient('wc_bunq_gateway.oauth2state.0'));
     }
 
-    public function testConnectingOnAServerWhoseOpcacheStripsDocCommentsExplainsTheHostSetting()
-    {
-        // Issue #50: the bunq SDK cannot read bunq's responses there, so the merchant would scan the QR code for nothing.
-        $bunq = new FakeBunqApi();
-        $bunq->canDecodeResponses = false;
-        update_option('woocommerce_bunq_settings', $this->liveSettings());
-        $gateway = new Gateway($bunq);
-
-        $this->assertNull($gateway->get_connect_url());
-        $this->assertStringContainsString('Ask your hosting provider to set opcache.save_comments=1', get_transient(Gateway::LAST_ERROR_TRANSIENT));
-        $this->assertFalse(get_transient('wc_bunq_gateway.oauth2state.0'));
-        $this->assertLogged('error', 'opcache.save_comments=0');
-    }
-
     public function testOnlyTheConnectButtonGoesOnToBunqAfterSaving()
     {
         $gateway = $this->createGateway($this->liveSettings());
@@ -628,7 +614,7 @@ final class GatewayTest extends TestCase
 
         $this->assertFalse($gateway->load_api_context());
         $this->assertSame('not json', $this->credentials()['api_context']);
-        $this->assertLogged('error', 'json_decode error');
+        $this->assertLogged('error', 'The stored bunq API context is not valid JSON');
     }
 
     public function testLoadingWithoutAnApiContextFails()

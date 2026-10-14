@@ -28,6 +28,7 @@ function sanitize_key($key) { return preg_replace('/[^a-z0-9_\-]/', '', strtolow
 function wp_unslash($value) { return is_string($value) ? stripslashes($value) : $value; }
 function wc_clean($value) { return is_string($value) ? sanitize_text_field($value) : $value; }
 function absint($value) { return abs((int) $value); }
+function wp_json_encode($data, $options = 0, $depth = 512) { return json_encode($data, $options, $depth); }
 
 // --- Hooks --------------------------------------------------------------------------------------------------
 

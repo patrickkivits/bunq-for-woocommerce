@@ -71,10 +71,5 @@ ini_set( 'error_log', dirname( __DIR__ ) . '/.integration-error.log' );
 
 require $wp_phpunit_dir . '/includes/bootstrap.php';
 
-// The bunq SDK still declares implicitly nullable parameters, which PHP 8.4+ reports as deprecated when its
-// classes are compiled. That is the SDK's concern, not the plugin's, so deprecations are left out here just as
-// they are in the unit suite and the compatibility workflows.
-error_reporting( E_ALL & ~E_DEPRECATED );
-
 require dirname( __DIR__ ) . '/FakeBunqApi.php';
 require __DIR__ . '/TestCase.php';

@@ -30,13 +30,18 @@ jobs:
             | xargs -0 -n1 -P4 php -l \
             | { ! grep -v 'No syntax errors'; }
 
-      # Deprecations are filtered out because bunq/sdk_php 1.28 still uses implicitly
-      # nullable parameters (deprecated since PHP 8.4); anything more severe fails the step.
-      - name: Load the vendored dependencies at runtime
+      # Any notice, including deprecations, fails the step.
+      - name: Load the plugin's API client and the vendored dependencies at runtime
         run: |
-          php -d 'error_reporting=E_ALL & ~E_DEPRECATED' -d display_errors=1 -r '
+          php -d error_reporting=E_ALL -d display_errors=1 -r '
+            set_error_handler(function ($level, $message, $file, $line) {
+                fwrite(STDERR, "$message in $file:$line\n");
+                exit(1);
+            });
+            define("ABSPATH", __DIR__ . "/");
             require "vendor/autoload.php";
-            \bunq\Security\KeyPair::generate();
+            \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient::generate_key_pair();
+            new \GuzzleHttp\Client();
             new \League\OAuth2\Client\Provider\GenericProvider([
                 "clientId" => "id",
                 "clientSecret" => "secret",
