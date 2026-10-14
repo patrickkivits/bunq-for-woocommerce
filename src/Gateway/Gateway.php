@@ -485,9 +485,17 @@ class Gateway extends WC_Payment_Gateway {
 	 * Where the "Connect to bunq" button leads once the settings are saved: the authorization page at bunq for the
 	 * saved OAuth client of the active mode.
 	 *
-	 * @return string|null Null when the OAuth client is incomplete; the error is shown on the settings page.
+	 * @return string|null Null when the OAuth client is incomplete or the bunq SDK cannot run on this server; the error
+	 *                     is shown on the settings page.
 	 */
 	public function get_connect_url() {
+		if ( ! $this->api->can_decode_responses() ) {
+			Logger::log( ApiClient::cannot_decode_responses_error() );
+			set_transient( self::LAST_ERROR_TRANSIENT, ApiClient::cannot_decode_responses_error(), 5 * MINUTE_IN_SECONDS );
+
+			return null;
+		}
+
 		$testmode      = 'yes' === $this->get_option( 'testmode' );
 		$prefix        = $testmode ? 'test_' : '';
 		$client_id     = (string) $this->get_option( $prefix . 'oauth_client_id' );
@@ -539,6 +547,10 @@ class Gateway extends WC_Payment_Gateway {
 
 		if ( ! $api_key ) {
 			return;
+		}
+
+		if ( ! $this->api->can_decode_responses() ) {
+			throw new Exception( ApiClient::cannot_decode_responses_error() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
 		}
 
 		// Creating the context talks to bunq (installation, device-server, session-server). Let errors bubble up so

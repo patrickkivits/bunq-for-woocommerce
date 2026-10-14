@@ -38,6 +38,9 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
     /** @var string|null What get_account_name() returns. */
     public $accountName = null;
 
+    /** @var bool What can_decode_responses() returns: false on a server whose OPcache strips doc comments. */
+    public $canDecodeResponses = true;
+
     /** @var \Throwable[] Thrown by the named method (create_payment_request, get_payment, ...) when set. */
     public $exceptions = array();
 
@@ -50,6 +53,11 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
         }
 
         return $this->renewedContext !== null ? $this->renewedContext : $json;
+    }
+
+    public function can_decode_responses()
+    {
+        return $this->canDecodeResponses;
     }
 
     public function create_api_context($api_key, $testmode)

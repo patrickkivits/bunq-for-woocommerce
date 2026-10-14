@@ -14,6 +14,10 @@ msgstr ""
 msgid "Payment method"
 msgstr "Zahlungsmethode"
 
+#: src/Bunq/ApiClient.php:119
+msgid "PHP's OPcache on this server removes code comments (opcache.save_comments=0), which the bunq SDK needs to read bunq's responses. Ask your hosting provider to set opcache.save_comments=1, then click \"Connect to bunq\" again."
+msgstr "Der OPcache von PHP entfernt auf diesem Server Kommentare aus dem Code (opcache.save_comments=0), die das bunq SDK zum Lesen der Antworten von bunq benötigt. Bitten Sie Ihren Hosting-Anbieter, opcache.save_comments=1 einzustellen, und klicken Sie dann erneut auf „Mit bunq verbinden“."
+
 #: src/Bunq/ApiClient.php:224
 msgid "Connect your bunq account first"
 msgstr "Verbinden Sie zuerst Ihr bunq-Konto"
