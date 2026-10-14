@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,7 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * WooCommerce.
 * HTTPS, so bunq can reach the shop's callback URL.
 * The PHP extensions openssl, curl, json and mbstring.
+* When PHP's OPcache is enabled: `opcache.save_comments=1` (PHP's default). The bunq SDK reads the types of bunq's responses from code comments, which `opcache.save_comments=0` removes; only your hosting provider can change this setting.
 
 The plugin is developed by Patrick Kivits and is the WooCommerce integration bunq presents to its business customers, see [WooCommerce on bunq.com](https://www.bunq.com/business/features/integrations/woocommerce) and the [bunq Help article](https://help.bunq.com/nl-nl/articles/how-can-i-accept-woocommerce-payments-with-my-bunq-account).
 
@@ -99,6 +100,7 @@ Everything the plugin does with bunq (callbacks received, payments matched, refu
 * The plugin shows the error returned by bunq at the top of the settings page right after the redirect back from bunq, with details in the WooCommerce log.
 * Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
 * bunq ties the API key to the IP address the shop's server connects from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with "Incorrect API key or IP address".
+* If the error mentions `opcache.save_comments=0`, or the log shows "Installation::getToken(): Return value must be of type bunq\Model\Core\Token, array returned", ask your hosting provider to set `opcache.save_comments=1`.
 
 = Unpaid orders are cancelled before the customer paid =
 
@@ -113,6 +115,11 @@ Yes. Check **Use the bunq sandbox** under **Test mode** and connect the OAuth cl
 The bunq.me payment page is hosted by bunq and follows the language of the customer's browser.
 
 == Changelog ==
+
+= 1.8.1 =
+* Servers whose PHP OPcache removes code comments (`opcache.save_comments=0`) could not connect to bunq: the bunq SDK needs those comments to read bunq's responses, and connecting failed with "Installation::getToken(): Return value must be of type bunq\Model\Core\Token, array returned". The settings page now explains that the hosting provider has to set `opcache.save_comments=1`, before sending you to bunq and in the bank account select.
+* `opcache.save_comments=1` is listed in the requirements.
+* Updated Dutch, French and German translations.
 
 = 1.8.0 =
 * Redesigned settings page: a Connection row shows whether the shop is connected to bunq and to which account, the redirect URL to register in the bunq app has a Copy button, and the fields are grouped into bunq account, Receiving payments and Checkout.
@@ -169,6 +176,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.8.1 =
+Explains what to ask your host when connecting to bunq fails with "Installation::getToken(): Return value must be of type ... Token, array returned" (opcache.save_comments=0).
 
 = 1.8.0 =
 Redesigned settings page with one-click "Connect to bunq". The redirect URL must be exactly the plugin settings page URL shown on the settings page: update it in the bunq app if you registered a different one. Settings and the bunq connection are kept.

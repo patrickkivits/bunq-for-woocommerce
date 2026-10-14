@@ -29,6 +29,7 @@ https://bunq-for-woocommerce.patrickkivits.com/
 - HTTPS/SSL certificate (for callbacks/payment processing to work)
 - PHP version: >= 7.3 (up to and including 8.5)
 - PHP extensions: openssl, curl, json, mbstring
+- When PHP's OPcache is enabled: `opcache.save_comments=1` (PHP's default). The bunq SDK reads the types of bunq's responses from code comments, which `opcache.save_comments=0` removes; only your hosting provider can change this setting
 - WordPress version: >= 4.7
 - WooCommerce version: >= 2.2
 
@@ -92,6 +93,7 @@ If the settings page still says *Not connected* after connecting, or the **Bank 
 2. Full details are written to **WooCommerce** > **Status** > **Logs** (source: `bunq`).
 3. Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
 4. Every attempt whitelists the IP address the request was sent from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with *Incorrect API key or IP address*.
+5. If the error mentions `opcache.save_comments=0`, or the log shows *Installation::getToken(): Return value must be of type bunq\Model\Core\Token, array returned*, ask your hosting provider to set `opcache.save_comments=1` (see [Requirements](#requirements)).
 
 ## Optional configuration
 

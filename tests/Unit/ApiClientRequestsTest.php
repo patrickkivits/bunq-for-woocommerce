@@ -21,11 +21,17 @@ final class RecordingApiClient extends ApiClient
     public $notificationFilters = array();
     public $exception = null;
     public $notificationFiltersException = null;
+    public $canDecodeResponses = true;
 
     /** @var array[] The posted draft payments as array(entry, monetary account id). */
     public $draftPayments = array();
     /** @var array[] The posted notification filter lists as array(monetary account id, filters). */
     public $savedNotificationFilters = array();
+
+    public function can_decode_responses()
+    {
+        return $this->canDecodeResponses;
+    }
 
     public function get_notification_filters($monetary_account_bank_id = null)
     {
@@ -93,6 +99,18 @@ final class ApiClientRequestsTest extends TestCase
             12 => 'NL12BUNQ0000000012 - Savings',
             13 => 'NL13BUNQ0000000013 - Household (Joint)',
         ), $this->client->get_bank_accounts(true));
+    }
+
+    public function testOnAServerWhoseOpcacheStripsDocCommentsTheSelectExplainsTheHostSetting()
+    {
+        // The accounts would fail with "Call to a member function getType() on array".
+        $this->client->canDecodeResponses = false;
+        $this->client->exception = new \RuntimeException('Must not be listed');
+
+        $options = $this->client->get_bank_accounts(true);
+
+        $this->assertSame(array(''), array_keys($options));
+        $this->assertStringContainsString('Ask your hosting provider to set opcache.save_comments=1', $options['']);
     }
 
     public function testAFailedBankAccountLookupExplainsWhyInTheSelect()

@@ -131,6 +131,19 @@ final class OAuthAuthorizationTest extends TestCase
         $this->assertSame('', $this->credentials()['api_context']);
     }
 
+    public function testOnAServerWhoseOpcacheStripsDocCommentsBunqIsNotCalledAndTheHostSettingIsShown()
+    {
+        $gateway = $this->gateway($this->liveSettings(array('api_context' => '')));
+        $this->bunq->canDecodeResponses = false;
+
+        $gateway->complete_oauth_authorization();
+
+        $this->assertStringContainsString('Ask your hosting provider to set opcache.save_comments=1', get_transient(Gateway::LAST_ERROR_TRANSIENT));
+        $this->assertFalse(get_transient(Gateway::LAST_SUCCESS_TRANSIENT));
+        $this->assertSame(array(), $this->bunq->callsTo('create_api_context'));
+        $this->assertSame('', $this->credentials()['api_context']);
+    }
+
     public function testOutputDuringTheAuthorizationDoesNotReachTheResponse()
     {
         $gateway = $this->gateway($this->liveSettings());

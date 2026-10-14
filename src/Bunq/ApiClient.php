@@ -11,6 +11,7 @@ use bunq\Context\ApiContext;
 use bunq\Context\BunqContext;
 use bunq\Exception\TooManyRequestsException;
 use bunq\Model\Core\DeviceServerInternal;
+use bunq\Model\Core\Installation;
 use bunq\Model\Core\NotificationFilterUrlMonetaryAccountInternal;
 use bunq\Model\Core\SessionServer;
 use bunq\Model\Generated\Endpoint\BunqMeTabApiObject;
@@ -95,6 +96,27 @@ class ApiClient {
 	 */
 	public static function environment( $testmode ) {
 		return $testmode ? BunqEnumApiEnvironmentType::SANDBOX() : BunqEnumApiEnvironmentType::PRODUCTION();
+	}
+
+	/**
+	 * Whether the bunq SDK can read bunq's responses on this server. It decodes them by the types in the doc comments
+	 * of its model properties, which OPcache strips from the compiled code when opcache.save_comments is off; every
+	 * call to bunq then fails, starting with "Installation::getToken(): Return value must be of type
+	 * bunq\Model\Core\Token, array returned" while connecting.
+	 *
+	 * @return bool
+	 */
+	public function can_decode_responses() {
+		return false !== ( new \ReflectionProperty( Installation::class, 'token' ) )->getDocComment();
+	}
+
+	/**
+	 * What to tell the merchant when the bunq SDK cannot read bunq's responses (can_decode_responses()).
+	 *
+	 * @return string
+	 */
+	public static function cannot_decode_responses_error() {
+		return __( 'PHP\'s OPcache on this server removes code comments (opcache.save_comments=0), which the bunq SDK needs to read bunq\'s responses. Ask your hosting provider to set opcache.save_comments=1, then click "Connect to bunq" again.', 'bunq-for-woocommerce' );
 	}
 
 	/**
@@ -222,6 +244,11 @@ class ApiClient {
 	public function get_bank_accounts( $api_context ) {
 		if ( ! $api_context ) {
 			return array( '' => __( 'Connect your bunq account first', 'bunq-for-woocommerce' ) );
+		}
+
+		if ( ! $this->can_decode_responses() ) {
+			/* translators: %s: error message from bunq */
+			return array( '' => sprintf( __( 'Error: %s', 'bunq-for-woocommerce' ), self::cannot_decode_responses_error() ) );
 		}
 
 		try {
