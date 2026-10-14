@@ -45,8 +45,12 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      # PHPUnit lives in tests/composer.json so it never ends up in the committed,
-      # shipped vendor/ directory.
+      # The plugin's own dependencies, as shipped in the release zip.
+      - name: Install the plugin dependencies
+        run: composer install --no-dev --no-interaction --no-progress
+
+      # PHPUnit lives in tests/composer.json so it never ends up in the vendor/ directory that ships in the
+      # release zip.
       - name: Install PHPUnit
         run: composer install --working-dir=tests --no-interaction --no-progress
 
@@ -92,6 +96,9 @@ jobs:
           extensions: mysqli, openssl, curl, json, mbstring
           coverage: none
           tools: composer:v2
+
+      - name: Install the plugin dependencies
+        run: composer install --no-dev --no-interaction --no-progress
 
       - name: Install PHPUnit, the WordPress test suite and WooCommerce
         run: composer install --working-dir=tests --no-interaction --no-progress

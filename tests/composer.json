@@ -1,5 +1,5 @@
 {
-    "description": "Development dependencies for the test suite. Kept apart from the root composer.json because the root vendor/ directory is committed and shipped in the plugin zip.",
+    "description": "Development dependencies for the test suite. Kept apart from the root composer.json because the root vendor/ directory is shipped in the plugin zip.",
     "config": {
         "platform-check": false,
         "platform": {

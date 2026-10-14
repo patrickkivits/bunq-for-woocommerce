@@ -111,7 +111,7 @@ The bunq.me payment page itself is hosted by bunq and follows the language of th
 
 ## Development
 
-The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForWooCommerce`), loaded through the committed Composer autoloader (PSR-4). `bunq-for-woocommerce.php` only defines the plugin file constant, loads the autoloader and boots `Plugin`, which registers every hook:
+The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForWooCommerce`), loaded through the Composer autoloader (PSR-4). `bunq-for-woocommerce.php` only defines the plugin file constant, loads the autoloader and boots `Plugin`, which registers every hook:
 
 | Class | Responsibility |
 | --- | --- |
@@ -128,11 +128,16 @@ Secrets: the API keys and API contexts (which hold the private key and the sessi
 
 The class names of earlier versions (`WC_Bunq_Gateway`, `WC_Bunq_WooCommerce_Block_Checkout`) still resolve to these classes. After adding a class, nothing needs to be regenerated; after changing the `autoload` section of `composer.json`, run `composer dump-autoload` in the repository root.
 
-There are two test suites, both installed from `tests/composer.json` so that nothing lands in the committed `vendor/` directory that ships in the plugin zip:
+The `vendor/` directory is not committed. Install the plugin's own dependencies in the repository root, and the development dependencies from `tests/composer.json`, which stay apart so that nothing lands in the `vendor/` directory that ships in the plugin zip:
 
 ```
+composer install --no-dev
 composer install --working-dir=tests
 ```
+
+The release workflow builds the zip with the dependencies included; `.github/scripts/build-plugin.sh HEAD build` builds the same plugin folder locally in `build/bunq-for-woocommerce/`.
+
+There are two test suites:
 
 **Unit tests** run without WordPress: `tests/stubs/` stands in for the WordPress and WooCommerce functions the plugin calls, and nothing talks to bunq. They cover the pure logic (rate limiting, retries, description sanitising, scheduling) and run on PHP 7.3 up to 8.5.
 

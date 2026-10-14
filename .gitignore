@@ -1,4 +1,6 @@
 .idea
+/vendor/
+/build/
 tests/vendor/
 tests/wordpress/
 tests/wp-content/
