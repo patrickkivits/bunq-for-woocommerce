@@ -11,9 +11,7 @@
  * - picks the first bank account, enables the gateway and registers the callback URL when the shop has a public URL.
  */
 
-use bunq\Context\BunqContext;
-use bunq\Model\Generated\Endpoint\OauthCallbackUrlApiObject;
-use bunq\Model\Generated\Endpoint\OauthClientApiObject;
+use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 use PatrickKivits\BunqForWooCommerce\Gateway\CallbackHandler;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 use PatrickKivits\BunqForWooCommerce\Plugin;
@@ -75,41 +73,41 @@ if ( empty( $credentials['test_api_key'] ) ) {
 	WP_CLI::log( 'Created a bunq sandbox user.' );
 }
 
-$gateway = new Gateway( Plugin::instance()->api_client() );
+$api     = Plugin::instance()->api_client();
+$gateway = new Gateway( $api );
 
-if ( $gateway->load_api_context() ) {
-	WP_CLI::log( 'The stored bunq sandbox API context works from this orb.' );
-} else {
-	WP_CLI::log( 'Creating a bunq sandbox API context for this orb...' );
-	$gateway->refresh_api_context( false );
-
-	if ( ! $gateway->load_api_context() ) {
-		WP_CLI::error( 'The new bunq sandbox API context cannot be loaded.' );
+// Loading a stored context does not call bunq, so call it: the gateway (re)creates the context when there is none or
+// bunq refuses it from this orb's IP address.
+delete_transient( Gateway::CONTEXT_FAILED_TRANSIENT );
+$gateway->call_bunq(
+	function () use ( $api ) {
+		return $api->request( 'GET', 'user/' . $api->user_id() );
 	}
-}
+);
+WP_CLI::log( 'The bunq sandbox API context works from this orb.' );
 
 $settings_url = Gateway::settings_url();
 
 // A real sandbox OAuth client, with this shop's settings page as redirect URL.
 if ( empty( $state['oauth_client_id'] ) ) {
-	$client_id = OauthClientApiObject::create()->getValue();
-	$client    = OauthClientApiObject::get( $client_id )->getValue();
+	$client_id = ApiClient::id( $api->request( 'POST', 'user/' . $api->user_id() . '/oauth-client', array() ) );
+	$client    = ApiClient::item( $api->request( 'GET', 'user/' . $api->user_id() . '/oauth-client/' . $client_id ), 'OauthClient' );
 
 	$state['oauth_client_id']    = $client_id;
 	$state['redirect_urls']      = array();
-	$settings['test_oauth_client_id']     = $client->getClientId();
-	$settings['test_oauth_client_secret'] = $client->getSecret();
+	$settings['test_oauth_client_id']     = $client['client_id'];
+	$settings['test_oauth_client_secret'] = $client['secret'];
 	WP_CLI::log( 'Created a bunq sandbox OAuth client.' );
 }
 
 if ( ! in_array( $settings_url, $state['redirect_urls'], true ) && ! Url::is_local( $settings_url ) ) {
-	OauthCallbackUrlApiObject::create( (int) $state['oauth_client_id'], $settings_url );
+	$api->request( 'POST', 'user/' . $api->user_id() . '/oauth-client/' . (int) $state['oauth_client_id'] . '/callback-url', array( 'url' => $settings_url ) );
 	$state['redirect_urls'][] = $settings_url;
 	WP_CLI::log( 'Registered the OAuth redirect URL ' . $settings_url );
 }
 
 // The first bank account of the sandbox user, unless one of its accounts is selected already.
-$accounts = array_map( 'strval', array_filter( array_keys( Plugin::instance()->api_client()->get_bank_accounts( true ) ) ) );
+$accounts = array_map( 'strval', array_filter( array_keys( $api->get_bank_accounts( true ) ) ) );
 if ( ! in_array( (string) ( isset( $settings['monetary_account_bank_id'] ) ? $settings['monetary_account_bank_id'] : '' ), $accounts, true ) ) {
 	$settings['monetary_account_bank_id'] = (string) reset( $accounts );
 	unset( $state['callback_url'] );
@@ -122,12 +120,12 @@ $callback_url = CallbackHandler::url();
 
 if ( ! Url::is_local( $callback_url ) && ( empty( $state['callback_url'] ) || $state['callback_url'] !== $callback_url ) ) {
 	$monetary_account_id = (int) $settings['monetary_account_bank_id'];
-	Plugin::instance()->api_client()->create_notification_filters( $monetary_account_id ? $monetary_account_id : null );
+	$api->create_notification_filters( $monetary_account_id ? $monetary_account_id : null );
 	$state['callback_url'] = $callback_url;
 	WP_CLI::log( 'Registered the bunq callback URL ' . $callback_url );
 }
 
-$state['user_id'] = BunqContext::getUserContext()->getUserId();
+$state['user_id'] = $api->user_id();
 update_option( BUNQ_DEMO_STATE, $state, false );
 delete_transient( Gateway::BANK_ACCOUNTS_TRANSIENT );
 delete_transient( Gateway::CONTEXT_FAILED_TRANSIENT );

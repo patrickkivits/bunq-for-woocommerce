@@ -2,6 +2,7 @@
 
 namespace BunqTest;
 
+use PatrickKivits\BunqForWooCommerce\Bunq\ApiException;
 use WC_Bunq_Gateway;
 
 /**
@@ -404,6 +405,112 @@ final class BunqPaymentFlowTest extends TestCase
         $this->assertLogged('info', 'bunq API context created for production');
     }
 
+    public function testWhenBunqRefusesANewSessionTheContextIsRecreatedAndTheCallRepeated()
+    {
+        $gateway = $this->authorizedGateway();
+        $order = $this->unpaidOrder('24.95');
+        $this->bunqReports('WAITING_FOR_PAYMENT', array(FakeBunqApi::payment(777, '24.95')));
+        $this->bunq->exceptions['get_payment_request'] = array($this->contextRejected());
+
+        $this->assertSame('paid', $gateway->check_payment_status($order));
+
+        $this->assertCount(2, $this->bunq->callsTo('get_payment_request'));
+        $this->assertSame(array(array('live-api-key', false)), $this->bunq->callsTo('create_api_context'));
+        $this->assertSame('{"created":1}', $this->credentials()['api_context']);
+        $this->assertLogged('warning', 'bunq refused a new session (Incorrect API key or IP address.), recreating the API context from the saved API key');
+    }
+
+    public function testOtherBunqErrorsDoNotRecreateTheContext()
+    {
+        $gateway = $this->authorizedGateway();
+        // An ended session the API client could not renew is not the same as a context bunq refuses.
+        $this->bunq->exceptions['cancel_payment_request'] = new ApiException('Insufficient authentication.', 403);
+
+        try {
+            $gateway->cancel_payment_request(55);
+            $this->fail('The bunq error should have been rethrown');
+        } catch (ApiException $exception) {
+            $this->assertSame(403, $exception->getCode());
+        }
+
+        $this->assertCount(1, $this->bunq->callsTo('cancel_payment_request'));
+        $this->assertSame(array(), $this->bunq->callsTo('create_api_context'));
+    }
+
+    public function testCallsAreNotRepeatedOnceOneOfThemWentThrough()
+    {
+        $gateway = $this->authorizedGateway();
+        $this->bunq->payments[777] = FakeBunqApi::payment(777, '24.95');
+        $this->bunq->exceptions['cancel_payment_request'] = array($this->contextRejected());
+
+        try {
+            $gateway->call_bunq(function () {
+                $this->bunq->get_payment(777, 123);
+                $this->bunq->cancel_payment_request(55, 123);
+            });
+            $this->fail('The bunq error should have been rethrown');
+        } catch (ApiException $exception) {
+            $this->assertTrue($exception->is_context_rejected());
+        }
+
+        $this->assertCount(1, $this->bunq->callsTo('get_payment'), 'Not done twice');
+        $this->assertSame(array(), $this->bunq->callsTo('create_api_context'));
+    }
+
+    public function testAContextBunqKeepsRefusingIsRecreatedOnceAndReported()
+    {
+        $gateway = $this->authorizedGateway();
+        $this->bunq->exceptions['get_payment'] = array($this->contextRejected(), $this->contextRejected(), $this->contextRejected());
+        $order = $this->paidOrder();
+
+        $error = $gateway->process_refund($order->get_id(), 5);
+
+        $this->assertSame('bunq refund failed: Incorrect API key or IP address.', $error->get_error_message());
+        $this->assertCount(2, $this->bunq->callsTo('get_payment'), 'Recreated once, not in a loop');
+        $this->assertCount(1, $this->bunq->callsTo('create_api_context'));
+    }
+
+    public function testAfterAFailedRecreationTheNextRequestsDoNotTryAgain()
+    {
+        $gateway = $this->authorizedGateway();
+        $this->bunq->exceptions['get_payment_request'] = $this->contextRejected();
+        $this->bunq->exceptions['create_api_context'] = new \RuntimeException('Incorrect API key or IP address');
+
+        foreach (array(1, 2, 3) as $attempt) {
+            try {
+                $gateway->check_payment_status($this->unpaidOrder('24.95'));
+                $this->fail('The bunq error should have been rethrown');
+            } catch (\RuntimeException $exception) {
+                $this->assertSame($attempt === 1 ? 'Incorrect API key or IP address' : 'Incorrect API key or IP address.', $exception->getMessage());
+            }
+        }
+
+        $this->assertCount(1, $this->bunq->callsTo('create_api_context'), 'Only until the failure is remembered');
+        $this->assertSame(1, get_transient(WC_Bunq_Gateway::CONTEXT_FAILED_TRANSIENT));
+    }
+
+    public function testTheSettingsPageRecreatesAContextBunqRefuses()
+    {
+        Environment::$isAdmin = true;
+        $this->bunq->exceptions['get_bank_accounts'] = array($this->contextRejected());
+
+        $fields = $this->authorizedGateway()->get_form_fields();
+
+        $this->assertSame($this->bunq->bankAccounts, $fields['monetary_account_bank_id']['options']);
+        $this->assertCount(1, $this->bunq->callsTo('create_api_context'));
+    }
+
+    public function testTheSettingsPageSaysWhenTheContextCannotBeRecreated()
+    {
+        Environment::$isAdmin = true;
+        $this->bunq->exceptions['get_bank_accounts'] = $this->contextRejected();
+        $this->bunq->exceptions['create_api_context'] = new \RuntimeException('Incorrect API key or IP address');
+
+        $fields = $this->authorizedGateway()->get_form_fields();
+
+        $this->assertSame(array('' => 'bunq rejected the saved connection. Connect again.'), $fields['monetary_account_bank_id']['options']);
+    }
+
     public function testAFailedRecreationIsRememberedAndRethrown()
     {
         $gateway = $this->authorizedGateway(array('api_context' => 'unusable-api-context'));
@@ -478,6 +585,14 @@ final class BunqPaymentFlowTest extends TestCase
         update_option('woocommerce_bunq_settings', $this->liveSettings(array_merge(array('api_context' => '{"live":1}'), $settings)));
 
         return new WC_Bunq_Gateway($this->bunq);
+    }
+
+    /**
+     * What the API client throws when bunq refuses a new session for the stored context.
+     */
+    private function contextRejected()
+    {
+        return new ApiException('Incorrect API key or IP address.', 400, '', true);
     }
 
     private function unpaidOrder($total)

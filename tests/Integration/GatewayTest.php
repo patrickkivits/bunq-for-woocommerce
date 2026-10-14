@@ -317,7 +317,7 @@ final class GatewayTest extends TestCase
 
         $this->assertFalse($gateway->load_api_context());
         $this->assertSame('not json', $this->credentials()['api_context']);
-        $this->assertLogged('error', 'json_decode error');
+        $this->assertLogged('error', 'The stored bunq API context is not valid JSON');
     }
 
     /**

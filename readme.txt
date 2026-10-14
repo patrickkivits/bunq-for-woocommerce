@@ -29,7 +29,6 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * WooCommerce.
 * HTTPS, so bunq can reach the shop's callback URL.
 * The PHP extensions openssl, curl, json and mbstring.
-* When PHP's OPcache is enabled: `opcache.save_comments=1` (PHP's default). The bunq SDK reads the types of bunq's responses from code comments, which `opcache.save_comments=0` removes; only your hosting provider can change this setting.
 
 The plugin is developed by Patrick Kivits and is the WooCommerce integration bunq presents to its business customers, see [WooCommerce on bunq.com](https://www.bunq.com/business/features/integrations/woocommerce) and the [bunq Help article](https://help.bunq.com/nl-nl/articles/how-can-i-accept-woocommerce-payments-with-my-bunq-account).
 
@@ -100,7 +99,6 @@ Everything the plugin does with bunq (callbacks received, payments matched, refu
 * The plugin shows the error returned by bunq at the top of the settings page right after the redirect back from bunq, with details in the WooCommerce log.
 * Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
 * bunq ties the API key to the IP address the shop's server connects from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with "Incorrect API key or IP address".
-* If the error mentions `opcache.save_comments=0`, or the log shows "Installation::getToken(): Return value must be of type bunq\Model\Core\Token, array returned", ask your hosting provider to set `opcache.save_comments=1`.
 
 = Unpaid orders are cancelled before the customer paid =
 
@@ -115,6 +113,14 @@ Yes. Check **Use the bunq sandbox** under **Test mode** and connect the OAuth cl
 The bunq.me payment page is hosted by bunq and follows the language of the customer's browser.
 
 == Changelog ==
+
+= Unreleased =
+* The plugin talks to the bunq API with its own client instead of the bunq PHP SDK. The plugin zip is about 98,000 lines of code smaller, PHP 8.4 and newer no longer report deprecations from it, and `opcache.save_comments=0` no longer breaks the connection with bunq.
+* Fewer calls to bunq: loading the connection no longer lists the bank accounts on every request, and the default bank account is only looked up when no bank account is selected.
+* When bunq ends a session early, the plugin opens a new one and repeats the rejected call. When bunq refuses a new session as well (for example after the server's IP address changed), it reconnects with the saved access before any call went through, and not again for five minutes after a failed attempt.
+* Connecting keeps the callback URLs other integrations registered on the bank account; before, they were replaced.
+* The bank account select lists up to 200 accounts per type instead of 10.
+* Existing connections keep working without connecting again.
 
 = 1.8.1 =
 * Servers whose PHP OPcache removes code comments (`opcache.save_comments=0`) could not connect to bunq: the bunq SDK needs those comments to read bunq's responses, and connecting failed with "Installation::getToken(): Return value must be of type bunq\Model\Core\Token, array returned". The settings page now explains that the hosting provider has to set `opcache.save_comments=1`, before sending you to bunq and in the bank account select.

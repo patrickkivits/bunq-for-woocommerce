@@ -7,8 +7,8 @@
 
 namespace PatrickKivits\BunqForWooCommerce;
 
-use bunq\Security\KeyPair;
 use Exception;
+use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,7 +42,7 @@ final class Requirements {
 	}
 
 	/**
-	 * The PHP extensions the bunq SDK needs.
+	 * The PHP extensions the bunq API client needs.
 	 *
 	 * @return string[]
 	 */
@@ -74,7 +74,7 @@ final class Requirements {
 			}
 		}
 
-		// Generating a key pair proves OpenSSL can do what the bunq SDK needs, but it costs tens of milliseconds, so
+		// Generating a key pair proves OpenSSL can do what the bunq API client needs, but it costs tens of milliseconds, so
 		// the outcome is remembered per PHP/OpenSSL build in an autoloaded option (a transient would cost two queries
 		// per request without an object cache).
 		$fingerprint = md5( PHP_VERSION . '|' . ( defined( 'OPENSSL_VERSION_TEXT' ) ? OPENSSL_VERSION_TEXT : '' ) );
@@ -84,7 +84,7 @@ final class Requirements {
 		}
 
 		try {
-			KeyPair::generate();
+			ApiClient::generate_key_pair();
 		} catch ( Exception $exception ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Only under WP_DEBUG.

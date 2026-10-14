@@ -107,8 +107,8 @@ jobs:
 
       # WP_DEBUG_LOG collects every PHP notice raised while WordPress, WooCommerce and
       # the plugin were installed and loaded. Only entries raised by the plugin's own
-      # code fail the job: WordPress/WooCommerce notices are not ours, and deprecations
-      # are excluded because bunq/sdk_php still uses implicitly nullable parameters.
+      # code fail the job: WordPress/WooCommerce notices are not ours, nor are those of
+      # the vendored dependencies.
       - name: Check the debug log for notices raised by the plugin
         if: always()
         run: |
@@ -123,8 +123,7 @@ jobs:
           echo "::endgroup::"
 
           plugin_entries=$(grep 'plugins/bunq-for-woocommerce/' "$log" \
-            | grep -v 'plugins/bunq-for-woocommerce/vendor/' \
-            | grep -v 'PHP Deprecated' || true)
+            | grep -v 'plugins/bunq-for-woocommerce/vendor/' || true)
 
           if [ -n "$plugin_entries" ]; then
             echo "::error::The plugin raised PHP notices or warnings:"

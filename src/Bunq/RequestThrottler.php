@@ -42,7 +42,7 @@ final class RequestThrottler {
 	/**
 	 * Wait until a request to the endpoint stays within bunq's rate limit, and register it.
 	 *
-	 * @param string $endpoint       Endpoint URL as defined by the bunq SDK (e.g. "user/%s/monetary-account").
+	 * @param string $endpoint       Endpoint path (e.g. "user/1/monetary-account-bank").
 	 * @param string $request_method HTTP method.
 	 */
 	public function ensure_api_limits_are_respected( $endpoint, $request_method ) {
