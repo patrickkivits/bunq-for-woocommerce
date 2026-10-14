@@ -12,6 +12,7 @@ use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiException;
 use PatrickKivits\BunqForWooCommerce\Bunq\OAuthClient;
 use PatrickKivits\BunqForWooCommerce\Logger;
+use PatrickKivits\BunqForWooCommerce\Orders\OrderLock;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
 use PatrickKivits\BunqForWooCommerce\Plugin;
 use PatrickKivits\BunqForWooCommerce\Support\Money;
@@ -37,7 +38,6 @@ class Gateway extends WC_Payment_Gateway {
 	const LAST_SUCCESS_TRANSIENT   = 'wc_bunq_gateway.last_success';
 	const BANK_ACCOUNTS_TRANSIENT  = 'wc_bunq_gateway.bunq_get_bank_accounts';
 	const CONTEXT_FAILED_TRANSIENT = 'wc_bunq_gateway.context_failed';
-	const LOCK_TRANSIENT_PREFIX    = 'wc_bunq_gateway.lock.';
 	const REFRESH_ACCOUNTS_ACTION  = 'bunq_refresh_accounts';
 	const DISCONNECT_ACTION        = 'bunq_disconnect';
 
@@ -1025,13 +1025,20 @@ class Gateway extends WC_Payment_Gateway {
 
 		// The callback, the customer's return and the scheduled check can run at the same time; let one of them do
 		// the work.
-		$lock = self::LOCK_TRANSIENT_PREFIX . $order->get_id();
-		if ( get_transient( $lock ) ) {
+		if ( ! OrderLock::acquire( $order->get_id(), 30 ) ) {
+			// The other check may have asked bunq just before this payment came in.
+			PaymentMonitor::schedule_follow_up_check( $order->get_id(), 30 );
+
 			return 'pending';
 		}
-		set_transient( $lock, 1, 30 );
 
 		try {
+			// Another check may have finished after this request loaded the order; recording its payment again
+			// would duplicate the payment meta data, the order note and the payment completion.
+			if ( ! OrderLock::stored_order_needs_payment( $order ) ) {
+				return 'settled';
+			}
+
 			$payment_request = $this->call_bunq(
 				function () use ( $payment_request_id ) {
 					return $this->api->get_payment_request( $payment_request_id, $this->get_monetary_account_bank_id() );
@@ -1040,7 +1047,7 @@ class Gateway extends WC_Payment_Gateway {
 
 			return $this->apply_payment_request( $order, $payment_request_id, $payment_request );
 		} finally {
-			delete_transient( $lock );
+			OrderLock::release( $order->get_id() );
 		}
 	}
 

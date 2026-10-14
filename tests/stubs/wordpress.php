@@ -135,6 +135,68 @@ function delete_transient($key)
     return true;
 }
 
+/**
+ * The few queries the plugin runs on $wpdb itself (OrderLock), answered from the options and orders above.
+ * prepare() keeps the query and its arguments apart so query() and get_var() can tell them apart.
+ */
+final class wpdb
+{
+    public $options = 'wp_options';
+    public $posts = 'wp_posts';
+
+    public function prepare($query, ...$args)
+    {
+        return array($query, $args);
+    }
+
+    public function query($prepared)
+    {
+        list($query, $args) = $prepared;
+
+        if (strpos($query, 'INSERT IGNORE INTO wp_options') === 0) {
+            if (array_key_exists($args[0], Environment::$options)) {
+                return 0;
+            }
+            Environment::$options[$args[0]] = $args[1];
+
+            return 1;
+        }
+
+        throw new LogicException('Query not stubbed: ' . $query);
+    }
+
+    public function get_var($prepared)
+    {
+        list($query, $args) = $prepared;
+
+        if (strpos($query, 'SELECT option_value FROM wp_options WHERE option_name = %s') === 0) {
+            return array_key_exists($args[0], Environment::$options) ? Environment::$options[$args[0]] : null;
+        }
+
+        if (strpos($query, 'SELECT post_status FROM wp_posts WHERE ID = %d') === 0) {
+            return isset(Environment::$orders[$args[0]]) ? 'wc-' . Environment::$orders[$args[0]]->get_status() : null;
+        }
+
+        throw new LogicException('Query not stubbed: ' . $query);
+    }
+
+    public function delete($table, array $where)
+    {
+        if ($table !== $this->options || array_keys($where) !== array('option_name', 'option_value')) {
+            throw new LogicException('Delete not stubbed: ' . $table);
+        }
+        $name = $where['option_name'];
+        if (!array_key_exists($name, Environment::$options) || Environment::$options[$name] !== $where['option_value']) {
+            return 0;
+        }
+        unset(Environment::$options[$name]);
+
+        return 1;
+    }
+}
+
+$GLOBALS['wpdb'] = new wpdb();
+
 // --- Request, user and site ---------------------------------------------------------------------------------
 
 function is_admin() { return Environment::$isAdmin; }

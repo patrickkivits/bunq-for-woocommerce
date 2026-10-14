@@ -121,6 +121,7 @@ The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForW
 | `Gateway\CallbackHandler` | The callback bunq sends to `/wc-api/wc_bunq_gateway/` |
 | `Gateway\PaymentMethods`, `Gateway\SettingsFields` | The bunq.me payment methods and the settings form |
 | `Orders\PaymentMonitor` | Payment checks on return and from Action Scheduler; cancels the bunq payment request of cancelled orders |
+| `Orders\OrderLock` | Lets one payment check per order run at a time (callback, return and scheduled checks can coincide) |
 | `Blocks\CheckoutIntegration` | The block checkout payment method (script in `assets/js/block-checkout.js`) |
 | `Bunq\ApiClient`, `Bunq\ApiException`, `Bunq\OAuthClient` | Every call to bunq (signed, verified, rate limited and retried; no bunq SDK) and its errors, and the OAuth authorization |
 

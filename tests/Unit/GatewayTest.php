@@ -3,6 +3,7 @@
 namespace BunqTest;
 
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Orders\OrderLock;
 
 /**
  * The WooCommerce payment gateway, up to the point where it would talk to bunq.
@@ -746,7 +747,7 @@ final class GatewayTest extends TestCase
     {
         $gateway = $this->createGateway($this->liveSettings());
         $order = Environment::addOrder(array('meta' => array('bunq_payment_request_id' => 55)));
-        set_transient('wc_bunq_gateway.lock.' . $order->get_id(), 1, 30);
+        $this->assertTrue(OrderLock::acquire($order->get_id(), 30), 'Another check holds the lock');
 
         $this->assertSame('pending', $gateway->check_payment_status($order));
         $this->assertSame(array(), Environment::$logs, 'bunq was not contacted');
@@ -764,7 +765,7 @@ final class GatewayTest extends TestCase
             $this->assertStringContainsString('bunq API context is not available', $exception->getMessage());
         }
 
-        $this->assertFalse(get_transient('wc_bunq_gateway.lock.' . $order->get_id()));
+        $this->assertArrayNotHasKey('wc_bunq_gateway.lock.' . $order->get_id(), Environment::$options, 'The lock is released');
         $this->assertSame('pending', $order->get_status());
     }
 
