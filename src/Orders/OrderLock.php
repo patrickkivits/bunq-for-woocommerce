@@ -107,7 +107,7 @@ final class OrderLock {
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Past every cache on purpose; the table name comes from WooCommerce.
 		if ( class_exists( OrderUtil::class ) && OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$table  = OrderUtil::get_table_for_orders();
+			$table  = esc_sql( OrderUtil::get_table_for_orders() );
 			$status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d", $order->get_id() ) );
 		} else {
 			$status = $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE ID = %d", $order->get_id() ) );
