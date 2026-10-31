@@ -98,7 +98,7 @@ Everything the plugin does with bunq (callbacks received, payments matched, refu
 
 * The plugin shows the error returned by bunq at the top of the settings page right after the redirect back from bunq, with details in the WooCommerce log.
 * Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
-* bunq ties the API key to the IP address the shop's server connects from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with "Incorrect API key or IP address".
+* bunq ties the API key to the IP address the shop's server connects from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with "Incorrect API key or IP address". List all of the host's outgoing addresses with the `bunq_for_woocommerce_permitted_ips` filter and click **Connect again**; see the plugin's GitHub readme for an example.
 
 = Unpaid orders are cancelled before the customer paid =
 

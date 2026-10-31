@@ -252,6 +252,27 @@ final class ApiClientTest extends TestCase
         $this->assertSame('session-token', $this->server->requests[3]['headers']['X-Bunq-Client-Authentication']);
     }
 
+    public function testTheDeviceServerAcceptsTheKeyFromTheFilteredIpAddresses()
+    {
+        add_filter('bunq_for_woocommerce_permitted_ips', function ($ips) {
+            return array_merge($ips, array(' 52.57.69.90 ', '2a05:d014:145b:5600::1', '52.57.69.90', '*', 'not-an-ip', ''));
+        });
+
+        $this->server
+            ->respond(array(
+                array('Id' => array('id' => 1)),
+                array('Token' => array('id' => 2, 'token' => 'installation-token')),
+                array('ServerPublicKey' => array('server_public_key' => FakeBunqServer::keys()['server']['public'])),
+            ))
+            ->respond(array(array('Id' => array('id' => 3))))
+            ->respond($this->oauthSession('session-token'));
+
+        $this->api->create_api_context('oauth-access-token', true);
+
+        // Valid addresses are kept once and trimmed; anything bunq would reject (a wildcard, junk) is left out.
+        $this->assertSame(array('52.57.69.90', '2a05:d014:145b:5600::1'), $this->server->body(1)['permitted_ips']);
+    }
+
     public function testACreationBunqRejectsLeavesNoContextLoaded()
     {
         $this->server
