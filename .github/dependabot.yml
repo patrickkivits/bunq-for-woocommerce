@@ -1,0 +1,37 @@
+version: 2
+updates:
+  # Runtime dependencies (vendor/ is shipped in the plugin zip)
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Amsterdam"
+    open-pull-requests-limit: 10
+    groups:
+      composer-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # Dev dependencies for the test suite
+  - package-ecosystem: "composer"
+    directory: "/tests"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Amsterdam"
+    open-pull-requests-limit: 5
+    groups:
+      test-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      timezone: "Europe/Amsterdam"
+    groups:
+      github-actions:
+        patterns: ["*"]
