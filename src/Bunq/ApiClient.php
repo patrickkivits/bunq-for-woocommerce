@@ -150,13 +150,42 @@ class ApiClient {
 			array(
 				'description'   => self::DEVICE_DESCRIPTION,
 				'secret'        => $context['api_key'],
-				'permitted_ips' => array(),
+				'permitted_ips' => self::permitted_ips(),
 			)
 		);
 
 		$this->load( $this->start_session( $context ), null );
 
 		return self::to_json( $this->context );
+	}
+
+	/**
+	 * The IP addresses bunq accepts the API key from, registered with the device server when connecting.
+	 *
+	 * By default the list is empty, so bunq binds the key to the address the shop connects from. A shop whose
+	 * outgoing requests come from several addresses (a load balanced or serverless host) can list all of them with
+	 * the bunq_for_woocommerce_permitted_ips filter; bunq then accepts the key from each. The list only applies to
+	 * new connections: connect again after changing it.
+	 *
+	 * @return string[] Valid IPv4 and IPv6 addresses, without duplicates.
+	 */
+	public static function permitted_ips() {
+		/**
+		 * Filters the IP addresses bunq accepts the shop's API key from.
+		 *
+		 * @param string[] $permitted_ips IP addresses; empty to use the address the shop connects from.
+		 */
+		$ips = apply_filters( 'bunq_for_woocommerce_permitted_ips', array() );
+
+		$permitted = array();
+		foreach ( (array) $ips as $ip ) {
+			$ip = trim( (string) $ip );
+			if ( false !== filter_var( $ip, FILTER_VALIDATE_IP ) && ! in_array( $ip, $permitted, true ) ) {
+				$permitted[] = $ip;
+			}
+		}
+
+		return $permitted;
 	}
 
 	/**

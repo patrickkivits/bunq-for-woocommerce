@@ -93,6 +93,18 @@ If the settings page still says *Not connected* after connecting, or the **Bank 
 3. Make sure the redirect URL registered in the bunq app is **exactly** the redirect URL shown on the settings page, including `&section=bunq`.
 4. Every attempt whitelists the IP address the request was sent from. If your host sends outgoing requests from changing IP addresses, bunq may reject the session with *Incorrect API key or IP address*.
 
+### Hosts with several outgoing IP addresses
+
+On a load balanced or serverless host outgoing requests can come from any address in a pool, and bunq rejects the connection with *Incorrect API key or IP address* as soon as one comes from another address. List all of the host's outgoing addresses with the `bunq_for_woocommerce_permitted_ips` filter, for example in a must-use plugin, and click **Connect again** so bunq registers them:
+
+```php
+add_filter( 'bunq_for_woocommerce_permitted_ips', function ( $ips ) {
+	return array_merge( $ips, array( '203.0.113.10', '203.0.113.11' ) );
+} );
+```
+
+The addresses only apply to new connections. bunq does not accept a wildcard (`*`) through its API, so invalid entries are left out.
+
 ## Optional configuration
 
 By default WooCommerce will **hold stock** for unpaid orders for **60 minutes**. When this limit is reached, the pending order will be **cancelled**.
