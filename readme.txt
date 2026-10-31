@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.9.1
+Stable tag: 1.9.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 1.9.2 =
+* New filter `bunq_for_woocommerce_permitted_ips` to register the IP addresses bunq accepts the shop's API key from. Shops on hosts that send outgoing requests from several addresses (load balanced or serverless hosting) can list all of them, so bunq no longer rejects the connection with "Incorrect API key or IP address" when a request comes from another address of the host. Click **Connect again** after setting the list.
+
 = 1.9.1 =
 * When bunq's callback and the customer's return to the shop checked the same order at the same moment, both could record the payment: the bunq payment id and account were stored twice on the order, the "bunq payment received" note was added twice and the payment completion (status change, emails) ran twice. Only one check of an order runs at a time now, and a check that finds the payment already recorded leaves the order alone.
 
@@ -185,6 +188,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.9.2 =
+Adds the bunq_for_woocommerce_permitted_ips filter for hosts with several outgoing IP addresses. Nothing changes unless you use it; no need to connect again.
 
 = 1.9.1 =
 Fixes a bunq payment being recorded twice on an order (payment id, note, status change and emails) when bunq's callback and the customer's return arrived at the same moment.

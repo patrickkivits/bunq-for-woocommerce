@@ -25,7 +25,7 @@ final class Plugin {
 	/**
 	 * The plugin version; matches the Version header of the main plugin file.
 	 */
-	const VERSION = '1.9.1';
+	const VERSION = '1.9.2';
 
 	/**
 	 * The text domain.
