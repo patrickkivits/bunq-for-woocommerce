@@ -399,8 +399,8 @@ msgid "Separate payment methods"
 msgstr "Losse betaalmethoden"
 
 #: src/Gateway/SettingsFields.php:147
-msgid "Show iDEAL | Wero, card and Bancontact as separate payment methods"
-msgstr "Toon iDEAL | Wero, card en Bancontact als losse betaalmethoden"
+msgid "Show payment methods separately"
+msgstr "Toon betaalmethoden apart"
 
 #: src/Gateway/SettingsFields.php:150
 msgid "Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately."

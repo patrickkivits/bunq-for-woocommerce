@@ -73,7 +73,7 @@ bunq's terms and privacy policy apply to this data:
 
 Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL | Wero, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
 
-With **Show iDEAL | Wero, card and Bancontact as separate payment methods** each of them is a payment option of its own at checkout, with its own logo, instead of one bunq option; customers go straight to the chosen method on bunq.me. **Payment methods** limits which of them are offered, and they also appear in WooCommerce's list of payment methods, where turning one on or off updates these settings. Payments from a bunq account are not offered separately.
+With **Show payment methods separately** iDEAL | Wero, card and Bancontact are each a payment option of their own at checkout, with its own logo, instead of one bunq option; customers go straight to the chosen method on bunq.me. **Payment methods** limits which of them are offered, and they also appear in WooCommerce's list of payment methods, where turning one on or off updates these settings. Payments from a bunq account are not offered separately.
 
 = Managing the connection =
 

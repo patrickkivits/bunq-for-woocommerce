@@ -258,7 +258,7 @@ msgid "Separate payment methods"
 msgstr ""
 
 #: src/Gateway/SettingsFields.php:147
-msgid "Show iDEAL | Wero, card and Bancontact as separate payment methods"
+msgid "Show payment methods separately"
 msgstr ""
 
 #: src/Gateway/SettingsFields.php:150

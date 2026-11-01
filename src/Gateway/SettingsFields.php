@@ -144,7 +144,7 @@ final class SettingsFields {
 			),
 			'separate_gateways'        => array(
 				'title'       => __( 'Separate payment methods', 'bunq-for-woocommerce' ),
-				'label'       => __( 'Show iDEAL | Wero, card and Bancontact as separate payment methods', 'bunq-for-woocommerce' ),
+				'label'       => __( 'Show payment methods separately', 'bunq-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'default'     => 'no',
 				'description' => __( 'Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately.', 'bunq-for-woocommerce' ),
