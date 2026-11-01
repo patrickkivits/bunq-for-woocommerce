@@ -13,6 +13,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 ## Features
 
 - iDEAL | Wero, credit and debit cards, Bancontact and bunq-to-bunq transfers through a [bunq.me](https://bunq.me) payment request.
+- The iDEAL | Wero, card and Bancontact logos at checkout, and optionally each of them as a payment option of its own.
 - Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 - Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
@@ -63,6 +64,8 @@ Upload the new `bunq-for-woocommerce.zip` the same way. WordPress recognises the
 <img width="700" alt="The bunq account section once connected, with Connect again, Change OAuth client and Disconnect, and the bank account select" src=".github/images/settings-connected.png">
 
 Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL | Wero, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
+
+With **Show iDEAL | Wero, card and Bancontact as separate payment methods** each of them is a payment option of its own at checkout, with its own logo, instead of one bunq option; customers go straight to the chosen method on bunq.me. **Payment methods** limits which of them are offered, and they also appear in WooCommerce's list of payment methods, where turning one on or off updates these settings. Payments from a bunq account are not offered separately.
 
 ### Managing the connection
 
@@ -176,6 +179,10 @@ tests/vendor/bin/phpcs
 ```
 
 The WooCommerce version under test is the one pinned in `tests/composer.lock`; update it with `composer update --working-dir=tests wpackagist-plugin/woocommerce`. The suites and the coding standards check run on every push through GitHub Actions.
+
+## Credits
+
+The payment method logos in `assets/images` are from [Pronamic's wp-pay-logos](https://github.com/pronamic/wp-pay-logos) (GPL-2.0-or-later).
 
 ## Disclaimer
 

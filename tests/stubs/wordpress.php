@@ -614,6 +614,7 @@ class WC_Payment_Gateway
     public function get_option_key() { return $this->plugin_id . $this->id . '_settings'; }
     public function get_form_fields() { return $this->form_fields; }
     public function get_method_title() { return $this->method_title; }
+    public function get_method_description() { return $this->method_description; }
     public function supports($feature) { return in_array($feature, $this->supports, true); }
     public function admin_options() {}
 

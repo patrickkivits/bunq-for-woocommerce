@@ -95,6 +95,11 @@ final class BlockCheckoutTest extends TestCase
             'description' => 'Pay with bunq',
             'payment_methods' => array('ideal' => 'iDEAL | Wero'),
             'direct_gateway' => true,
+            'icons' => array(array(
+                'id' => 'ideal',
+                'src' => 'https://shop.example/wp-content/plugins/bunq-for-woocommerce/assets/images/ideal-wero.svg',
+                'alt' => 'iDEAL | Wero',
+            )),
             'select_label' => 'Payment method',
             'supports' => array('products', 'refunds'),
         ), $method->get_payment_method_data());

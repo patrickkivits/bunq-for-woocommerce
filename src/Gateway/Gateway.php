@@ -119,6 +119,14 @@ class Gateway extends WC_Payment_Gateway {
 	public $direct_gateway;
 
 	/**
+	 * Whether iDEAL | Wero, card and Bancontact are offered as payment options of their own (MethodGateway) instead
+	 * of this one.
+	 *
+	 * @var bool
+	 */
+	public $separate_gateways;
+
+	/**
 	 * The bunq API.
 	 *
 	 * @var ApiClient
@@ -143,7 +151,6 @@ class Gateway extends WC_Payment_Gateway {
 		$this->oauth = $oauth ? $oauth : new OAuthClient();
 
 		$this->id                 = self::ID;
-		$this->icon               = '';
 		$this->method_title       = 'bunq';
 		$this->method_description = __( 'bunq payment gateway for WooCommerce', 'bunq-for-woocommerce' );
 		$this->supports           = array(
@@ -171,10 +178,11 @@ class Gateway extends WC_Payment_Gateway {
 		$this->api_context              = (string) $this->get_setting( 'api_context' );
 		$this->monetary_account_bank_id = $this->get_option( 'monetary_account_bank_id' );
 		$this->direct_gateway           = 'yes' === $this->get_option( 'direct_gateway' );
+		$this->separate_gateways        = 'yes' === $this->get_option( 'separate_gateways' );
 		$this->has_fields               = $this->direct_gateway;
+		$this->icon                     = $this->get_icon_url();
 
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_api_' . CallbackHandler::API_REQUEST, array( $this, 'handle_callback' ) );
+		$this->register_hooks();
 
 		foreach ( array( 'oauth_client_secret', 'test_oauth_client_secret' ) as $key ) {
 			Logger::add_secret( $this->get_option( $key ), 'client secret' );
@@ -182,6 +190,40 @@ class Gateway extends WC_Payment_Gateway {
 		foreach ( array( 'api_key', 'test_api_key' ) as $key ) {
 			Logger::add_secret( $this->get_setting( $key ), 'API key' );
 		}
+	}
+
+	/**
+	 * Hook the settings form and the bunq callback into WooCommerce.
+	 */
+	protected function register_hooks() {
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_api_' . CallbackHandler::API_REQUEST, array( $this, 'handle_callback' ) );
+	}
+
+	/**
+	 * Whether a gateway id is one of the plugin's: this gateway or one of the separate payment method gateways.
+	 * Orders paid with any of them are bunq.me payment requests.
+	 *
+	 * @param string $id Gateway id, for example the payment method of an order.
+	 * @return bool
+	 */
+	public static function is_bunq_gateway_id( $id ) {
+		return self::ID === $id || in_array( $id, self::method_gateway_ids(), true );
+	}
+
+	/**
+	 * The ids of the separate payment method gateways (MethodGateway), such as "bunq_ideal".
+	 *
+	 * @return string[] Gateway ids by payment method id, in checkout order.
+	 */
+	public static function method_gateway_ids() {
+		$ids = array();
+
+		foreach ( PaymentMethods::SEPARATE as $method ) {
+			$ids[ $method ] = self::ID . '_' . $method;
+		}
+
+		return $ids;
 	}
 
 	/**
@@ -318,6 +360,45 @@ class Gateway extends WC_Payment_Gateway {
 		}
 
 		return function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : '';
+	}
+
+	/**
+	 * The payment methods whose logos are shown at checkout: those the customer may pick with the direct gateway,
+	 * otherwise every method bunq.me offers.
+	 *
+	 * @param float|null $total Cart or order total; null for every enabled method.
+	 * @return array[] See PaymentMethods::icons().
+	 */
+	public function get_icons( $total = null ) {
+		$methods = $this->direct_gateway ? $this->get_allowed_payment_methods( $total ) : PaymentMethods::all();
+
+		return PaymentMethods::icons( PaymentMethods::in_checkout_order( $methods ) );
+	}
+
+	/**
+	 * The URL of the first logo, for code that reads the gateway's icon property.
+	 *
+	 * @return string
+	 */
+	protected function get_icon_url() {
+		$icons = $this->get_icons();
+
+		return $icons ? $icons[0]['src'] : '';
+	}
+
+	/**
+	 * The logos next to the gateway's title in the classic checkout.
+	 *
+	 * @return string
+	 */
+	public function get_icon() {
+		$html = '';
+
+		foreach ( $this->get_icons( $this->get_checkout_total() ) as $icon ) {
+			$html .= '<img src="' . esc_url( $icon['src'] ) . '" alt="' . esc_attr( $icon['alt'] ) . '" class="bunq-payment-method-icon" />';
+		}
+
+		return apply_filters( 'woocommerce_gateway_icon', $html, $this->id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce's hook.
 	}
 
 	/**
@@ -857,7 +938,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( ! parent::is_available() ) {
+		if ( ! parent::is_available() || ! $this->is_offered() ) {
 			return false;
 		}
 
@@ -866,6 +947,31 @@ class Gateway extends WC_Payment_Gateway {
 		}
 
 		return (bool) $this->get_setting( 'api_context' ) && ! get_transient( self::CONTEXT_FAILED_TRANSIENT );
+	}
+
+	/**
+	 * Whether this gateway is offered at checkout as far as the settings go: not when the payment methods are
+	 * offered as gateways of their own.
+	 *
+	 * @return bool
+	 */
+	protected function is_offered() {
+		return ! $this->separate_gateways;
+	}
+
+	/**
+	 * The payment method bunq.me should open directly: the one the customer picked with the direct gateway.
+	 *
+	 * @return string|null bunq.me's name for it; null to let the customer choose on bunq.me.
+	 */
+	protected function get_requested_bunqme_payment_method() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- WooCommerce verified the checkout nonce.
+		if ( empty( $_POST[ self::PAYMENT_METHOD_FIELD ] ) ) {
+			return null;
+		}
+
+		return PaymentMethods::bunqme_name( sanitize_text_field( wp_unslash( $_POST[ self::PAYMENT_METHOD_FIELD ] ) ) );
+		// phpcs:enable
 	}
 
 	/**
@@ -878,13 +984,8 @@ class Gateway extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		try {
-			// The block checkout does not call validate_fields(), so check the posted method here as well.
-			$bunqme_payment_method = null;
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verified the checkout nonce.
-			if ( ! empty( $_POST[ self::PAYMENT_METHOD_FIELD ] ) ) {
-				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verified the checkout nonce.
-				$bunqme_payment_method = PaymentMethods::bunqme_name( sanitize_text_field( wp_unslash( $_POST[ self::PAYMENT_METHOD_FIELD ] ) ) );
-			}
+			// The block checkout does not call validate_fields(); bunqme_name() only knows the valid methods.
+			$bunqme_payment_method = $this->get_requested_bunqme_payment_method();
 
 			$payment_request = $this->call_bunq(
 				function () use ( $order ) {
