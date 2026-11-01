@@ -17,11 +17,14 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 
 * iDEAL | Wero, credit and debit cards, Bancontact and bunq-to-bunq transfers through a bunq.me payment request.
 * Optionally let customers pick the payment method at checkout; methods whose bunq limits do not fit the order total are hidden.
+* The iDEAL | Wero, card and Bancontact logos at checkout, and optionally each of them as a payment option of its own.
 * Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 * Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 * Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
 * Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
 * Translated into Dutch, French and German.
+
+The payment method logos are from [Pronamic's wp-pay-logos](https://github.com/pronamic/wp-pay-logos) (GPL-2.0-or-later).
 
 = Requirements =
 
@@ -69,6 +72,8 @@ bunq's terms and privacy policy apply to this data:
 7. Under **Receiving payments**, select the **Bank account** payments are paid into. Check **Enable bunq Gateway** at the top of the page and click **Save changes**.
 
 Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL | Wero, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
+
+With **Show iDEAL | Wero, card and Bancontact as separate payment methods** each of them is a payment option of its own at checkout, with its own logo, instead of one bunq option; customers go straight to the chosen method on bunq.me. **Payment methods** limits which of them are offered, and they also appear in WooCommerce's list of payment methods, where turning one on or off updates these settings. Payments from a bunq account are not offered separately.
 
 = Managing the connection =
 

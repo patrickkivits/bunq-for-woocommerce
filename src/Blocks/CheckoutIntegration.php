@@ -9,13 +9,14 @@ namespace PatrickKivits\BunqForWooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\PaymentMethods;
 use PatrickKivits\BunqForWooCommerce\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Offers the gateway in the WooCommerce block checkout.
+ * Offers a gateway in the WooCommerce block checkout: the bunq gateway or a separate payment method gateway.
  */
 final class CheckoutIntegration extends AbstractPaymentMethodType {
 
@@ -30,7 +31,7 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 	const SCRIPT_PATH = 'assets/js/block-checkout.js';
 
 	/**
-	 * The payment method name; matches the gateway id.
+	 * The payment method name; matches the gateway id. The checkout script reads its data as "<name>_data".
 	 *
 	 * @var string
 	 */
@@ -44,11 +45,26 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 	private $gateway;
 
 	/**
+	 * Constructor.
+	 *
+	 * @param string $gateway_id The bunq gateway's id, or that of a separate payment method gateway.
+	 */
+	public function __construct( $gateway_id = Gateway::ID ) {
+		$this->name = $gateway_id;
+	}
+
+	/**
 	 * Use the gateway instance WooCommerce registered; a second one would register the gateway's hooks twice.
 	 */
 	public function initialize() {
-		$gateway       = Plugin::instance()->gateway();
-		$this->gateway = $gateway ? $gateway : new Gateway();
+		$gateway = Plugin::instance()->gateway( $this->name );
+
+		if ( ! $gateway ) {
+			$method  = array_search( $this->name, Gateway::method_gateway_ids(), true );
+			$gateway = false === $method ? new Gateway() : new MethodGateway( $method );
+		}
+
+		$this->gateway = $gateway;
 	}
 
 	/**
@@ -100,6 +116,7 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 			'description'     => $this->gateway->description,
 			'payment_methods' => PaymentMethods::options( $this->gateway->get_allowed_payment_methods( $total ) ),
 			'direct_gateway'  => $this->gateway->direct_gateway,
+			'icons'           => $this->gateway->get_icons( $total ),
 			'select_label'    => __( 'Payment method', 'bunq-for-woocommerce' ),
 			'supports'        => array_values( array_filter( $this->gateway->supports, array( $this->gateway, 'supports' ) ) ),
 		);

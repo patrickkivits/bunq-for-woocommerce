@@ -7,6 +7,7 @@
 
 	var $testmode = $( '#woocommerce_bunq_testmode' );
 	var $directGateway = $( '#woocommerce_bunq_direct_gateway' );
+	var $separateGateways = $( '#woocommerce_bunq_separate_gateways' );
 	var $paymentMethods = $( '#woocommerce_bunq_enabled_payment_methods' );
 	var $bankAccount = $( '#woocommerce_bunq_monetary_account_bank_id' );
 	var editingClient = {};
@@ -36,11 +37,14 @@
 		$bankAccount.prop( 'disabled', mode !== savedMode );
 		$bankAccount.siblings( '.bunq-mode-note' ).prop( 'hidden', mode === savedMode );
 
-		$paymentMethods.closest( 'tr' ).prop( 'hidden', ! $directGateway.is( ':checked' ) );
+		// With separate payment methods, each method has its own title and goes straight to bunq.me.
+		$( '#woocommerce_bunq_title, #woocommerce_bunq_description' ).add( $directGateway ).closest( 'tr' ).prop( 'hidden', $separateGateways.is( ':checked' ) );
+		$paymentMethods.closest( 'tr' ).prop( 'hidden', ! $directGateway.is( ':checked' ) && ! $separateGateways.is( ':checked' ) );
 	}
 
 	$testmode.on( 'change', update );
 	$directGateway.on( 'change', update );
+	$separateGateways.on( 'change', update );
 
 	$( document ).on( 'click', '.bunq-edit-client', function () {
 		var mode = activeMode();
