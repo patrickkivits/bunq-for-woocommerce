@@ -2,9 +2,9 @@
     const { createElement, useState, useEffect } = window.wp.element;
     const { decodeEntities } = window.wp.htmlEntities;
 
-    // The bunq gateway and the separate payment method gateways (Gateway::method_gateway_ids()). WooCommerce only
-    // hands out the data of those that are offered.
-    const gatewayIds = [ 'bunq', 'bunq_ideal', 'bunq_card', 'bunq_bancontact' ];
+    // The bunq gateway and the separate payment method gateways (CheckoutIntegration). WooCommerce only hands out the
+    // data of those that are offered.
+    const gatewayIds = ( window.wcBunqBlockCheckout && window.wcBunqBlockCheckout.gatewayIds ) || [ 'bunq' ];
 
     gatewayIds.forEach( ( gatewayId ) => {
         const settings = window.wc.wcSettings.getSetting( gatewayId + '_data', null );
@@ -13,6 +13,17 @@
             registerPaymentMethod( settings );
         }
     } );
+
+    // Whether bunq accepts the cart total for a payment method; the total can change on the checkout page.
+    function fitsLimits( limits, cartTotals ) {
+        if ( ! limits || ! cartTotals ) {
+            return true;
+        }
+
+        const total = parseInt( cartTotals.total_price, 10 ) / Math.pow( 10, cartTotals.currency_minor_unit || 0 );
+
+        return total >= limits.min && ( limits.max === null || total <= limits.max );
+    }
 
     function registerPaymentMethod( settings ) {
         const title = decodeEntities( settings.title || 'bunq' );
@@ -122,7 +133,7 @@
             label: label,
             content: createElement( Content, null ),
             edit: createElement( Edit, null ),
-            canMakePayment: () => true,
+            canMakePayment: ( { cartTotals } ) => fitsLimits( settings.limits, cartTotals ),
             ariaLabel: title,
             supports: {
                 features: settings.supports || [ 'products' ],

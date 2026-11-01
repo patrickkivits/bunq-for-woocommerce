@@ -325,4 +325,69 @@ final class MethodGatewayTest extends TestCase
         $this->assertInstanceOf(MethodGateway::class, $gateway);
         $this->assertSame('bunq_bancontact', $gateway->id);
     }
+
+    // --- Code review follow-ups ---------------------------------------------------------------------------------
+
+    public function testWooCommercesToggleReadsWhetherThisPaymentOptionIsOn()
+    {
+        // WooCommerce's toggle reads get_option('enabled') and writes the opposite.
+        update_option('woocommerce_bunq_settings', $this->liveSettings());
+        $gateway = new MethodGateway('bancontact');
+
+        $this->assertSame('no', $gateway->get_option('enabled'), 'bunq is enabled, but this option is not offered');
+
+        $gateway->update_option('enabled', 'yes');
+        $this->assertSame('yes', $gateway->get_option('enabled'));
+        $this->assertSame('yes', get_option('woocommerce_bunq_settings')['enabled'], 'Other settings still come from bunq');
+    }
+
+    public function testARestUpdateOfAPaymentOptionKeepsTheBunqSettings()
+    {
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('separate_gateways' => 'yes')));
+        $gateway = new MethodGateway('card');
+        $posted = array_merge(get_option('woocommerce_bunq_settings'), array('enabled' => 'no', 'title' => 'Card', 'description' => 'Pay by card'));
+
+        $saved = apply_filters('woocommerce_gateway_bunq_card_settings_values', $posted, $gateway);
+
+        $this->assertSame('yes', $saved['enabled'], 'bunq stays enabled');
+        $this->assertSame('iDEAL | Wero, Credit Card or Bancontact', $saved['title']);
+        $this->assertSame('Pay with iDEAL | Wero, Credit Card or Bancontact', $saved['description']);
+        $this->assertSame(array('ideal', 'bancontact', 'bunq-transfer'), array_values($saved['enabled_payment_methods']), 'Only this option is turned off');
+    }
+
+    public function testARestUpdateThatKeepsThePaymentOptionAsItIsChangesNothing()
+    {
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('separate_gateways' => 'yes')));
+        $gateway = new MethodGateway('ideal');
+        $settings = get_option('woocommerce_bunq_settings');
+
+        $saved = apply_filters('woocommerce_gateway_bunq_ideal_settings_values', array_merge($settings, array('enabled' => 'yes', 'title' => 'x')), $gateway);
+
+        $this->assertSame($settings, $saved);
+    }
+
+    public function testTheBlockCheckoutOffersAMethodGatewayForAnyTotalAndChecksTheLimitsItself()
+    {
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('api_context' => '{"live":1}', 'separate_gateways' => 'yes')));
+        Environment::$gateways['bunq_card'] = new MethodGateway('card');
+        WC()->cart = (object) array('total' => '600.00');
+        $method = new CheckoutIntegration('bunq_card');
+        $method->initialize();
+
+        $this->assertFalse(Environment::$gateways['bunq_card']->is_available(), 'Classic checkout: over the card limit');
+        $this->assertTrue($method->is_active(), 'Block checkout: the total can still change on the page');
+        $this->assertSame(array('min' => 1, 'max' => 500), $method->get_payment_method_data()['limits']);
+    }
+
+    public function testTheCheckoutScriptGetsTheGatewayIds()
+    {
+        $method = new CheckoutIntegration('bunq_ideal');
+        $method->initialize();
+        $method->get_payment_method_script_handles();
+
+        $this->assertSame(
+            array('gatewayIds' => array('bunq', 'bunq_ideal', 'bunq_card', 'bunq_bancontact')),
+            Environment::$localizedScripts['wc-bunq-blocks-integration']['wcBunqBlockCheckout']
+        );
+    }
 }

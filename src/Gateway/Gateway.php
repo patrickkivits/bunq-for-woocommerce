@@ -938,7 +938,18 @@ class Gateway extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( ! parent::is_available() || ! $this->is_offered() ) {
+		return $this->is_available_for_total( $this->get_checkout_total() );
+	}
+
+	/**
+	 * Whether the gateway is offered for an amount (see is_available()). The block checkout asks for any amount and
+	 * checks the cart total itself, as the total can change on the checkout page.
+	 *
+	 * @param float|null $total Cart or order total; null for any amount.
+	 * @return bool
+	 */
+	public function is_available_for_total( $total ) {
+		if ( ! parent::is_available() || ! $this->is_offered( $total ) ) {
 			return false;
 		}
 
@@ -953,10 +964,20 @@ class Gateway extends WC_Payment_Gateway {
 	 * Whether this gateway is offered at checkout as far as the settings go: not when the payment methods are
 	 * offered as gateways of their own.
 	 *
+	 * @param float|null $total Cart or order total; null for any amount. Not used: bunq.me offers the methods that fit.
 	 * @return bool
 	 */
-	protected function is_offered() {
+	protected function is_offered( $total ) {
 		return ! $this->separate_gateways;
+	}
+
+	/**
+	 * The amounts the gateway accepts, for the block checkout to check the cart total against.
+	 *
+	 * @return array|null Keys: min, max; null for any amount.
+	 */
+	public function get_amount_limits() {
+		return null;
 	}
 
 	/**

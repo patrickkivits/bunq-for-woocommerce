@@ -73,7 +73,8 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 	 * @return bool
 	 */
 	public function is_active() {
-		return $this->gateway->is_available();
+		// Any amount: the checkout script checks the cart total against the limits, as it can change on the page.
+		return $this->gateway->is_available_for_total( null );
 	}
 
 	/**
@@ -98,6 +99,13 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 			true
 		);
 
+		// The gateways the script registers when WooCommerce hands out their data.
+		wp_localize_script(
+			self::SCRIPT_HANDLE,
+			'wcBunqBlockCheckout',
+			array( 'gatewayIds' => array_values( array_merge( array( Gateway::ID ), Gateway::method_gateway_ids() ) ) )
+		);
+
 		return array( self::SCRIPT_HANDLE );
 	}
 
@@ -117,6 +125,7 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 			'payment_methods' => PaymentMethods::options( $this->gateway->get_allowed_payment_methods( $total ) ),
 			'direct_gateway'  => $this->gateway->direct_gateway,
 			'icons'           => $this->gateway->get_icons( $total ),
+			'limits'          => $this->gateway->get_amount_limits(),
 			'select_label'    => __( 'Payment method', 'bunq-for-woocommerce' ),
 			'supports'        => array_values( array_filter( $this->gateway->supports, array( $this->gateway, 'supports' ) ) ),
 		);

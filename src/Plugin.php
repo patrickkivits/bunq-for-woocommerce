@@ -14,6 +14,7 @@ use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\PaymentMethods;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
 
 defined( 'ABSPATH' ) || exit;
@@ -117,6 +118,9 @@ final class Plugin {
 		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( Gateway::class, 'hide_secrets_from_rest' ), 10, 2 );
 		// Not Gateway::ID: that would load the gateway class before WooCommerce, which it extends.
 		add_filter( 'woocommerce_gateway_bunq_settings_values', array( Gateway::class, 'keep_secrets_on_rest_update' ), 10, 2 );
+		foreach ( PaymentMethods::SEPARATE as $method ) {
+			add_filter( 'woocommerce_gateway_bunq_' . $method . '_settings_values', array( MethodGateway::class, 'keep_bunq_settings_on_rest_update' ), 10, 2 );
+		}
 		add_action( 'woocommerce_blocks_loaded', array( $this, 'register_block_checkout' ) );
 		$this->payment_monitor()->register_hooks();
 	}

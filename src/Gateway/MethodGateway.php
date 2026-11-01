@@ -117,13 +117,34 @@ class MethodGateway extends Gateway {
 	}
 
 	/**
+	 * A setting of the bunq gateway, except "enabled", which is whether this payment option is offered (WooCommerce's
+	 * list of payment methods reads it to toggle the option).
+	 *
+	 * @param string $key         Setting.
+	 * @param mixed  $empty_value Value for an empty setting.
+	 * @return mixed
+	 */
+	public function get_option( $key, $empty_value = null ) {
+		if ( 'enabled' !== $key ) {
+			return parent::get_option( $key, $empty_value );
+		}
+
+		if ( empty( $this->settings ) ) {
+			$this->init_settings();
+		}
+
+		return $this->is_enabled_in_settings() ? 'yes' : 'no';
+	}
+
+	/**
 	 * Whether the settings offer this payment option: the bunq gateway is enabled, its payment methods are offered
 	 * separately and this one is among the enabled payment methods.
 	 *
+	 * @param array|null $settings The bunq gateway's settings; the loaded ones by default.
 	 * @return bool
 	 */
-	public function is_enabled_in_settings() {
-		$settings = $this->settings;
+	public function is_enabled_in_settings( $settings = null ) {
+		$settings = null === $settings ? $this->settings : $settings;
 
 		return isset( $settings['enabled'], $settings['separate_gateways'] )
 			&& 'yes' === $settings['enabled']
@@ -142,9 +163,8 @@ class MethodGateway extends Gateway {
 	}
 
 	/**
-	 * Turning the payment option on or off in WooCommerce's list of payment methods: on also turns on the bunq
-	 * gateway and its separate payment methods; off leaves this method out of the enabled payment methods. Turning off
-	 * the last one goes back to the single bunq payment option. Other settings are the bunq gateway's.
+	 * Turning the payment option on or off in WooCommerce's list of payment methods (see with_enabled()). Other
+	 * settings are the bunq gateway's.
 	 *
 	 * @param string $key   Setting.
 	 * @param mixed  $value Value; "yes" or "no" for "enabled".
@@ -155,43 +175,98 @@ class MethodGateway extends Gateway {
 			return parent::update_option( $key, $value );
 		}
 
+		if ( empty( $this->settings ) ) {
+			$this->init_settings();
+		}
+
+		$this->settings          = $this->with_enabled( $this->settings, 'yes' === $value );
+		$this->separate_gateways = 'yes' === $this->settings['separate_gateways'];
+		$this->enabled           = $this->is_enabled_in_settings() ? 'yes' : 'no';
+
+		return update_option( $this->get_option_key(), $this->settings, 'yes' );
+	}
+
+	/**
+	 * The bunq gateway's settings with this payment option turned on or off. On also turns on the bunq gateway and
+	 * its separate payment methods; off leaves this method out of the enabled payment methods, and turning off the
+	 * last one goes back to the single bunq payment option.
+	 *
+	 * @param array $settings The bunq gateway's settings.
+	 * @param bool  $enable   On or off.
+	 * @return array
+	 */
+	public function with_enabled( array $settings, $enable ) {
 		$all     = array_column( PaymentMethods::all(), 'id' );
-		$saved   = $this->get_setting( 'enabled_payment_methods' );
+		$saved   = isset( $settings['enabled_payment_methods'] ) ? $settings['enabled_payment_methods'] : null;
 		$enabled = is_array( $saved ) && ! empty( $saved ) ? array_values( $saved ) : $all;
 		$id      = $this->get_payment_method_id();
 
-		if ( 'yes' === $value ) {
+		if ( $enable ) {
 			if ( ! in_array( $id, $enabled, true ) ) {
 				$enabled[] = $id;
 			}
 
-			parent::update_option( 'enabled', 'yes' );
-			parent::update_option( 'separate_gateways', 'yes' );
+			$settings['enabled']           = 'yes';
+			$settings['separate_gateways'] = 'yes';
 		} else {
 			$enabled = array_values( array_diff( $enabled, array( $id ) ) );
 
 			if ( ! array_intersect( $enabled, PaymentMethods::SEPARATE ) ) {
-				parent::update_option( 'separate_gateways', 'no' );
-				$enabled = is_array( $saved ) ? $saved : array();
+				$settings['separate_gateways'] = 'no';
+				$enabled                       = is_array( $saved ) ? $saved : array();
 			}
 		}
 
 		// Every method enabled is saved as none selected, which keeps offering methods bunq.me adds later.
-		$result = parent::update_option( 'enabled_payment_methods', array_diff( $all, $enabled ) ? $enabled : array() );
+		$settings['enabled_payment_methods'] = array_diff( $all, $enabled ) ? $enabled : array();
 
-		$this->separate_gateways = 'yes' === $this->get_setting( 'separate_gateways' );
-		$this->enabled           = $this->is_enabled_in_settings() ? 'yes' : 'no';
-
-		return $result;
+		return $settings;
 	}
 
 	/**
-	 * Offered when the separate payment methods are on and bunq accepts the checkout total for this method.
+	 * Keep a REST API update of this payment option (woocommerce_gateway_bunq_<method>_settings_values) from writing
+	 * its "enabled", title and description over the bunq gateway's settings, which it shares: only turning it on or
+	 * off is applied, as in the list of payment methods.
 	 *
+	 * @param array               $settings The settings WooCommerce is about to save.
+	 * @param \WC_Payment_Gateway $gateway  The gateway.
+	 * @return array
+	 */
+	public static function keep_bunq_settings_on_rest_update( $settings, $gateway ) {
+		if ( ! $gateway instanceof self || ! is_array( $settings ) ) {
+			return $settings;
+		}
+
+		$saved = get_option( $gateway->get_option_key(), array() );
+		$saved = is_array( $saved ) ? $saved : array();
+
+		if ( isset( $settings['enabled'] ) && ( 'yes' === $settings['enabled'] ) !== $gateway->is_enabled_in_settings( $saved ) ) {
+			$saved = $gateway->with_enabled( $saved, 'yes' === $settings['enabled'] );
+		}
+
+		return $saved;
+	}
+
+	/**
+	 * The amounts bunq accepts for this payment method, for the block checkout to check the cart total against.
+	 *
+	 * @return array|null Keys: min, max (null for no maximum).
+	 */
+	public function get_amount_limits() {
+		return array(
+			'min' => $this->payment_method['min'],
+			'max' => $this->payment_method['max'],
+		);
+	}
+
+	/**
+	 * Offered when the separate payment methods are on and bunq accepts the total for this method.
+	 *
+	 * @param float|null $total Cart or order total; null for any amount.
 	 * @return bool
 	 */
-	protected function is_offered() {
-		return $this->separate_gateways && $this->is_allowed( $this->get_allowed_payment_methods( $this->get_checkout_total() ) );
+	protected function is_offered( $total ) {
+		return $this->separate_gateways && $this->is_allowed( $this->get_allowed_payment_methods( $total ) );
 	}
 
 	/**

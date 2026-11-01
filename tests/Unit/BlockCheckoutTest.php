@@ -100,6 +100,7 @@ final class BlockCheckoutTest extends TestCase
                 'src' => 'https://shop.example/wp-content/plugins/bunq-for-woocommerce/assets/images/ideal-wero.svg',
                 'alt' => 'iDEAL | Wero',
             )),
+            'limits' => null,
             'select_label' => 'Payment method',
             'supports' => array('products', 'refunds'),
         ), $method->get_payment_method_data());

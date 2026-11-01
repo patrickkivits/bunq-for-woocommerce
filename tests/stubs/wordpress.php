@@ -240,7 +240,12 @@ function wp_enqueue_script($handle, $src = '', $deps = array(), $ver = false, $i
 }
 
 function wp_enqueue_style($handle, $src = '', $deps = array(), $ver = false, $media = 'all') {}
-function wp_localize_script($handle, $object_name, $l10n) { return true; }
+function wp_localize_script($handle, $object_name, $l10n)
+{
+    Environment::$localizedScripts[$handle][$object_name] = $l10n;
+
+    return true;
+}
 
 function wp_register_script($handle, $src, $deps = array(), $ver = false, $in_footer = false)
 {
