@@ -117,14 +117,14 @@ final class SettingsFields {
 				'title'       => __( 'Title', 'bunq-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'bunq-for-woocommerce' ),
-				'default'     => __( 'iDEAL, Credit Card or Bancontact', 'bunq-for-woocommerce' ),
+				'default'     => __( 'iDEAL | Wero, Credit Card or Bancontact', 'bunq-for-woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'description'              => array(
 				'title'       => __( 'Description', 'bunq-for-woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'bunq-for-woocommerce' ),
-				'default'     => __( 'Pay with iDEAL, Credit Card or Bancontact', 'bunq-for-woocommerce' ),
+				'default'     => __( 'Pay with iDEAL | Wero, Credit Card or Bancontact', 'bunq-for-woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'monetary_account_bank_id' => array(

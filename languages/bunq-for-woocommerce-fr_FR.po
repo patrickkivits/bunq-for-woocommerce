@@ -127,8 +127,8 @@ msgid "Credit or Debit Card"
 msgstr "Carte de crédit ou de débit"
 
 #: src/Gateway/PaymentMethods.php:35
-msgid "iDEAL"
-msgstr "iDEAL"
+msgid "iDEAL | Wero"
+msgstr "iDEAL | Wero"
 
 #: src/Gateway/PaymentMethods.php:42
 msgid "Bancontact"
@@ -204,8 +204,8 @@ msgid "This controls the title which the user sees during checkout."
 msgstr "Titre affiché au client lors du paiement."
 
 #: src/Gateway/SettingsFields.php:120
-msgid "iDEAL, Credit Card or Bancontact"
-msgstr "iDEAL, carte bancaire ou Bancontact"
+msgid "iDEAL | Wero, Credit Card or Bancontact"
+msgstr "iDEAL | Wero, carte bancaire ou Bancontact"
 
 #: src/Gateway/SettingsFields.php:124
 msgid "Description"
@@ -216,8 +216,8 @@ msgid "This controls the description which the user sees during checkout."
 msgstr "Description affichée au client lors du paiement."
 
 #: src/Gateway/SettingsFields.php:127
-msgid "Pay with iDEAL, Credit Card or Bancontact"
-msgstr "Payer avec iDEAL, carte bancaire ou Bancontact"
+msgid "Pay with iDEAL | Wero, Credit Card or Bancontact"
+msgstr "Payer avec iDEAL | Wero, carte bancaire ou Bancontact"
 
 #: src/Gateway/SettingsFields.php:131
 msgid "Bank account"

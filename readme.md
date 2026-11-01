@@ -12,7 +12,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 
 ## Features
 
-- iDEAL, credit and debit cards, Bancontact and bunq-to-bunq transfers through a [bunq.me](https://bunq.me) payment request.
+- iDEAL | Wero, credit and debit cards, Bancontact and bunq-to-bunq transfers through a [bunq.me](https://bunq.me) payment request.
 - Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 - Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
@@ -62,7 +62,7 @@ Upload the new `bunq-for-woocommerce.zip` the same way. WordPress recognises the
 
 <img width="700" alt="The bunq account section once connected, with Connect again, Change OAuth client and Disconnect, and the bank account select" src=".github/images/settings-connected.png">
 
-Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
+Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL | Wero, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
 
 ### Managing the connection
 

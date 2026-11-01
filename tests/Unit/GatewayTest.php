@@ -20,8 +20,8 @@ final class GatewayTest extends TestCase
         $this->assertFalse($gateway->testmode);
         $this->assertFalse($gateway->direct_gateway);
         $this->assertFalse($gateway->has_fields);
-        $this->assertSame('iDEAL, Credit Card or Bancontact', $gateway->title);
-        $this->assertSame('Pay with iDEAL, Credit Card or Bancontact', $gateway->description);
+        $this->assertSame('iDEAL | Wero, Credit Card or Bancontact', $gateway->title);
+        $this->assertSame('Pay with iDEAL | Wero, Credit Card or Bancontact', $gateway->description);
         $this->assertTrue($gateway->supports('products'));
         $this->assertTrue($gateway->supports('refunds'));
         $this->assertNull($gateway->get_monetary_account_bank_id());
@@ -207,7 +207,7 @@ final class GatewayTest extends TestCase
         $html = ob_get_clean();
 
         $this->assertStringContainsString('<select name="wc_bunq_gateway_payment_method">', $html);
-        $this->assertStringContainsString('<option value="ideal">iDEAL</option>', $html);
+        $this->assertStringContainsString('<option value="ideal">iDEAL | Wero</option>', $html);
         $this->assertStringContainsString('<option value="bunq-transfer">From a bunq account</option>', $html);
         $this->assertStringNotContainsString('value="card"', $html);
         $this->assertStringNotContainsString('value="bancontact"', $html);
@@ -272,7 +272,7 @@ final class GatewayTest extends TestCase
 
         $this->assertSame('multiselect', $fields['enabled_payment_methods']['type']);
         $this->assertSame(
-            array('card' => 'Credit or Debit Card', 'ideal' => 'iDEAL', 'bancontact' => 'Bancontact', 'bunq-transfer' => 'From a bunq account'),
+            array('card' => 'Credit or Debit Card', 'ideal' => 'iDEAL | Wero', 'bancontact' => 'Bancontact', 'bunq-transfer' => 'From a bunq account'),
             $fields['enabled_payment_methods']['options']
         );
     }
@@ -810,8 +810,8 @@ final class GatewayTest extends TestCase
     {
         $_POST = array(
             'woocommerce_bunq_enabled' => '1',
-            'woocommerce_bunq_title' => 'iDEAL, Credit Card or Bancontact',
-            'woocommerce_bunq_description' => 'Pay with iDEAL, Credit Card or Bancontact',
+            'woocommerce_bunq_title' => 'iDEAL | Wero, Credit Card or Bancontact',
+            'woocommerce_bunq_description' => 'Pay with iDEAL | Wero, Credit Card or Bancontact',
             'woocommerce_bunq_monetary_account_bank_id' => '123',
         );
 

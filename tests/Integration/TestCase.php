@@ -112,8 +112,8 @@ abstract class TestCase extends \WP_UnitTestCase
         return array_merge(array(
             'enabled' => 'yes',
             'testmode' => 'no',
-            'title' => 'iDEAL, Credit Card or Bancontact',
-            'description' => 'Pay with iDEAL, Credit Card or Bancontact',
+            'title' => 'iDEAL | Wero, Credit Card or Bancontact',
+            'description' => 'Pay with iDEAL | Wero, Credit Card or Bancontact',
             'monetary_account_bank_id' => '123',
             'direct_gateway' => 'no',
             'oauth_client_id' => 'live-client-id',

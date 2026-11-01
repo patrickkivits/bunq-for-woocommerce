@@ -18,8 +18,8 @@ final class GatewayTest extends TestCase
         $this->assertSame('no', $gateway->enabled);
         $this->assertFalse($gateway->testmode);
         $this->assertFalse($gateway->direct_gateway);
-        $this->assertSame('iDEAL, Credit Card or Bancontact', $gateway->title);
-        $this->assertSame('Pay with iDEAL, Credit Card or Bancontact', $gateway->description);
+        $this->assertSame('iDEAL | Wero, Credit Card or Bancontact', $gateway->title);
+        $this->assertSame('Pay with iDEAL | Wero, Credit Card or Bancontact', $gateway->description);
         $this->assertNull($gateway->get_monetary_account_bank_id());
         $this->assertFalse($gateway->is_available());
     }
@@ -352,8 +352,8 @@ final class GatewayTest extends TestCase
     {
         $_POST = array(
             'woocommerce_bunq_enabled' => '1',
-            'woocommerce_bunq_title' => 'iDEAL, Credit Card or Bancontact',
-            'woocommerce_bunq_description' => 'Pay with iDEAL, Credit Card or Bancontact',
+            'woocommerce_bunq_title' => 'iDEAL | Wero, Credit Card or Bancontact',
+            'woocommerce_bunq_description' => 'Pay with iDEAL | Wero, Credit Card or Bancontact',
             'woocommerce_bunq_monetary_account_bank_id' => '123',
         );
 
