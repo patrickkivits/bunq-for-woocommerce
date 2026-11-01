@@ -7,6 +7,8 @@
 
 namespace PatrickKivits\BunqForWooCommerce\Gateway;
 
+use PatrickKivits\BunqForWooCommerce\Plugin;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,10 +17,21 @@ defined( 'ABSPATH' ) || exit;
 final class PaymentMethods {
 
 	/**
+	 * The methods that can be offered as a payment option of their own (MethodGateway), in checkout order.
+	 */
+	const SEPARATE = array( 'ideal', 'card', 'bancontact' );
+
+	/**
+	 * Where the logos are, relative to the plugin directory.
+	 */
+	const ICON_PATH = 'assets/images/';
+
+	/**
 	 * Every payment method. "id" is what the setting and the checkout form store (keep stable); "bunqme" is the
-	 * value bunq.me expects in its paymentMethod query parameter to open that method directly.
+	 * value bunq.me expects in its paymentMethod query parameter to open that method directly; "icon" is the logo
+	 * in assets/images (null for none).
 	 *
-	 * @return array[] Keys: id, bunqme, description, min, max (null for no maximum).
+	 * @return array[] Keys: id, bunqme, description, icon, min, max (null for no maximum).
 	 */
 	public static function all() {
 		return array(
@@ -26,6 +39,7 @@ final class PaymentMethods {
 				'id'          => 'card',
 				'bunqme'      => 'CARD',
 				'description' => __( 'Credit or Debit Card', 'bunq-for-woocommerce' ),
+				'icon'        => 'card.svg',
 				'min'         => 1,
 				'max'         => 500,
 			),
@@ -33,6 +47,7 @@ final class PaymentMethods {
 				'id'          => 'ideal',
 				'bunqme'      => 'IDEAL',
 				'description' => __( 'iDEAL | Wero', 'bunq-for-woocommerce' ),
+				'icon'        => 'ideal-wero.svg',
 				'min'         => 0.01,
 				'max'         => null,
 			),
@@ -40,6 +55,7 @@ final class PaymentMethods {
 				'id'          => 'bancontact',
 				'bunqme'      => 'BANCONTACT',
 				'description' => __( 'Bancontact', 'bunq-for-woocommerce' ),
+				'icon'        => 'bancontact.svg',
 				'min'         => 5,
 				'max'         => 10000,
 			),
@@ -47,6 +63,7 @@ final class PaymentMethods {
 				'id'          => 'bunq-transfer',
 				'bunqme'      => 'BUNQ_TRANSFER',
 				'description' => __( 'From a bunq account', 'bunq-for-woocommerce' ),
+				'icon'        => null,
 				'min'         => 0.01,
 				'max'         => null,
 			),
@@ -114,5 +131,68 @@ final class PaymentMethods {
 	 */
 	public static function options( array $methods ) {
 		return array_column( $methods, 'description', 'id' );
+	}
+
+	/**
+	 * A payment method by id.
+	 *
+	 * @param string $id Method id.
+	 * @return array|null See all(); null for an unknown method.
+	 */
+	public static function get( $id ) {
+		foreach ( self::all() as $method ) {
+			if ( $method['id'] === $id ) {
+				return $method;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The logos of payment methods, for the checkout. Methods without a logo are left out.
+	 *
+	 * @param array[] $methods Methods as returned by all() or allowed().
+	 * @return array[] Keys: id, src (URL), alt.
+	 */
+	public static function icons( array $methods ) {
+		$icons = array();
+		$base  = plugin_dir_url( Plugin::instance()->file() ) . self::ICON_PATH;
+
+		foreach ( $methods as $method ) {
+			if ( empty( $method['icon'] ) ) {
+				continue;
+			}
+
+			$icons[] = array(
+				'id'  => $method['id'],
+				'src' => $base . $method['icon'],
+				'alt' => $method['description'],
+			);
+		}
+
+		return $icons;
+	}
+
+	/**
+	 * Sort methods in checkout order: those of SEPARATE first, in its order.
+	 *
+	 * @param array[] $methods Methods as returned by all() or allowed().
+	 * @return array[]
+	 */
+	public static function in_checkout_order( array $methods ) {
+		$position = array_flip( self::SEPARATE );
+
+		usort(
+			$methods,
+			function ( $a, $b ) use ( $position ) {
+				$a = isset( $position[ $a['id'] ] ) ? $position[ $a['id'] ] : PHP_INT_MAX;
+				$b = isset( $position[ $b['id'] ] ) ? $position[ $b['id'] ] : PHP_INT_MAX;
+
+				return $a === $b ? 0 : ( $a < $b ? -1 : 1 );
+			}
+		);
+
+		return $methods;
 	}
 }

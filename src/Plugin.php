@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\PaymentMethods;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
 
 defined( 'ABSPATH' ) || exit;
@@ -116,6 +118,9 @@ final class Plugin {
 		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( Gateway::class, 'hide_secrets_from_rest' ), 10, 2 );
 		// Not Gateway::ID: that would load the gateway class before WooCommerce, which it extends.
 		add_filter( 'woocommerce_gateway_bunq_settings_values', array( Gateway::class, 'keep_secrets_on_rest_update' ), 10, 2 );
+		foreach ( PaymentMethods::SEPARATE as $method ) {
+			add_filter( 'woocommerce_gateway_bunq_' . $method . '_settings_values', array( MethodGateway::class, 'keep_bunq_settings_on_rest_update' ), 10, 2 );
+		}
 		add_action( 'woocommerce_blocks_loaded', array( $this, 'register_block_checkout' ) );
 		$this->payment_monitor()->register_hooks();
 	}
@@ -156,18 +161,19 @@ final class Plugin {
 	}
 
 	/**
-	 * The gateway instance WooCommerce registered.
+	 * A gateway instance WooCommerce registered.
 	 *
+	 * @param string $id The bunq gateway's id, or that of a separate payment method gateway.
 	 * @return Gateway|null
 	 */
-	public function gateway() {
+	public function gateway( $id = Gateway::ID ) {
 		if ( ! function_exists( 'WC' ) || ! WC()->payment_gateways() ) {
 			return null;
 		}
 
 		$gateways = WC()->payment_gateways()->payment_gateways();
 
-		return isset( $gateways[ Gateway::ID ] ) && $gateways[ Gateway::ID ] instanceof Gateway ? $gateways[ Gateway::ID ] : null;
+		return isset( $gateways[ $id ] ) && $gateways[ $id ] instanceof Gateway && $gateways[ $id ]->id === $id ? $gateways[ $id ] : null;
 	}
 
 	/**
@@ -223,13 +229,19 @@ final class Plugin {
 	}
 
 	/**
-	 * Add the gateway to WooCommerce (woocommerce_payment_gateways).
+	 * Add the gateway and the separate payment method gateways to WooCommerce (woocommerce_payment_gateways). The
+	 * latter are always registered, so orders paid with them can still be refunded after the "Separate payment
+	 * methods" setting is turned off; they are only offered at checkout while it is on.
 	 *
-	 * @param string[] $gateways Gateway class names.
-	 * @return string[]
+	 * @param array $gateways Gateway class names or instances.
+	 * @return array
 	 */
 	public function add_gateway( $gateways ) {
 		$gateways[] = Gateway::class;
+
+		foreach ( array_keys( Gateway::method_gateway_ids() ) as $method ) {
+			$gateways[] = new MethodGateway( $method );
+		}
 
 		return $gateways;
 	}
@@ -253,6 +265,10 @@ final class Plugin {
 	 */
 	public function register_payment_method_type( $registry ) {
 		$registry->register( new CheckoutIntegration() );
+
+		foreach ( Gateway::method_gateway_ids() as $id ) {
+			$registry->register( new CheckoutIntegration( $id ) );
+		}
 	}
 
 	/**

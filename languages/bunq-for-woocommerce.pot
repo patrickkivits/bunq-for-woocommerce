@@ -10,7 +10,7 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Domain: bunq-for-woocommerce\n"
 
-#: src/Blocks/CheckoutIntegration.php:103
+#: src/Blocks/CheckoutIntegration.php:120
 msgid "Payment method"
 msgstr ""
 
@@ -31,110 +31,124 @@ msgstr ""
 msgid "Error: %s"
 msgstr ""
 
-#: src/Gateway/Gateway.php:147
+#: src/Gateway/Gateway.php:155
 msgid "bunq payment gateway for WooCommerce"
 msgstr ""
 
-#: src/Gateway/Gateway.php:266
+#: src/Gateway/Gateway.php:309
 msgid "bunq authorization completed. Select your bank account and save the settings."
 msgstr ""
 
-#: src/Gateway/Gateway.php:333
+#: src/Gateway/Gateway.php:433
 msgid "Payment method invalid"
 msgstr ""
 
-#: src/Gateway/Gateway.php:448
+#: src/Gateway/Gateway.php:548
 msgid "You are not allowed to do this."
 msgstr ""
 
-#: src/Gateway/Gateway.php:479
+#: src/Gateway/Gateway.php:579
 msgid "Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app."
 msgstr ""
 
-#: src/Gateway/Gateway.php:480
+#: src/Gateway/Gateway.php:580
 msgid "Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app."
 msgstr ""
 
-#: src/Gateway/Gateway.php:498
+#: src/Gateway/Gateway.php:598
 msgid "Enter the Client ID and Client Secret of your bunq OAuth client, then click \"Connect to bunq\"."
 msgstr ""
 
-#: src/Gateway/Gateway.php:687
+#: src/Gateway/Gateway.php:787
 msgid "Saved. Leave empty to keep it, or paste a new secret to replace it."
 msgstr ""
 
-#: src/Gateway/Gateway.php:800
+#: src/Gateway/Gateway.php:900
 msgid "Refresh bank accounts"
 msgstr ""
 
-#: src/Gateway/Gateway.php:810
+#: src/Gateway/Gateway.php:910
 msgid "bunq rejected the saved connection. Connect again."
 msgstr ""
 
 #. translators: %s: bunq payment request id
-#: src/Gateway/Gateway.php:884
+#: src/Gateway/Gateway.php:1009
 msgid "bunq payment request %s created"
 msgstr ""
 
-#: src/Gateway/Gateway.php:907
+#: src/Gateway/Gateway.php:1032
 msgid "The payment could not be started with bunq. Please try again or choose another payment method."
 msgstr ""
 
-#: src/Gateway/Gateway.php:926
+#: src/Gateway/Gateway.php:1051
 msgid "This order has no bunq payment that can be refunded."
 msgstr ""
 
-#: src/Gateway/Gateway.php:930
+#: src/Gateway/Gateway.php:1055
 msgid "The refund amount must be greater than zero."
 msgstr ""
 
-#: src/Gateway/Gateway.php:947
+#: src/Gateway/Gateway.php:1072
 msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
 msgstr ""
 
 #. translators: 1: order number, 2: shop name
-#: src/Gateway/Gateway.php:952
+#: src/Gateway/Gateway.php:1077
 msgid "Refund order %1$s %2$s"
 msgstr ""
 
 #. translators: 1: refunded amount, 2: bunq draft payment id
-#: src/Gateway/Gateway.php:974
+#: src/Gateway/Gateway.php:1099
 msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
 msgstr ""
 
 #. translators: %s: error message from bunq
-#: src/Gateway/Gateway.php:989
+#: src/Gateway/Gateway.php:1114
 msgid "bunq refund failed: %s"
 msgstr ""
 
 #. translators: %s: bunq payment id
-#: src/Gateway/Gateway.php:1087
+#: src/Gateway/Gateway.php:1212
 msgid "bunq payment %s received"
 msgstr ""
 
 #. translators: 1: bunq payment id, 2: amount received, 3: order total
-#: src/Gateway/Gateway.php:1110
+#: src/Gateway/Gateway.php:1235
 msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
 msgstr ""
 
 #. translators: 1: bunq payment request id, 2: status reported by bunq
-#: src/Gateway/Gateway.php:1132
+#: src/Gateway/Gateway.php:1257
 msgid "bunq payment request %1$s is %2$s"
 msgstr ""
 
-#: src/Gateway/PaymentMethods.php:28
+#. translators: %s: payment method, such as "Bancontact"
+#: src/Gateway/MethodGateway.php:57
+msgid "%s (bunq)"
+msgstr ""
+
+#. translators: %s: payment method, such as "Bancontact"
+#: src/Gateway/MethodGateway.php:62
+msgid "Offers %s as a payment option of its own. It uses the connection and settings of the bunq payment method."
+msgstr ""
+
+#: src/Gateway/MethodGateway.php:106
+msgid "Open the bunq settings"
+msgstr ""
+
+#: src/Gateway/PaymentMethods.php:41
 msgid "Credit or Debit Card"
 msgstr ""
 
-#: src/Gateway/PaymentMethods.php:35
+#: src/Gateway/PaymentMethods.php:49
 msgid "iDEAL | Wero"
 msgstr ""
 
-#: src/Gateway/PaymentMethods.php:42
+#: src/Gateway/PaymentMethods.php:57
 msgid "Bancontact"
 msgstr ""
 
-#: src/Gateway/PaymentMethods.php:49
+#: src/Gateway/PaymentMethods.php:65
 msgid "From a bunq account"
 msgstr ""
 
@@ -163,95 +177,107 @@ msgstr ""
 msgid "Checkout"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:79
+#: src/Gateway/SettingsFields.php:80
 msgid "Payment methods"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:83
+#: src/Gateway/SettingsFields.php:84
 msgid "The payment methods customers can choose from. Leave empty to offer all of them."
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:86
+#: src/Gateway/SettingsFields.php:87
 msgid "All payment methods"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:103
+#: src/Gateway/SettingsFields.php:104
 msgid "Enable/Disable"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:104
+#: src/Gateway/SettingsFields.php:105
 msgid "Enable bunq Gateway"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:110
+#: src/Gateway/SettingsFields.php:111
 msgid "Test mode"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:111
+#: src/Gateway/SettingsFields.php:112
 msgid "Use the bunq sandbox"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:113
+#: src/Gateway/SettingsFields.php:114
 msgid "Try payments without real money. The sandbox has its own OAuth client and connection."
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:117
+#: src/Gateway/SettingsFields.php:118
 msgid "Title"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:119
+#: src/Gateway/SettingsFields.php:120
 msgid "This controls the title which the user sees during checkout."
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:120
+#: src/Gateway/SettingsFields.php:121
 msgid "iDEAL | Wero, Credit Card or Bancontact"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:124
+#: src/Gateway/SettingsFields.php:125
 msgid "Description"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:126
+#: src/Gateway/SettingsFields.php:127
 msgid "This controls the description which the user sees during checkout."
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:127
+#: src/Gateway/SettingsFields.php:128
 msgid "Pay with iDEAL | Wero, Credit Card or Bancontact"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:131
+#: src/Gateway/SettingsFields.php:132
 msgid "Bank account"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:133
+#: src/Gateway/SettingsFields.php:134
 msgid "Payments are paid into this bunq account."
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:137
+#: src/Gateway/SettingsFields.php:138
 msgid "Direct Gateway"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:138
+#: src/Gateway/SettingsFields.php:139
 msgid "Enable direct gateway"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:141
+#: src/Gateway/SettingsFields.php:142
 msgid "Allow your customers to directly select a payment method from the checkout page."
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:155
+#: src/Gateway/SettingsFields.php:146
+msgid "Separate payment methods"
+msgstr ""
+
+#: src/Gateway/SettingsFields.php:147
+msgid "Show payment methods separately"
+msgstr ""
+
+#: src/Gateway/SettingsFields.php:150
+msgid "Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately."
+msgstr ""
+
+#: src/Gateway/SettingsFields.php:163
 msgid "Sandbox Client ID"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:155
+#: src/Gateway/SettingsFields.php:163
 msgid "Client ID"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:173
+#: src/Gateway/SettingsFields.php:181
 msgid "Sandbox Client Secret"
 msgstr ""
 
-#: src/Gateway/SettingsFields.php:173
+#: src/Gateway/SettingsFields.php:181
 msgid "Client Secret"
 msgstr ""
 

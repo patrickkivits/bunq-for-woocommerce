@@ -75,6 +75,7 @@ final class SettingsFields {
 			'title'                    => $fields['title'],
 			'description'              => $fields['description'],
 			'direct_gateway'           => $fields['direct_gateway'],
+			'separate_gateways'        => $fields['separate_gateways'],
 			'enabled_payment_methods'  => array(
 				'title'             => __( 'Payment methods', 'bunq-for-woocommerce' ),
 				'type'              => 'multiselect',
@@ -91,8 +92,8 @@ final class SettingsFields {
 	}
 
 	/**
-	 * The fields that do not depend on other settings, among them the defaults of the direct gateway and test mode
-	 * settings that decide about the others.
+	 * The fields that do not depend on other settings, among them the defaults of the direct gateway, separate
+	 * payment methods and test mode settings that decide about the others.
 	 *
 	 * @param array $bank_accounts Options of the bank account select.
 	 * @return array[]
@@ -140,6 +141,13 @@ final class SettingsFields {
 				'default'     => 'no',
 				'description' => __( 'Allow your customers to directly select a payment method from the checkout page.', 'bunq-for-woocommerce' ),
 				'desc_tip'    => true,
+			),
+			'separate_gateways'        => array(
+				'title'       => __( 'Separate payment methods', 'bunq-for-woocommerce' ),
+				'label'       => __( 'Show payment methods separately', 'bunq-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'default'     => 'no',
+				'description' => __( 'Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately.', 'bunq-for-woocommerce' ),
 			),
 		);
 	}

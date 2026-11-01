@@ -5,6 +5,7 @@ namespace BunqTest;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
 use PatrickKivits\BunqForWooCommerce\Plugin;
 use PatrickKivits\BunqForWooCommerce\Requirements;
 
@@ -15,8 +16,10 @@ final class PluginLoadingTest extends TestCase
 {
     public function testTheGatewayIsAddedToTheWooCommercePaymentGateways()
     {
-        $this->assertSame(array(Gateway::class), apply_filters('woocommerce_payment_gateways', array()));
-        $this->assertSame(array('WC_Gateway_Paypal', Gateway::class), apply_filters('woocommerce_payment_gateways', array('WC_Gateway_Paypal')));
+        $gateways = apply_filters('woocommerce_payment_gateways', array('WC_Gateway_Paypal'));
+
+        $this->assertSame(array('WC_Gateway_Paypal', Gateway::class), array_slice($gateways, 0, 2));
+        $this->assertContainsOnlyInstancesOf(MethodGateway::class, array_slice($gateways, 2), 'The separate payment methods follow');
     }
 
     public function testTheClassNamesOfEarlierVersionsStillWork()
@@ -73,6 +76,9 @@ final class PluginLoadingTest extends TestCase
             'wc_bunq_cancel_payment_request',
             'wc_bunq_check_payment',
             'woocommerce_blocks_loaded',
+            'woocommerce_gateway_bunq_bancontact_settings_values',
+            'woocommerce_gateway_bunq_card_settings_values',
+            'woocommerce_gateway_bunq_ideal_settings_values',
             'woocommerce_gateway_bunq_settings_values',
             'woocommerce_order_status_cancelled',
             'woocommerce_payment_gateways',

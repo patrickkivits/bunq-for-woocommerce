@@ -240,7 +240,12 @@ function wp_enqueue_script($handle, $src = '', $deps = array(), $ver = false, $i
 }
 
 function wp_enqueue_style($handle, $src = '', $deps = array(), $ver = false, $media = 'all') {}
-function wp_localize_script($handle, $object_name, $l10n) { return true; }
+function wp_localize_script($handle, $object_name, $l10n)
+{
+    Environment::$localizedScripts[$handle][$object_name] = $l10n;
+
+    return true;
+}
 
 function wp_register_script($handle, $src, $deps = array(), $ver = false, $in_footer = false)
 {
@@ -614,6 +619,7 @@ class WC_Payment_Gateway
     public function get_option_key() { return $this->plugin_id . $this->id . '_settings'; }
     public function get_form_fields() { return $this->form_fields; }
     public function get_method_title() { return $this->method_title; }
+    public function get_method_description() { return $this->method_description; }
     public function supports($feature) { return in_array($feature, $this->supports, true); }
     public function admin_options() {}
 
