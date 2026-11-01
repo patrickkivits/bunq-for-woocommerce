@@ -53,6 +53,16 @@ final class BlockCheckoutTest extends TestCase
         $this->assertFalse($method->is_active());
     }
 
+    public function testTheMethodIsInactiveForCartsInAnotherCurrency()
+    {
+        update_option('woocommerce_currency', 'USD');
+        $this->registerGateway($this->createGateway($this->liveSettings(array('api_context' => '{"live":1}'))));
+        $method = new CheckoutIntegration();
+        $method->initialize();
+
+        $this->assertFalse($method->is_active());
+    }
+
     public function testTheCheckoutScriptIsRegisteredWithItsDependencies()
     {
         $method = new CheckoutIntegration();

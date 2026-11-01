@@ -38,6 +38,7 @@ class Gateway extends WC_Payment_Gateway {
 	const LAST_SUCCESS_TRANSIENT   = 'wc_bunq_gateway.last_success';
 	const BANK_ACCOUNTS_TRANSIENT  = 'wc_bunq_gateway.bunq_get_bank_accounts';
 	const CONTEXT_FAILED_TRANSIENT = 'wc_bunq_gateway.context_failed';
+	const CURRENCY                 = 'EUR';
 	const REFRESH_ACCOUNTS_ACTION  = 'bunq_refresh_accounts';
 	const DISCONNECT_ACTION        = 'bunq_disconnect';
 
@@ -299,6 +300,24 @@ class Gateway extends WC_Payment_Gateway {
 		}
 
 		return $total > 0 ? $total : null;
+	}
+
+	/**
+	 * The currency the customer is about to pay in: that of the order on the pay-for-order page, otherwise the store
+	 * currency (which currency switchers filter for the cart).
+	 *
+	 * @return string
+	 */
+	public function get_checkout_currency() {
+		if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-pay' ) ) {
+			$order = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
+
+			if ( $order ) {
+				return (string) $order->get_currency();
+			}
+		}
+
+		return function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : '';
 	}
 
 	/**
@@ -832,12 +851,17 @@ class Gateway extends WC_Payment_Gateway {
 
 	/**
 	 * Only offer the gateway at checkout when the bunq authorization has been completed; without an API context no
-	 * payment request can be created.
+	 * payment request can be created. bunq.me payment requests are in euros only, so it is hidden for other
+	 * currencies as well.
 	 *
 	 * @return bool
 	 */
 	public function is_available() {
 		if ( ! parent::is_available() ) {
+			return false;
+		}
+
+		if ( self::CURRENCY !== $this->get_checkout_currency() ) {
 			return false;
 		}
 

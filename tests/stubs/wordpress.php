@@ -383,6 +383,7 @@ function wc_price($price, $args = array())
     return (isset($args['currency']) ? $args['currency'] . ' ' : '') . number_format((float) $price, 2, '.', '');
 }
 
+function get_woocommerce_currency() { return apply_filters('woocommerce_currency', get_option('woocommerce_currency', 'EUR')); }
 function wc_get_logger() { return new WC_Logger(); }
 
 function is_wc_endpoint_url($endpoint = false)

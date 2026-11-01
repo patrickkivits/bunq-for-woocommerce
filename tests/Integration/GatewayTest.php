@@ -52,6 +52,14 @@ final class GatewayTest extends TestCase
         $this->assertFalse($this->createGateway($this->liveSettings(array('api_context' => 'saved-api-context')))->is_available(), 'Recreating the API context failed recently');
     }
 
+    public function testTheGatewayIsHiddenWhenTheStoreCurrencyIsNotEuro()
+    {
+        update_option('woocommerce_currency', 'USD');
+        $this->assertSame('USD', get_woocommerce_currency());
+
+        $this->assertFalse($this->createGateway($this->liveSettings(array('api_context' => 'saved-api-context')))->is_available());
+    }
+
     public function testTheSettingsFormHasTheOAuthClientsOfBothModesAndNoApiContext()
     {
         $fields = array_keys($this->createGateway($this->liveSettings())->get_form_fields());
