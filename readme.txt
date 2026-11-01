@@ -9,13 +9,13 @@ Stable tag: 1.9.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Accept iDEAL, card, Bancontact and bunq payments in your WooCommerce shop with just your bunq account.
+Accept iDEAL | Wero, card, Bancontact and bunq payments in your WooCommerce shop with just your bunq account.
 
 == Description ==
 
 Your customers pay through a bunq.me payment request on your own bunq account. There is no payment service provider in between: the money lands on the bunq account you choose.
 
-* iDEAL, credit and debit cards, Bancontact and bunq-to-bunq transfers through a bunq.me payment request.
+* iDEAL | Wero, credit and debit cards, Bancontact and bunq-to-bunq transfers through a bunq.me payment request.
 * Optionally let customers pick the payment method at checkout; methods whose bunq limits do not fit the order total are hidden.
 * Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 * Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
@@ -68,7 +68,7 @@ bunq's terms and privacy policy apply to this data:
 6. Click **Connect to bunq**. The settings are saved and bunq shows a QR code: scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq sends you back to the settings page, where **Connection** now says "Connected to bunq as" followed by your name.
 7. Under **Receiving payments**, select the **Bank account** payments are paid into. Check **Enable bunq Gateway** at the top of the page and click **Save changes**.
 
-Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
+Under **Checkout** you set the title and description customers see. With **Enable direct gateway** customers choose iDEAL | Wero, card, Bancontact or a bunq transfer on the checkout page; **Payment methods** limits which of them are offered.
 
 = Managing the connection =
 

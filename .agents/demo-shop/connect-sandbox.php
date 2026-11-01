@@ -28,8 +28,8 @@ $settings = is_array( $settings ) ? $settings : array();
 // Sandbox mode, the way a merchant would leave it after connecting.
 $settings = array_merge(
 	array(
-		'title'       => 'iDEAL, Credit Card or Bancontact',
-		'description' => 'Pay with iDEAL, Credit Card or Bancontact',
+		'title'       => 'iDEAL | Wero, Credit Card or Bancontact',
+		'description' => 'Pay with iDEAL | Wero, Credit Card or Bancontact',
 	),
 	$settings,
 	array(

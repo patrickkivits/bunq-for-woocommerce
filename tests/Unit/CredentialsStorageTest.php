@@ -101,8 +101,8 @@ final class CredentialsStorageTest extends TestCase
     {
         $_POST = array(
             'woocommerce_bunq_enabled' => '1',
-            'woocommerce_bunq_title' => 'iDEAL, Credit Card or Bancontact',
-            'woocommerce_bunq_description' => 'Pay with iDEAL, Credit Card or Bancontact',
+            'woocommerce_bunq_title' => 'iDEAL | Wero, Credit Card or Bancontact',
+            'woocommerce_bunq_description' => 'Pay with iDEAL | Wero, Credit Card or Bancontact',
             'woocommerce_bunq_monetary_account_bank_id' => '123',
         );
 

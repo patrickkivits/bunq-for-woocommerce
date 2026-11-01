@@ -32,7 +32,7 @@ final class PaymentMethods {
 			array(
 				'id'          => 'ideal',
 				'bunqme'      => 'IDEAL',
-				'description' => __( 'iDEAL', 'bunq-for-woocommerce' ),
+				'description' => __( 'iDEAL | Wero', 'bunq-for-woocommerce' ),
 				'min'         => 0.01,
 				'max'         => null,
 			),

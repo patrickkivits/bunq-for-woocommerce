@@ -93,7 +93,7 @@ final class BlockCheckoutTest extends TestCase
             'id' => 'bunq',
             'title' => 'bunq',
             'description' => 'Pay with bunq',
-            'payment_methods' => array('ideal' => 'iDEAL'),
+            'payment_methods' => array('ideal' => 'iDEAL | Wero'),
             'direct_gateway' => true,
             'select_label' => 'Payment method',
             'supports' => array('products', 'refunds'),
