@@ -20,9 +20,6 @@ final class BunqPaymentFlowTest extends TestCase
     {
         parent::set_up();
 
-        // bunq only handles euros; the WordPress test install defaults to dollars.
-        update_option('woocommerce_currency', 'EUR');
-
         $this->bunq = new FakeBunqApi();
         update_option('woocommerce_bunq_settings', $this->liveSettings(array('api_context' => '{"live":1}')));
         $this->gateway = new WC_Bunq_Gateway($this->bunq);

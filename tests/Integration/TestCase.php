@@ -15,6 +15,9 @@ abstract class TestCase extends \WP_UnitTestCase
     {
         parent::set_up();
 
+        // bunq only handles euros; the WordPress test install defaults to another currency.
+        update_option('woocommerce_currency', 'EUR');
+
         $this->logs = array();
         add_filter('woocommerce_logger_log_message', array($this, 'recordLog'), 10, 3);
 

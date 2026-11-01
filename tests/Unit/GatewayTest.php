@@ -242,6 +242,39 @@ final class GatewayTest extends TestCase
         $this->assertFalse($this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')))->is_available(), 'Recreating the API context failed recently');
     }
 
+    public function testTheGatewayIsOnlyAvailableForEuros()
+    {
+        $settings = $this->liveSettings(array('api_context' => '{"live":1}'));
+
+        update_option('woocommerce_currency', 'USD');
+        $this->assertFalse($this->createGateway($settings)->is_available(), 'Store currency is not EUR');
+
+        update_option('woocommerce_currency', 'EUR');
+        add_filter('woocommerce_currency', function () {
+            return 'GBP';
+        });
+        $this->assertFalse($this->createGateway($settings)->is_available(), 'A currency switcher changed the cart currency');
+    }
+
+    public function testThePayForOrderPageUsesTheOrderCurrency()
+    {
+        $gateway = $this->createGateway($this->liveSettings(array('api_context' => '{"live":1}')));
+        $order = Environment::addOrder(array('total' => '42.00', 'currency' => 'USD'));
+        Environment::$wcEndpoint = 'order-pay';
+        Environment::$queryVars['order-pay'] = (string) $order->get_id();
+
+        $this->assertSame('USD', $gateway->get_checkout_currency());
+        $this->assertFalse($gateway->is_available(), 'The order is not in euros');
+
+        update_option('woocommerce_currency', 'USD');
+        $euroOrder = Environment::addOrder(array('total' => '42.00', 'currency' => 'EUR'));
+        Environment::$queryVars['order-pay'] = (string) $euroOrder->get_id();
+        $this->assertTrue($gateway->is_available(), 'A euro order can be paid while the store currency changed since');
+
+        Environment::$queryVars['order-pay'] = '999';
+        $this->assertSame('USD', $gateway->get_checkout_currency(), 'Unknown order, the store currency');
+    }
+
     public function testTheSettingsFormHasTheOAuthClientsOfBothModes()
     {
         // The settings page shows those of the mode the test mode checkbox selects, also before it is saved.
