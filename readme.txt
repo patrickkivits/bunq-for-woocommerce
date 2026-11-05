@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.9.2
+Stable tag: 1.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -119,6 +119,12 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 1.10.0 =
+* The iDEAL | Wero, card and Bancontact logos are shown at checkout, in the classic and the block checkout.
+* New setting **Show payment methods separately**: iDEAL | Wero, card and Bancontact each appear as a payment option of their own at checkout, with their own logo, and take the customer straight to that method on bunq.me. Off by default.
+* iDEAL is shown as "iDEAL | Wero" for the move of iDEAL to Wero. Saved settings and existing orders keep working.
+* bunq is no longer offered at checkout when the cart or order is not in euros; bunq.me payment requests are in euros only.
+
 = 1.9.2 =
 * New filter `bunq_for_woocommerce_permitted_ips` to register the IP addresses bunq accepts the shop's API key from. Shops on hosts that send outgoing requests from several addresses (load balanced or serverless hosting) can list all of them, so bunq no longer rejects the connection with "Incorrect API key or IP address" when a request comes from another address of the host. Click **Connect again** after setting the list.
 
@@ -193,6 +199,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.10.0 =
+Shows the iDEAL | Wero, card and Bancontact logos at checkout and can offer them as separate payment options. bunq is hidden for carts that are not in euros. No need to connect again.
 
 = 1.9.2 =
 Adds the bunq_for_woocommerce_permitted_ips filter for hosts with several outgoing IP addresses. Nothing changes unless you use it; no need to connect again.
