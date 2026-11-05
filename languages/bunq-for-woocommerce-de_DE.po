@@ -379,3 +379,29 @@ msgstr "bunq-Zahlungsanfrage %s storniert"
 #: src/Requirements.php:122
 msgid "cannot be activated due to incompatible environment."
 msgstr "kann nicht aktiviert werden, da die Umgebung nicht kompatibel ist."
+
+#. translators: %s: payment method, such as "Bancontact"
+#: src/Gateway/MethodGateway.php:57
+msgid "%s (bunq)"
+msgstr "%s (bunq)"
+
+#. translators: %s: payment method, such as "Bancontact"
+#: src/Gateway/MethodGateway.php:62
+msgid "Offers %s as a payment option of its own. It uses the connection and settings of the bunq payment method."
+msgstr "Bietet %s als eigene Zahlungsmethode an. Nutzt die Verbindung und die Einstellungen der bunq-Zahlungsmethode."
+
+#: src/Gateway/MethodGateway.php:106
+msgid "Open the bunq settings"
+msgstr "bunq-Einstellungen öffnen"
+
+#: src/Gateway/SettingsFields.php:146
+msgid "Separate payment methods"
+msgstr "Separate Zahlungsmethoden"
+
+#: src/Gateway/SettingsFields.php:147
+msgid "Show payment methods separately"
+msgstr "Zahlungsmethoden separat anzeigen"
+
+#: src/Gateway/SettingsFields.php:150
+msgid "Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately."
+msgstr "Kunden sehen an der Kasse jede Zahlungsmethode mit eigenem Logo statt einer bunq-Option und gelangen auf bunq.me direkt zu ihr. Titel, Beschreibung und direktes Gateway gelten dann nicht, und Zahlungen von einem bunq-Konto werden nicht separat angeboten."

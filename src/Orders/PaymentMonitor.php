@@ -77,7 +77,7 @@ final class PaymentMonitor {
 	 */
 	public static function order_awaits_payment( $order ) {
 		return $order instanceof WC_Order
-			&& Gateway::ID === $order->get_payment_method()
+			&& Gateway::is_bunq_gateway_id( $order->get_payment_method() )
 			&& $order->needs_payment()
 			&& intval( $order->get_meta( Gateway::META_PAYMENT_REQUEST_ID ) ) > 0;
 	}
@@ -248,7 +248,7 @@ final class PaymentMonitor {
 	public function queue_cancellation( $order_id, $order = null ) {
 		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
 
-		if ( ! $order || Gateway::ID !== $order->get_payment_method() ) {
+		if ( ! $order || ! Gateway::is_bunq_gateway_id( $order->get_payment_method() ) ) {
 			return;
 		}
 
@@ -272,7 +272,7 @@ final class PaymentMonitor {
 	public function cancel_payment_request( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order || Gateway::ID !== $order->get_payment_method() ) {
+		if ( ! $order || ! Gateway::is_bunq_gateway_id( $order->get_payment_method() ) ) {
 			return;
 		}
 

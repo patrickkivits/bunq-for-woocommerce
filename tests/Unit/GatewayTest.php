@@ -281,7 +281,7 @@ final class GatewayTest extends TestCase
         $fields = $this->createGateway($this->liveSettings())->get_form_fields();
 
         $this->assertSame(
-            array('enabled', 'account', 'testmode', 'connection', 'oauth_client_id', 'oauth_client_secret', 'test_oauth_client_id', 'test_oauth_client_secret', 'connect', 'receiving', 'monetary_account_bank_id', 'checkout', 'title', 'description', 'direct_gateway', 'enabled_payment_methods'),
+            array('enabled', 'account', 'testmode', 'connection', 'oauth_client_id', 'oauth_client_secret', 'test_oauth_client_id', 'test_oauth_client_secret', 'connect', 'receiving', 'monetary_account_bank_id', 'checkout', 'title', 'description', 'direct_gateway', 'separate_gateways', 'enabled_payment_methods'),
             array_keys($fields)
         );
         $this->assertSame('password', $fields['oauth_client_secret']['type']);

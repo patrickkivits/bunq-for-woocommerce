@@ -25,6 +25,8 @@ final class Environment
     public static $asyncActions = array();
     public static $unscheduledHooks = array();
     public static $registeredScripts = array();
+    /** Data passed to wp_localize_script(), by script handle and object name. */
+    public static $localizedScripts = array();
     public static $deactivatedPlugins = array();
     public static $loadedTextdomains = array();
     public static $redirects = array();
@@ -56,6 +58,7 @@ final class Environment
         self::$asyncActions = array();
         self::$unscheduledHooks = array();
         self::$registeredScripts = array();
+        self::$localizedScripts = array();
         self::$deactivatedPlugins = array();
         self::$loadedTextdomains = array();
         self::$redirects = array();

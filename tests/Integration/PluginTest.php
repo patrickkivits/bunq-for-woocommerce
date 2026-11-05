@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PatrickKivits\BunqForWooCommerce\Plugin;
 use PatrickKivits\BunqForWooCommerce\Requirements;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
+use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
 use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 
 /**
@@ -47,6 +48,34 @@ final class PluginTest extends TestCase
         WC()->payment_gateways()->init();
 
         $this->assertArrayHasKey('bunq', WC()->payment_gateways()->get_available_payment_gateways());
+    }
+
+    public function testWithSeparatePaymentMethodsEachMethodIsOfferedInsteadOfBunq()
+    {
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('api_context' => 'saved-api-context', 'separate_gateways' => 'yes')));
+        WC()->payment_gateways()->init();
+
+        $available = WC()->payment_gateways()->get_available_payment_gateways();
+
+        $this->assertArrayNotHasKey('bunq', $available);
+        foreach (array('bunq_ideal', 'bunq_card', 'bunq_bancontact') as $id) {
+            $this->assertArrayHasKey($id, $available);
+            $this->assertInstanceOf(MethodGateway::class, $available[$id]);
+        }
+        $this->assertSame('iDEAL | Wero', $available['bunq_ideal']->get_title());
+        $this->assertStringContainsString('ideal-wero.svg', $available['bunq_ideal']->get_icon());
+    }
+
+    public function testTheSeparatePaymentMethodsAreRegisteredButNotOfferedByDefault()
+    {
+        update_option('woocommerce_bunq_settings', $this->liveSettings(array('api_context' => 'saved-api-context')));
+        WC()->payment_gateways()->init();
+
+        $this->assertArrayHasKey('bunq_ideal', WC()->payment_gateways()->payment_gateways(), 'Registered, so their orders can be refunded');
+        $this->assertSame('no', WC()->payment_gateways()->payment_gateways()['bunq_ideal']->enabled);
+        $this->assertSame(array('bunq'), array_values(array_filter(array_keys(WC()->payment_gateways()->get_available_payment_gateways()), function ($id) {
+            return strpos($id, 'bunq') === 0;
+        })));
     }
 
     public function testCompatibilityWithOrderTablesAndTheBlockCheckoutIsDeclared()
