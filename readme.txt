@@ -130,6 +130,16 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 1.11.0 =
+* Requires PHP 8.1 and WordPress 5.9 or newer.
+* New order action **Send bunq payment link to customer**: emails the customer a bunq.me link for an unpaid order, for example one taken by phone or sent as an invoice.
+* The order screen shows who paid with bunq and how: the payer's name and IBAN, the payment method and a link to the payment request.
+* Warns in the admin when the connection with bunq stops working, with the details in WooCommerce > Status.
+* Fix: payments are confirmed automatically again after selecting another bank account in the settings.
+* Fix: pending orders are still confirmed after the bank account setting changes.
+* Fix: a customer who places the order again no longer gets a second payment request; the open one is reused.
+* Fix: a payment that comes in just before WooCommerce cancels the unpaid order is recorded on the order, so it can be refunded.
+
 = 1.10.0 =
 * The iDEAL | Wero, card and Bancontact logos are shown at checkout, in the classic and the block checkout.
 * New setting **Show payment methods separately**: iDEAL | Wero, card and Bancontact each appear as a payment option of their own at checkout, with their own logo, and take the customer straight to that method on bunq.me. Off by default.
@@ -210,6 +220,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 1.11.0 =
+Requires PHP 8.1 and WordPress 5.9 or newer: check your versions before updating. Adds payment links and the bunq payment details on the order screen, and fixes payments not being confirmed after changing the bank account. No need to connect again.
 
 = 1.10.0 =
 Shows the iDEAL | Wero, card and Bancontact logos at checkout and can offer them as separate payment options. bunq is hidden for carts that are not in euros. No need to connect again.

@@ -95,9 +95,9 @@ class ApiClient {
 	/**
 	 * Stores the loaded API context when its session changes, null when the caller does not store it.
 	 *
-	 * @var callable|null
+	 * @var \Closure|null
 	 */
-	private $save = null;
+	private ?\Closure $save = null;
 
 	/**
 	 * The calls bunq answered successfully so far.
@@ -564,7 +564,7 @@ class ApiClient {
 		}
 
 		$this->context = $context;
-		$this->save    = $save;
+		$this->save    = null === $save ? null : \Closure::fromCallable( $save );
 	}
 
 	/**
@@ -585,7 +585,7 @@ class ApiClient {
 		}
 
 		if ( $this->save ) {
-			call_user_func( $this->save, self::to_json( $this->context ) );
+			( $this->save )( self::to_json( $this->context ) );
 		}
 	}
 
@@ -860,7 +860,8 @@ class ApiClient {
 	 * @return string
 	 */
 	private static function to_json( array $context ): string {
-		return wp_json_encode( $context );
+		// Empty when it cannot be encoded: an empty stored context is recreated on the next call.
+		return (string) wp_json_encode( $context );
 	}
 
 	/**
