@@ -1,13 +1,17 @@
 name: Release
 
-# Builds a plugin zip whose top-level folder is always "bunq-for-woocommerce/"
-# and attaches it to the GitHub release. GitHub's own source archives unpack to
-# "bunq-for-woocommerce-<tag>/", which makes WordPress treat every release as a
-# different plugin instead of an upgrade of the installed one.
+# Builds a plugin zip whose top-level folder is always the plugin slug and attaches it to the GitHub release.
+# GitHub's own source archives unpack to "<repo>-<tag>/", which makes WordPress treat every release as a
+# different plugin instead of an upgrade of the installed one. The slug is "pay-with-bunq-for-woocommerce" since
+# 2.1.0 (the wordpress.org name) and "bunq-for-woocommerce" for older tags.
+#
+# A full (not pre-)release is also deployed to wordpress.org, once the SVN_USERNAME and SVN_PASSWORD secrets are
+# set. "released" fires both for a new full release and for a pre-release promoted with
+# `gh release edit <tag> --prerelease=false`.
 
 on:
   release:
-    types: [published]
+    types: [published, released]
   workflow_dispatch:
     inputs:
       tag:
@@ -21,15 +25,20 @@ permissions:
 jobs:
   build:
     name: Build and attach plugin zip
+    if: github.event.action != 'released'
     runs-on: ubuntu-latest
     env:
       TAG: ${{ github.event.release.tag_name || inputs.tag }}
-      SLUG: bunq-for-woocommerce
     steps:
       - name: Check out the tagged commit
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Determine the plugin slug of this tag
+        run: |
+          if [ -f pay-with-bunq-for-woocommerce.php ]; then slug=pay-with-bunq-for-woocommerce; else slug=bunq-for-woocommerce; fi
+          echo "SLUG=$slug" >> "$GITHUB_ENV"
 
       - name: Check that the plugin header version matches the tag
         run: |
@@ -95,3 +104,50 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" "$SLUG.zip" --clobber
+
+  wordpress-org:
+    name: Deploy to wordpress.org
+    # Only the 2.x line is on wordpress.org: the 1.x tags have no pay-with-bunq-for-woocommerce.php (checked below)
+    # and their own release.yml does not listen to "released".
+    if: github.event.action == 'released'
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      SLUG: pay-with-bunq-for-woocommerce
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Check that this release belongs on wordpress.org
+        id: check
+        run: |
+          if [ -z "$SVN_USERNAME" ] || [ -z "$SVN_PASSWORD" ]; then
+            echo "::notice::SVN_USERNAME or SVN_PASSWORD is not set, skipping the wordpress.org deploy"
+          elif [ ! -f "$SLUG.php" ]; then
+            echo "::notice::$TAG has no $SLUG.php (a 1.x or pre-rename release), skipping the wordpress.org deploy"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
+          fi
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.check.outputs.deploy
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Build the plugin as released
+        if: steps.check.outputs.deploy
+        run: .github/scripts/build-plugin.sh "$TAG" build
+
+      # Commits build/<slug> to trunk and tags/<version>, and .wordpress-org/ (banner, icon, screenshots) to assets/.
+      - uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        if: steps.check.outputs.deploy
+        env:
+          BUILD_DIR: build/${{ env.SLUG }}
+          ASSETS_DIR: .wordpress-org

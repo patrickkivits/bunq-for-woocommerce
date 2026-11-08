@@ -38,7 +38,7 @@ final class PaymentMethods {
 			array(
 				'id'          => 'card',
 				'bunqme'      => 'CARD',
-				'description' => __( 'Credit or Debit Card', 'bunq-for-woocommerce' ),
+				'description' => __( 'Credit or Debit Card', 'pay-with-bunq-for-woocommerce' ),
 				'icon'        => 'card.svg',
 				'min'         => 1,
 				'max'         => 500,
@@ -46,7 +46,7 @@ final class PaymentMethods {
 			array(
 				'id'          => 'ideal',
 				'bunqme'      => 'IDEAL',
-				'description' => __( 'iDEAL | Wero', 'bunq-for-woocommerce' ),
+				'description' => __( 'iDEAL | Wero', 'pay-with-bunq-for-woocommerce' ),
 				'icon'        => 'ideal-wero.svg',
 				'min'         => 0.01,
 				'max'         => null,
@@ -54,7 +54,7 @@ final class PaymentMethods {
 			array(
 				'id'          => 'bancontact',
 				'bunqme'      => 'BANCONTACT',
-				'description' => __( 'Bancontact', 'bunq-for-woocommerce' ),
+				'description' => __( 'Bancontact', 'pay-with-bunq-for-woocommerce' ),
 				'icon'        => 'bancontact.svg',
 				'min'         => 5,
 				'max'         => 10000,
@@ -62,7 +62,7 @@ final class PaymentMethods {
 			array(
 				'id'          => 'bunq-transfer',
 				'bunqme'      => 'BUNQ_TRANSFER',
-				'description' => __( 'From a bunq account', 'bunq-for-woocommerce' ),
+				'description' => __( 'From a bunq account', 'pay-with-bunq-for-woocommerce' ),
 				'icon'        => null,
 				'min'         => 0.01,
 				'max'         => null,
@@ -182,7 +182,7 @@ final class PaymentMethods {
 		}
 
 		if ( in_array( $type, array( 'EBA_SCT', 'SWIFT' ), true ) ) {
-			return __( 'Bank transfer', 'bunq-for-woocommerce' );
+			return __( 'Bank transfer', 'pay-with-bunq-for-woocommerce' );
 		}
 
 		return $type;

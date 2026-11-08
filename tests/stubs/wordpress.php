@@ -266,13 +266,13 @@ function wp_register_script($handle, $src, $deps = array(), $ver = false, $in_fo
 
 // --- Plugins ------------------------------------------------------------------------------------------------
 
-// Like plugin_dir_url(): the plugin is installed as wp-content/plugins/bunq-for-woocommerce, whatever the checkout's
+// Like plugin_dir_url(): the plugin is installed as wp-content/plugins/pay-with-bunq-for-woocommerce, whatever the checkout's
 // directory is called.
 function plugin_basename($file)
 {
     $plugin_root = dirname(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
 
-    return 'bunq-for-woocommerce' . substr($file, strlen($plugin_root));
+    return 'pay-with-bunq-for-woocommerce' . substr($file, strlen($plugin_root));
 }
 
 function register_deactivation_hook($file, $callback)
@@ -286,7 +286,7 @@ function plugin_dir_url($file)
 {
     $plugin_root = dirname(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
 
-    return 'https://shop.example/wp-content/plugins/bunq-for-woocommerce' . substr(dirname($file), strlen($plugin_root)) . '/';
+    return 'https://shop.example/wp-content/plugins/pay-with-bunq-for-woocommerce' . substr(dirname($file), strlen($plugin_root)) . '/';
 }
 
 function is_plugin_active($plugin) { return Environment::$pluginActive; }

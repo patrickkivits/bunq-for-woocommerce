@@ -1,4 +1,4 @@
-=== bunq for WooCommerce ===
+=== Pay with bunq for WooCommerce ===
 Contributors: patrickkivits
 Donate link: https://bunq.me/patrickkivits
 Tags: woocommerce, payment gateway, bunq, ideal, bancontact
@@ -28,6 +28,8 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * Translated into Dutch, French and German.
 
 The payment method logos are from [Pronamic's wp-pay-logos](https://github.com/pronamic/wp-pay-logos) (GPL-2.0-or-later).
+
+The source code, including the development tools, is on [GitHub](https://github.com/patrickkivits/bunq-for-woocommerce).
 
 = Requirements =
 
@@ -66,7 +68,7 @@ bunq's terms and privacy policy apply to this data:
 
 == Installation ==
 
-1. In your WordPress admin panel, navigate to **Plugins** > **Add New**, search for "bunq for WooCommerce", then install and activate it.
+1. In your WordPress admin panel, navigate to **Plugins** > **Add New**, search for "Pay with bunq for WooCommerce", then install and activate it.
 2. Navigate to **WooCommerce** > **Settings** > **Payments** > **bunq**.
 3. Under **bunq account**, leave **Test mode** unchecked to receive real payments. To try the plugin first, check **Use the bunq sandbox** and use a bunq sandbox account in the steps below.
 4. Click **Copy** next to the **Redirect URL**. In the bunq app, navigate to **Developers** > **OAuth**, tap **Add Redirect URL** and paste it.

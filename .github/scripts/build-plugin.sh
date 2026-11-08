@@ -5,11 +5,11 @@
 #
 #   .github/scripts/build-plugin.sh <ref> <directory>
 #
-# Writes the plugin to <directory>/bunq-for-woocommerce/, the folder name WordPress uses as the plugin slug.
+# Writes the plugin to <directory>/pay-with-bunq-for-woocommerce/, the folder name WordPress uses as the plugin slug.
 set -euo pipefail
 
 ref="$1"
-slug=bunq-for-woocommerce
+slug=pay-with-bunq-for-woocommerce
 target="$2/$slug"
 
 rm -rf "$target"

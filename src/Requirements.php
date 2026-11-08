@@ -110,6 +110,6 @@ final class Requirements {
 	 * Explain why the plugin was deactivated (admin_notices).
 	 */
 	public function show_notice() {
-		echo '<div class="error"><p><strong>bunq for WooCommerce</strong> ' . esc_html__( 'cannot be activated due to incompatible environment.', 'bunq-for-woocommerce' ) . '</p></div>';
+		echo '<div class="error"><p><strong>Pay with bunq for WooCommerce</strong> ' . esc_html__( 'cannot be activated due to incompatible environment.', 'pay-with-bunq-for-woocommerce' ) . '</p></div>';
 	}
 }

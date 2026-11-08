@@ -1,98 +1,102 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bunq for WooCommerce\n"
+"Project-Id-Version: Pay with bunq for WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/patrickkivits/bunq-for-woocommerce/issues\n"
-"Language: de_DE\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Domain: bunq-for-woocommerce\n"
+"X-Domain: pay-with-bunq-for-woocommerce\n"
+
+#: pay-with-bunq-for-woocommerce.php:29
+msgid "Pay with bunq for WooCommerce is installed twice. Deactivate and delete the older copy; your settings and the bunq connection are kept."
+msgstr "Pay with bunq for WooCommerce est installé deux fois. Désactivez et supprimez l’ancienne copie ; vos réglages et la connexion à bunq sont conservés."
 
 #: src/Blocks/CheckoutIntegration.php:129
 msgid "Payment method"
-msgstr "Zahlungsmethode"
+msgstr "Moyen de paiement"
 
 #: src/Bunq/ApiClient.php:386
 msgid "Connect your bunq account first"
-msgstr "Verbinden Sie zuerst Ihr bunq-Konto"
+msgstr "Connectez d’abord votre compte bunq"
 
 #: src/Bunq/ApiClient.php:390
 msgid "Select a bank account"
-msgstr "Bankkonto auswählen"
+msgstr "Sélectionnez un compte bancaire"
 
 #: src/Bunq/ApiClient.php:393
 msgid "(Joint)"
-msgstr "(Gemeinschaftskonto)"
+msgstr "(Commun)"
 
 #. translators: %s: error message from bunq
 #: src/Bunq/ApiClient.php:418
 msgid "Error: %s"
-msgstr "Fehler: %s"
+msgstr "Erreur : %s"
 
 #: src/Emails/PaymentLinkEmail.php:42
 msgid "bunq payment link"
-msgstr "bunq-Zahlungslink"
+msgstr "Lien de paiement bunq"
 
 #: src/Emails/PaymentLinkEmail.php:43
 msgid "Sent to the customer when you choose \"Send bunq payment link to customer\" on an unpaid order. Holds the bunq.me link to pay the order with."
-msgstr "Wird an den Kunden gesendet, wenn Sie bei einer unbezahlten Bestellung „bunq-Zahlungslink an Kunden senden“ wählen. Enthält den bunq.me-Link, mit dem die Bestellung bezahlt werden kann."
+msgstr "Envoyé au client lorsque vous choisissez « Envoyer le lien de paiement bunq au client » sur une commande impayée. Contient le lien bunq.me pour payer la commande."
 
 #: src/Emails/PaymentLinkEmail.php:61
 msgid "Pay for your {site_title} order #{order_number}"
-msgstr "Bezahlen Sie Ihre Bestellung #{order_number} bei {site_title}"
+msgstr "Payez votre commande n°{order_number} chez {site_title}"
 
 #: src/Emails/PaymentLinkEmail.php:70
 msgid "Your payment link for order #{order_number}"
-msgstr "Ihr Zahlungslink für Bestellung #{order_number}"
+msgstr "Votre lien de paiement pour la commande n°{order_number}"
 
 #: src/Emails/PaymentLinkEmail.php:79
 msgid "Questions about your order? Just reply to this email."
-msgstr "Fragen zu Ihrer Bestellung? Antworten Sie einfach auf diese E-Mail."
+msgstr "Des questions sur votre commande ? Répondez simplement à cet e-mail."
 
 #: src/Gateway/ConnectionHealth.php:171 src/Gateway/Gateway.php:555
 msgid "You are not allowed to do this."
-msgstr "Sie dürfen diese Aktion nicht ausführen."
+msgstr "Vous n’êtes pas autorisé à effectuer cette action."
 
 #: src/Gateway/ConnectionHealth.php:303
 msgid "The connection with bunq works."
-msgstr "Die Verbindung mit bunq funktioniert."
+msgstr "La connexion avec bunq fonctionne."
 
 #. translators: %s: how long, for example "3 hours"
 #: src/Gateway/ConnectionHealth.php:336
 msgid "The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached."
-msgstr "Die bunq-Sandbox ist seit %s nicht erreichbar. Zahlungen mit bunq schlagen fehl, solange sie nicht erreichbar ist."
+msgstr "La sandbox bunq est injoignable depuis %s. Les paiements avec bunq échouent tant qu’elle est injoignable."
 
 #. translators: %s: how long, for example "3 hours"
 #: src/Gateway/ConnectionHealth.php:338
 msgid "bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached."
-msgstr "bunq ist seit %s nicht erreichbar. Zahlungen mit bunq schlagen fehl, solange bunq nicht erreichbar ist."
+msgstr "bunq est injoignable depuis %s. Les paiements avec bunq échouent tant que bunq est injoignable."
 
 #: src/Gateway/ConnectionHealth.php:343
 msgid "The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
-msgstr "Die Verbindung mit der bunq-Sandbox funktioniert nicht mehr, daher schlagen Zahlungen mit bunq fehl. Verbinden Sie sich auf der bunq-Einstellungsseite erneut. Das passiert, wenn der Zugriff in der bunq-App entfernt wurde oder der Shop sich jetzt von einer anderen IP-Adresse aus verbindet."
+msgstr "La connexion avec la sandbox bunq ne fonctionne plus : les paiements avec bunq échouent donc. Reconnectez-vous sur la page des réglages bunq. Cela arrive lorsque l’accès a été supprimé dans l’application bunq ou que la boutique se connecte désormais depuis une autre adresse IP."
 
 #: src/Gateway/ConnectionHealth.php:344
 msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
-msgstr "Die Verbindung mit bunq funktioniert nicht mehr, daher schlagen Zahlungen mit bunq fehl. Verbinden Sie sich auf der bunq-Einstellungsseite erneut. Das passiert, wenn der Zugriff in der bunq-App entfernt wurde oder der Shop sich jetzt von einer anderen IP-Adresse aus verbindet."
+msgstr "La connexion avec bunq ne fonctionne plus : les paiements avec bunq échouent donc. Reconnectez-vous sur la page des réglages bunq. Cela arrive lorsque l’accès a été supprimé dans l’application bunq ou que la boutique se connecte désormais depuis une autre adresse IP."
 
 #: src/Gateway/ConnectionHealth.php:352 src/Gateway/ConnectionHealth.php:442
-msgid "bunq for WooCommerce"
-msgstr "bunq for WooCommerce"
+msgid "Pay with bunq for WooCommerce"
+msgstr "Pay with bunq for WooCommerce"
 
 #. translators: %s: error message from bunq
 #: src/Gateway/ConnectionHealth.php:357 src/Gateway/SettingsPage.php:206
 msgid "bunq's answer: %s"
-msgstr "Antwort von bunq: %s"
+msgstr "Réponse de bunq : %s"
 
 #: src/Gateway/ConnectionHealth.php:362
 msgid "Go to the bunq settings"
-msgstr "Zu den bunq-Einstellungen"
+msgstr "Aller aux réglages bunq"
 
 #: src/Gateway/ConnectionHealth.php:363 src/Gateway/ConnectionHealth.php:422
 msgid "Check again"
-msgstr "Erneut prüfen"
+msgstr "Vérifier à nouveau"
 
 #: src/Gateway/ConnectionHealth.php:390
 msgid "Version"
@@ -100,19 +104,19 @@ msgstr "Version"
 
 #: src/Gateway/ConnectionHealth.php:398
 msgid "Enabled"
-msgstr "Aktiviert"
+msgstr "Activé"
 
 #: src/Gateway/ConnectionHealth.php:398
 msgid "Yes"
-msgstr "Ja"
+msgstr "Oui"
 
 #: src/Gateway/ConnectionHealth.php:398
 msgid "No"
-msgstr "Nein"
+msgstr "Non"
 
 #: src/Gateway/ConnectionHealth.php:399
 msgid "Mode"
-msgstr "Modus"
+msgstr "Mode"
 
 #: src/Gateway/ConnectionHealth.php:399
 msgid "Sandbox"
@@ -120,161 +124,161 @@ msgstr "Sandbox"
 
 #: src/Gateway/ConnectionHealth.php:399
 msgid "Live"
-msgstr "Live"
+msgstr "Production"
 
 #: src/Gateway/ConnectionHealth.php:402
 msgid "Not connected"
-msgstr "Nicht verbunden"
+msgstr "Non connecté"
 
 #. translators: %s: name of the bunq user that granted access
 #: src/Gateway/ConnectionHealth.php:405
 msgid "Connected as %s"
-msgstr "Verbunden als %s"
+msgstr "Connecté en tant que %s"
 
 #: src/Gateway/ConnectionHealth.php:407
 msgid "Connected"
-msgstr "Verbunden"
+msgstr "Connecté"
 
 #: src/Gateway/ConnectionHealth.php:409 src/Gateway/SettingsPage.php:170
 msgid "Connection"
-msgstr "Verbindung"
+msgstr "Connexion"
 
 #: src/Gateway/ConnectionHealth.php:413
 msgid "Not checked yet"
-msgstr "Noch nicht geprüft"
+msgstr "Pas encore vérifié"
 
 #: src/Gateway/ConnectionHealth.php:415
 msgid "Works"
-msgstr "Funktioniert"
+msgstr "Fonctionne"
 
 #: src/Gateway/ConnectionHealth.php:417
 msgid "Broken"
-msgstr "Gestört"
+msgstr "En panne"
 
 #: src/Gateway/ConnectionHealth.php:417
 msgid "bunq could not be reached"
-msgstr "bunq ist nicht erreichbar"
+msgstr "bunq est injoignable"
 
 #: src/Gateway/ConnectionHealth.php:424
 msgid "Connection check"
-msgstr "Verbindungsprüfung"
+msgstr "Vérification de la connexion"
 
 #: src/Gateway/ConnectionHealth.php:427
 msgid "Failing since"
-msgstr "Gestört seit"
+msgstr "En panne depuis"
 
 #: src/Gateway/ConnectionHealth.php:430
 msgid "Last check"
-msgstr "Letzte Prüfung"
+msgstr "Dernière vérification"
 
 #: src/Gateway/ConnectionHealth.php:431
 msgid "Next check"
-msgstr "Nächste Prüfung"
+msgstr "Prochaine vérification"
 
 #: src/Gateway/ConnectionHealth.php:431
 msgid "Not scheduled"
-msgstr "Nicht geplant"
+msgstr "Non planifiée"
 
 #: src/Gateway/ConnectionHealth.php:434
 msgid "Callback URL"
-msgstr "Callback-URL"
+msgstr "URL de callback"
 
 #: src/Gateway/Gateway.php:159
 msgid "bunq payment gateway for WooCommerce"
-msgstr "bunq-Zahlungsgateway für WooCommerce"
+msgstr "Passerelle de paiement bunq pour WooCommerce"
 
 #: src/Gateway/Gateway.php:313
 msgid "bunq authorization completed. Select your bank account and save the settings."
-msgstr "bunq-Autorisierung abgeschlossen. Wählen Sie Ihr Bankkonto aus und speichern Sie die Einstellungen."
+msgstr "Autorisation bunq terminée. Sélectionnez votre compte bancaire et enregistrez les réglages."
 
 #: src/Gateway/Gateway.php:437
 msgid "Payment method invalid"
-msgstr "Ungültige Zahlungsmethode"
+msgstr "Moyen de paiement invalide"
 
 #: src/Gateway/Gateway.php:587
 msgid "Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app."
-msgstr "Von der bunq-Sandbox getrennt. Um den Zugriff auch bei bunq zu widerrufen, entfernen Sie die Verbindung in der bunq-App."
+msgstr "Déconnecté de la sandbox bunq. Pour révoquer aussi l’accès chez bunq, supprimez la connexion dans l’application bunq."
 
 #: src/Gateway/Gateway.php:588
 msgid "Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app."
-msgstr "Von bunq getrennt. Um den Zugriff auch bei bunq zu widerrufen, entfernen Sie die Verbindung in der bunq-App."
+msgstr "Déconnecté de bunq. Pour révoquer aussi l’accès chez bunq, supprimez la connexion dans l’application bunq."
 
 #: src/Gateway/Gateway.php:606
 msgid "Enter the Client ID and Client Secret of your bunq OAuth client, then click \"Connect to bunq\"."
-msgstr "Geben Sie die Client ID und das Client Secret Ihres bunq-OAuth-Clients ein und klicken Sie dann auf „Mit bunq verbinden“."
+msgstr "Saisissez le Client ID et le Client Secret de votre client OAuth bunq, puis cliquez sur « Connecter à bunq »."
 
 #: src/Gateway/Gateway.php:814
 msgid "Saved. Leave empty to keep it, or paste a new secret to replace it."
-msgstr "Gespeichert. Leer lassen, um es zu behalten, oder ein neues Secret einfügen, um es zu ersetzen."
+msgstr "Enregistré. Laissez vide pour le conserver, ou collez un nouveau secret pour le remplacer."
 
 #: src/Gateway/Gateway.php:940
 msgid "Refresh bank accounts"
-msgstr "Bankkonten aktualisieren"
+msgstr "Actualiser les comptes bancaires"
 
 #: src/Gateway/Gateway.php:950
 msgid "bunq rejected the saved connection. Connect again."
-msgstr "bunq hat die gespeicherte Verbindung abgelehnt. Verbinden Sie sich erneut."
+msgstr "bunq a refusé la connexion enregistrée. Connectez-vous à nouveau."
 
 #: src/Gateway/Gateway.php:1074
 msgid "The payment could not be started with bunq. Please try again or choose another payment method."
-msgstr "Die Zahlung konnte bei bunq nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsmethode."
+msgstr "Le paiement n’a pas pu être lancé avec bunq. Veuillez réessayer ou choisir un autre moyen de paiement."
 
 #. translators: %s: bunq payment request id
 #: src/Gateway/Gateway.php:1106
 msgid "bunq payment request %s created"
-msgstr "bunq-Zahlungsanfrage %s erstellt"
+msgstr "Demande de paiement bunq %s créée"
 
 #. translators: %s: bunq payment request id
 #: src/Gateway/Gateway.php:1177 src/Orders/PaymentMonitor.php:291
 msgid "bunq payment request %s cancelled"
-msgstr "bunq-Zahlungsanfrage %s storniert"
+msgstr "Demande de paiement bunq %s annulée"
 
 #: src/Gateway/Gateway.php:1205
 msgid "This order has no bunq payment that can be refunded."
-msgstr "Diese Bestellung hat keine bunq-Zahlung, die erstattet werden kann."
+msgstr "Cette commande n’a aucun paiement bunq pouvant être remboursé."
 
 #: src/Gateway/Gateway.php:1209
 msgid "The refund amount must be greater than zero."
-msgstr "Der Erstattungsbetrag muss größer als null sein."
+msgstr "Le montant du remboursement doit être supérieur à zéro."
 
 #: src/Gateway/Gateway.php:1221
 msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
-msgstr "Die bunq-Zahlung dieser Bestellung hat keine IBAN für die Erstattung (zum Beispiel eine Kartenzahlung). Erstatten Sie sie stattdessen über die bunq-App."
+msgstr "Le paiement bunq de cette commande n’a pas d’IBAN vers lequel rembourser (par exemple un paiement par carte). Remboursez-le depuis l’application bunq."
 
 #. translators: 1: order number, 2: shop name
 #: src/Gateway/Gateway.php:1226
 msgid "Refund order %1$s %2$s"
-msgstr "Erstattung Bestellung %1$s %2$s"
+msgstr "Remboursement commande %1$s %2$s"
 
 #. translators: 1: refunded amount, 2: bunq draft payment id
 #: src/Gateway/Gateway.php:1246
 msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
-msgstr "bunq-Erstattung von %1$s als Zahlungsentwurf %2$s angelegt. Bestätigen Sie ihn in der bunq-App, um das Geld zu senden."
+msgstr "Remboursement bunq de %1$s créé comme paiement brouillon %2$s. Approuvez-le dans l'application bunq pour envoyer l'argent."
 
 #. translators: %s: error message from bunq
 #: src/Gateway/Gateway.php:1261
 msgid "bunq refund failed: %s"
-msgstr "bunq-Erstattung fehlgeschlagen: %s"
+msgstr "Échec du remboursement bunq : %s"
 
 #. translators: %s: bunq payment id
 #: src/Gateway/Gateway.php:1358
 msgid "bunq payment %s received"
-msgstr "bunq-Zahlung %s erhalten"
+msgstr "Paiement bunq %s reçu"
 
 #. translators: 1: bunq payment id, 2: amount received, 3: order total
 #: src/Gateway/Gateway.php:1387
 msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
-msgstr "bunq-Zahlung %1$s über %2$s erhalten, aber der Bestellwert beträgt %3$s. Prüfen Sie die Zahlung, bevor Sie die Bestellung bearbeiten."
+msgstr "Paiement bunq %1$s de %2$s reçu, mais le total de la commande est %3$s. Vérifiez le paiement avant de traiter la commande."
 
 #. translators: 1: bunq payment request id, 2: status reported by bunq
 #: src/Gateway/Gateway.php:1409
 msgid "bunq payment request %1$s is %2$s"
-msgstr "bunq-Zahlungsanfrage %1$s ist %2$s"
+msgstr "La demande de paiement bunq %1$s est %2$s"
 
 #. translators: 1: bunq payment id, 2: amount received
 #: src/Gateway/Gateway.php:1524
 msgid "bunq payment %1$s of %2$s came in, but the order was cancelled. Restore the order or refund the payment."
-msgstr "bunq-Zahlung %1$s über %2$s erhalten, aber die Bestellung wurde storniert. Stellen Sie die Bestellung wieder her oder erstatten Sie die Zahlung."
+msgstr "Paiement bunq %1$s de %2$s reçu, mais la commande a été annulée. Rétablissez la commande ou remboursez le paiement."
 
 #. translators: %s: payment method, such as "Bancontact"
 #: src/Gateway/MethodGateway.php:57
@@ -284,15 +288,15 @@ msgstr "%s (bunq)"
 #. translators: %s: payment method, such as "Bancontact"
 #: src/Gateway/MethodGateway.php:62
 msgid "Offers %s as a payment option of its own. It uses the connection and settings of the bunq payment method."
-msgstr "Bietet %s als eigene Zahlungsmethode an. Nutzt die Verbindung und die Einstellungen der bunq-Zahlungsmethode."
+msgstr "Propose %s comme moyen de paiement à part entière. Utilise la connexion et les réglages du moyen de paiement bunq."
 
 #: src/Gateway/MethodGateway.php:106
 msgid "Open the bunq settings"
-msgstr "bunq-Einstellungen öffnen"
+msgstr "Ouvrir les réglages bunq"
 
 #: src/Gateway/PaymentMethods.php:41
 msgid "Credit or Debit Card"
-msgstr "Kredit- oder Debitkarte"
+msgstr "Carte de crédit ou de débit"
 
 #: src/Gateway/PaymentMethods.php:49
 msgid "iDEAL | Wero"
@@ -304,128 +308,128 @@ msgstr "Bancontact"
 
 #: src/Gateway/PaymentMethods.php:65
 msgid "From a bunq account"
-msgstr "Von einem bunq-Konto"
+msgstr "Depuis un compte bunq"
 
 #: src/Gateway/PaymentMethods.php:185
 msgid "Bank transfer"
-msgstr "Banküberweisung"
+msgstr "Virement bancaire"
 
 #: src/Gateway/SettingsFields.php:37
 msgid "Customers see bunq at checkout once your bunq account is connected."
-msgstr "Kunden sehen bunq an der Kasse, sobald Ihr bunq-Konto verbunden ist."
+msgstr "Les clients voient bunq lors du paiement dès que votre compte bunq est connecté."
 
 #: src/Gateway/SettingsFields.php:42
 msgid "bunq account"
-msgstr "bunq-Konto"
+msgstr "Compte bunq"
 
 #. translators: %s: link to the setup guide
 #: src/Gateway/SettingsFields.php:47
 msgid "Payments go straight to your own bunq account. Connect it with an OAuth client that you create in the bunq app. %s"
-msgstr "Zahlungen gehen direkt auf Ihr eigenes bunq-Konto. Verbinden Sie es mit einem OAuth-Client, den Sie in der bunq-App erstellen. %s"
+msgstr "Les paiements arrivent directement sur votre propre compte bunq. Connectez-le avec un client OAuth que vous créez dans l’application bunq. %s"
 
 #: src/Gateway/SettingsFields.php:48
 msgid "Setup guide"
-msgstr "Einrichtungsanleitung"
+msgstr "Guide de configuration"
 
 #: src/Gateway/SettingsFields.php:67
 msgid "Receiving payments"
-msgstr "Zahlungen empfangen"
+msgstr "Réception des paiements"
 
 #: src/Gateway/SettingsFields.php:72
 msgid "Checkout"
-msgstr "Kasse"
+msgstr "Paiement"
 
 #: src/Gateway/SettingsFields.php:80
 msgid "Payment methods"
-msgstr "Zahlungsmethoden"
+msgstr "Moyens de paiement"
 
 #: src/Gateway/SettingsFields.php:84
 msgid "The payment methods customers can choose from. Leave empty to offer all of them."
-msgstr "Die Zahlungsmethoden, aus denen Kunden wählen können. Leer lassen, um alle anzubieten."
+msgstr "Les moyens de paiement parmi lesquels les clients peuvent choisir. Laissez vide pour tous les proposer."
 
 #: src/Gateway/SettingsFields.php:87
 msgid "All payment methods"
-msgstr "Alle Zahlungsmethoden"
+msgstr "Tous les moyens de paiement"
 
 #: src/Gateway/SettingsFields.php:104
 msgid "Enable/Disable"
-msgstr "Aktivieren/Deaktivieren"
+msgstr "Activer/Désactiver"
 
 #: src/Gateway/SettingsFields.php:105
 msgid "Enable bunq Gateway"
-msgstr "bunq-Gateway aktivieren"
+msgstr "Activer la passerelle bunq"
 
 #: src/Gateway/SettingsFields.php:111
 msgid "Test mode"
-msgstr "Testmodus"
+msgstr "Mode test"
 
 #: src/Gateway/SettingsFields.php:112
 msgid "Use the bunq sandbox"
-msgstr "Die bunq-Sandbox verwenden"
+msgstr "Utiliser la sandbox bunq"
 
 #: src/Gateway/SettingsFields.php:114
 msgid "Try payments without real money. The sandbox has its own OAuth client and connection."
-msgstr "Testen Sie Zahlungen ohne echtes Geld. Die Sandbox hat einen eigenen OAuth-Client und eine eigene Verbindung."
+msgstr "Testez des paiements sans argent réel. La sandbox a son propre client OAuth et sa propre connexion."
 
 #: src/Gateway/SettingsFields.php:118
 msgid "Title"
-msgstr "Titel"
+msgstr "Titre"
 
 #: src/Gateway/SettingsFields.php:120
 msgid "This controls the title which the user sees during checkout."
-msgstr "Dieser Titel wird dem Kunden beim Bezahlvorgang angezeigt."
+msgstr "Titre affiché au client lors du paiement."
 
 #: src/Gateway/SettingsFields.php:121
 msgid "iDEAL | Wero, Credit Card or Bancontact"
-msgstr "iDEAL | Wero, Kreditkarte oder Bancontact"
+msgstr "iDEAL | Wero, carte bancaire ou Bancontact"
 
 #: src/Gateway/SettingsFields.php:125
 msgid "Description"
-msgstr "Beschreibung"
+msgstr "Description"
 
 #: src/Gateway/SettingsFields.php:127
 msgid "This controls the description which the user sees during checkout."
-msgstr "Diese Beschreibung wird dem Kunden beim Bezahlvorgang angezeigt."
+msgstr "Description affichée au client lors du paiement."
 
 #: src/Gateway/SettingsFields.php:128
 msgid "Pay with iDEAL | Wero, Credit Card or Bancontact"
-msgstr "Bezahlen mit iDEAL | Wero, Kreditkarte oder Bancontact"
+msgstr "Payer avec iDEAL | Wero, carte bancaire ou Bancontact"
 
 #: src/Gateway/SettingsFields.php:132
 msgid "Bank account"
-msgstr "Bankkonto"
+msgstr "Compte bancaire"
 
 #: src/Gateway/SettingsFields.php:134
 msgid "Payments are paid into this bunq account."
-msgstr "Zahlungen gehen auf dieses bunq-Konto."
+msgstr "Les paiements sont versés sur ce compte bunq."
 
 #: src/Gateway/SettingsFields.php:138
 msgid "Direct Gateway"
-msgstr "Direktes Gateway"
+msgstr "Passerelle directe"
 
 #: src/Gateway/SettingsFields.php:139
 msgid "Enable direct gateway"
-msgstr "Direktes Gateway aktivieren"
+msgstr "Activer la passerelle directe"
 
 #: src/Gateway/SettingsFields.php:142
 msgid "Allow your customers to directly select a payment method from the checkout page."
-msgstr "Kunden können die Zahlungsmethode direkt auf der Kassenseite auswählen."
+msgstr "Permettre à vos clients de choisir directement un moyen de paiement sur la page de commande."
 
 #: src/Gateway/SettingsFields.php:146
 msgid "Separate payment methods"
-msgstr "Separate Zahlungsmethoden"
+msgstr "Moyens de paiement séparés"
 
 #: src/Gateway/SettingsFields.php:147
 msgid "Show payment methods separately"
-msgstr "Zahlungsmethoden separat anzeigen"
+msgstr "Afficher les moyens de paiement séparément"
 
 #: src/Gateway/SettingsFields.php:150
 msgid "Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately."
-msgstr "Kunden sehen an der Kasse jede Zahlungsmethode mit eigenem Logo statt einer bunq-Option und gelangen auf bunq.me direkt zu ihr. Titel, Beschreibung und direktes Gateway gelten dann nicht, und Zahlungen von einem bunq-Konto werden nicht separat angeboten."
+msgstr "Les clients voient chaque moyen de paiement avec son propre logo lors du paiement, au lieu d'une seule option bunq, et y accèdent directement sur bunq.me. Le titre, la description et la passerelle directe ne s'appliquent alors plus, et les paiements depuis un compte bunq ne sont pas proposés séparément."
 
 #: src/Gateway/SettingsFields.php:163
 msgid "Sandbox Client ID"
-msgstr "Sandbox-Client-ID"
+msgstr "Client ID de la sandbox"
 
 #: src/Gateway/SettingsFields.php:163
 msgid "Client ID"
@@ -433,7 +437,7 @@ msgstr "Client ID"
 
 #: src/Gateway/SettingsFields.php:181
 msgid "Sandbox Client Secret"
-msgstr "Sandbox-Client-Secret"
+msgstr "Client Secret de la sandbox"
 
 #: src/Gateway/SettingsFields.php:181
 msgid "Client Secret"
@@ -441,45 +445,45 @@ msgstr "Client Secret"
 
 #: src/Gateway/SettingsPage.php:42
 msgid "Redirect URL copied to the clipboard."
-msgstr "Weiterleitungs-URL in die Zwischenablage kopiert."
+msgstr "URL de redirection copiée dans le presse-papiers."
 
 #: src/Gateway/SettingsPage.php:43
 msgid "Save the settings to choose from the bank accounts of the other mode."
-msgstr "Speichern Sie die Einstellungen, um aus den Bankkonten des anderen Modus zu wählen."
+msgstr "Enregistrez les réglages pour choisir parmi les comptes bancaires de l’autre mode."
 
 #: src/Gateway/SettingsPage.php:44
 msgid "Disconnect the shop from bunq? Customers can no longer pay with bunq until you connect again."
-msgstr "Den Shop von bunq trennen? Kunden können erst wieder mit bunq bezahlen, wenn Sie sich erneut verbinden."
+msgstr "Déconnecter la boutique de bunq ? Les clients ne pourront plus payer avec bunq jusqu’à ce que vous vous reconnectiez."
 
 #: src/Gateway/SettingsPage.php:61
 msgid "bunq could not be connected:"
-msgstr "bunq konnte nicht verbunden werden:"
+msgstr "Impossible de connecter bunq :"
 
 #. translators: %s: link to the WooCommerce log page
 #: src/Gateway/SettingsPage.php:66
 msgid "Details are logged in %s (source: bunq)."
-msgstr "Details werden in %s protokolliert (Quelle: bunq)."
+msgstr "Les détails sont consignés dans %s (source : bunq)."
 
 #: src/Gateway/SettingsPage.php:67
 msgid "WooCommerce > Status > Logs"
-msgstr "WooCommerce > Status > Protokolle"
+msgstr "WooCommerce > État > Journaux"
 
 #: src/Gateway/SettingsPage.php:113
 msgid "Redirect URL"
-msgstr "Weiterleitungs-URL"
+msgstr "URL de redirection"
 
 #: src/Gateway/SettingsPage.php:118
 msgid "Copy"
-msgstr "Kopieren"
+msgstr "Copier"
 
 #: src/Gateway/SettingsPage.php:120
 msgid "Copied!"
-msgstr "Kopiert!"
+msgstr "Copié !"
 
 #. translators: 1: menu path in the bunq app, 2: action in the bunq app, 3: action in the bunq app
 #: src/Gateway/SettingsPage.php:125
 msgid "In the bunq app, go to %1$s, tap %2$s and enter this URL. Then tap %3$s and copy the Client ID and Client Secret into the fields below."
-msgstr "Gehen Sie in der bunq-App zu %1$s, tippen Sie auf %2$s und geben Sie diese URL ein. Tippen Sie dann auf %3$s und kopieren Sie die Client ID und das Client Secret in die Felder unten."
+msgstr "Dans l’application bunq, allez dans %1$s, touchez %2$s et saisissez cette URL. Touchez ensuite %3$s et copiez le Client ID et le Client Secret dans les champs ci-dessous."
 
 #: src/Gateway/SettingsPage.php:126
 msgid "Developers › OAuth"
@@ -495,73 +499,73 @@ msgstr ""
 
 #: src/Gateway/SettingsPage.php:150
 msgid "Connect to bunq"
-msgstr "Mit bunq verbinden"
+msgstr "Connecter à bunq"
 
 #: src/Gateway/SettingsPage.php:151
 msgid "Saves your settings and opens bunq, which shows a QR code. Scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq then sends you back here."
-msgstr "Speichert Ihre Einstellungen und öffnet bunq, das einen QR-Code anzeigt. Scannen Sie ihn mit der bunq-App, wählen Sie die Bankkonten, die der Shop verwenden darf, und bestätigen Sie. bunq leitet Sie danach hierher zurück."
+msgstr "Enregistre vos réglages et ouvre bunq, qui affiche un code QR. Scannez-le avec l’application bunq, choisissez les comptes bancaires que la boutique peut utiliser et approuvez. bunq vous renvoie ensuite ici."
 
 #. translators: %s: name of the bunq user that granted access
 #: src/Gateway/SettingsPage.php:183
 msgid "Connected to the bunq sandbox as %s."
-msgstr "Mit der bunq-Sandbox verbunden als %s."
+msgstr "Connecté à la sandbox bunq en tant que %s."
 
 #. translators: %s: name of the bunq user that granted access
 #: src/Gateway/SettingsPage.php:186
 msgid "Connected to bunq as %s."
-msgstr "Mit bunq verbunden als %s."
+msgstr "Connecté à bunq en tant que %s."
 
 #: src/Gateway/SettingsPage.php:196
 msgid "Connected to the bunq sandbox."
-msgstr "Mit der bunq-Sandbox verbunden."
+msgstr "Connecté à la sandbox bunq."
 
 #: src/Gateway/SettingsPage.php:196
 msgid "Connected to bunq."
-msgstr "Mit bunq verbunden."
+msgstr "Connecté à bunq."
 
 #: src/Gateway/SettingsPage.php:203
 msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it."
-msgstr "Die Verbindung mit bunq funktioniert nicht mehr, daher schlagen Zahlungen mit bunq fehl. Verbinden Sie sich erneut, um das zu beheben."
+msgstr "La connexion avec bunq ne fonctionne plus : les paiements avec bunq échouent donc. Reconnectez-vous pour la rétablir."
 
 #: src/Gateway/SettingsPage.php:210
 msgid "bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it."
-msgstr "bunq hat die Verbindung kürzlich abgelehnt, daher wird bunq an der Kasse nicht angeboten. Verbinden Sie sich erneut, um das zu beheben."
+msgstr "bunq a récemment refusé la connexion : bunq n’est donc pas proposé lors du paiement. Connectez-vous à nouveau pour le rétablir."
 
 #: src/Gateway/SettingsPage.php:214
 msgid "Connect again"
-msgstr "Erneut verbinden"
+msgstr "Se reconnecter"
 
 #: src/Gateway/SettingsPage.php:215
 msgid "Change OAuth client"
-msgstr "OAuth-Client ändern"
+msgstr "Modifier le client OAuth"
 
 #: src/Gateway/SettingsPage.php:216
 msgid "Disconnect"
-msgstr "Trennen"
+msgstr "Déconnecter"
 
 #: src/Gateway/SettingsPage.php:219
 msgid "Not connected to the bunq sandbox."
-msgstr "Nicht mit der bunq-Sandbox verbunden."
+msgstr "Non connecté à la sandbox bunq."
 
 #: src/Gateway/SettingsPage.php:219
 msgid "Not connected to bunq."
-msgstr "Nicht mit bunq verbunden."
+msgstr "Non connecté à bunq."
 
 #: src/Gateway/SettingsPage.php:223
 msgid "Click \"Connect to bunq\" below and scan the QR code with the bunq app."
-msgstr "Klicken Sie unten auf „Mit bunq verbinden“ und scannen Sie den QR-Code mit der bunq-App."
+msgstr "Cliquez sur « Connecter à bunq » ci-dessous et scannez le code QR avec l’application bunq."
 
 #: src/Gateway/SettingsPage.php:224
 msgid "Register the redirect URL in the bunq app and enter the Client ID and Client Secret of your OAuth client below."
-msgstr "Registrieren Sie die Weiterleitungs-URL in der bunq-App und geben Sie unten die Client ID und das Client Secret Ihres OAuth-Clients ein."
+msgstr "Enregistrez l’URL de redirection dans l’application bunq et saisissez ci-dessous le Client ID et le Client Secret de votre client OAuth."
 
 #: src/Orders/PaymentDetails.php:81
 msgid "bunq payment"
-msgstr "bunq-Zahlung"
+msgstr "Paiement bunq"
 
 #: src/Orders/PaymentDetails.php:113
 msgid "Payer"
-msgstr "Zahler"
+msgstr "Payeur"
 
 #: src/Orders/PaymentDetails.php:114
 msgid "IBAN"
@@ -569,85 +573,85 @@ msgstr "IBAN"
 
 #: src/Orders/PaymentDetails.php:115
 msgid "Method"
-msgstr "Methode"
+msgstr "Méthode"
 
 #: src/Orders/PaymentDetails.php:116
 msgid "Payment ID"
-msgstr "Zahlungs-ID"
+msgstr "ID du paiement"
 
 #: src/Orders/PaymentDetails.php:127
 msgid "No bunq payment has been received for this order yet."
-msgstr "Für diese Bestellung ist noch keine bunq-Zahlung eingegangen."
+msgstr "Aucun paiement bunq n’a encore été reçu pour cette commande."
 
 #: src/Orders/PaymentDetails.php:139
 msgid "View the payment request on bunq.me"
-msgstr "Zahlungsanforderung auf bunq.me ansehen"
+msgstr "Voir la demande de paiement sur bunq.me"
 
 #: src/Orders/PaymentDetails.php:201
 msgid "bunq payer name"
-msgstr "Name des bunq-Zahlers"
+msgstr "Nom du payeur bunq"
 
 #: src/Orders/PaymentDetails.php:202
 msgid "bunq payer IBAN"
-msgstr "IBAN des bunq-Zahlers"
+msgstr "IBAN du payeur bunq"
 
 #: src/Orders/PaymentLink.php:77
 msgid "Send bunq payment link to customer"
-msgstr "bunq-Zahlungslink an Kunden senden"
+msgstr "Envoyer le lien de paiement bunq au client"
 
 #: src/Orders/PaymentLink.php:105
 msgid "The bunq payment link was not sent: connect your bunq account in the bunq payment settings first."
-msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Verbinden Sie zuerst Ihr bunq-Konto in den bunq-Zahlungseinstellungen."
+msgstr "Le lien de paiement bunq n’a pas été envoyé : connectez d’abord votre compte bunq dans les réglages de paiement bunq."
 
 #: src/Orders/PaymentLink.php:111
 msgid "The bunq payment link was not sent: only unpaid orders in euros can be paid with a bunq payment link."
-msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Nur unbezahlte Bestellungen in Euro können mit einem bunq-Zahlungslink bezahlt werden."
+msgstr "Le lien de paiement bunq n’a pas été envoyé : seules les commandes impayées en euros peuvent être payées avec un lien de paiement bunq."
 
 #: src/Orders/PaymentLink.php:117
 msgid "The bunq payment link was not sent: the order has no billing email address."
-msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Die Bestellung hat keine Rechnungs-E-Mail-Adresse."
+msgstr "Le lien de paiement bunq n’a pas été envoyé : la commande n’a pas d’adresse e-mail de facturation."
 
 #: src/Orders/PaymentLink.php:125
 msgid "The bunq payment link was not sent: the \"bunq payment link\" email is disabled in WooCommerce > Settings > Emails."
-msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Die E-Mail „bunq-Zahlungslink“ ist unter WooCommerce > Einstellungen > E-Mails deaktiviert."
+msgstr "Le lien de paiement bunq n’a pas été envoyé : l’e-mail « Lien de paiement bunq » est désactivé dans WooCommerce > Réglages > E-mails."
 
 #: src/Orders/PaymentLink.php:134
 msgid "The bunq payment link could not be created. The WooCommerce logs (source: bunq) have the details."
-msgstr "Der bunq-Zahlungslink konnte nicht erstellt werden. Details finden Sie in den WooCommerce-Protokollen (Quelle: bunq)."
+msgstr "Le lien de paiement bunq n’a pas pu être créé. Les détails se trouvent dans les journaux WooCommerce (source : bunq)."
 
 #: src/Orders/PaymentLink.php:140
 msgid "The bunq payment link was not sent: a payment for this order already came in through bunq. Check the order notes."
-msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Für diese Bestellung ist bereits eine Zahlung über bunq eingegangen. Prüfen Sie die Bestellnotizen."
+msgstr "Le lien de paiement bunq n’a pas été envoyé : un paiement pour cette commande a déjà été reçu via bunq. Consultez les notes de commande."
 
 #: src/Orders/PaymentLink.php:152
 msgid "The bunq payment link could not be emailed to the customer. Check that your site can send email."
-msgstr "Der bunq-Zahlungslink konnte dem Kunden nicht per E-Mail gesendet werden. Prüfen Sie, ob Ihre Website E-Mails versenden kann."
+msgstr "Le lien de paiement bunq n’a pas pu être envoyé par e-mail au client. Vérifiez que votre site peut envoyer des e-mails."
 
 #. translators: %s: customer's email address
 #: src/Orders/PaymentLink.php:160
 msgid "bunq payment link sent to %s"
-msgstr "bunq-Zahlungslink an %s gesendet"
+msgstr "Lien de paiement bunq envoyé à %s"
 
 #: src/Requirements.php:113
 msgid "cannot be activated due to incompatible environment."
-msgstr "kann nicht aktiviert werden, da die Umgebung nicht kompatibel ist."
+msgstr "ne peut pas être activé car l’environnement n’est pas compatible."
 
 #. translators: %s: customer's first name
 #: templates/emails/customer-bunq-payment-link.php:31
 #: templates/emails/plain/customer-bunq-payment-link.php:27
 msgid "Hi %s,"
-msgstr "Hallo %s,"
+msgstr "Bonjour %s,"
 
 #. translators: 1: order number, 2: order total
 #: templates/emails/customer-bunq-payment-link.php:38
 #: templates/emails/plain/customer-bunq-payment-link.php:31
 msgid "You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact."
-msgstr "Sie können Bestellung #%1$s über %2$s mit dem Link unten bezahlen. Auf bunq.me wählen Sie selbst, wie Sie bezahlen, zum Beispiel mit iDEAL | Wero, Karte oder Bancontact."
+msgstr "Vous pouvez payer la commande n°%1$s de %2$s avec le lien ci-dessous. Sur bunq.me, vous choisissez votre moyen de paiement, par exemple iDEAL | Wero, une carte ou Bancontact."
 
 #: templates/emails/customer-bunq-payment-link.php:45
 msgid "Pay now"
-msgstr "Jetzt bezahlen"
+msgstr "Payer maintenant"
 
 #: templates/emails/customer-bunq-payment-link.php:48
 msgid "Does the button not work? Copy this link into your browser:"
-msgstr "Funktioniert die Schaltfläche nicht? Kopieren Sie diesen Link in Ihren Browser:"
+msgstr "Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :"

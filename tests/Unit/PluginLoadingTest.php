@@ -47,6 +47,18 @@ final class PluginLoadingTest extends TestCase
         $this->assertInstanceOf('WC_Bunq_Gateway', new Gateway());
     }
 
+    public function testASecondCopyOfThePluginOnlyAddsANotice()
+    {
+        Environment::$hooks = array();
+
+        require dirname(__DIR__, 2) . '/pay-with-bunq-for-woocommerce.php';
+
+        $this->assertSame(array('admin_notices'), $this->sortedHookNames());
+        ob_start();
+        do_action('admin_notices');
+        $this->assertStringContainsString('installed twice', ob_get_clean());
+    }
+
     public function testAnIncompatibleEnvironmentOnlyGetsTheDeactivationAndItsNotice()
     {
         Environment::$hooks = array();
@@ -57,7 +69,7 @@ final class PluginLoadingTest extends TestCase
         $this->assertSame(array('admin_init', 'admin_notices', 'before_woocommerce_init', 'init'), $this->sortedHookNames());
 
         do_action('admin_init');
-        $this->assertSame(array('bunq-for-woocommerce/bunq-for-woocommerce.php'), Environment::$deactivatedPlugins);
+        $this->assertSame(array('pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php'), Environment::$deactivatedPlugins);
     }
 
     public function testACompatibleEnvironmentGetsTheGatewayAndItsHooks()
@@ -74,7 +86,7 @@ final class PluginLoadingTest extends TestCase
             'before_woocommerce_init',
             'bunq_for_woocommerce_connection_check',
             'bunq_for_woocommerce_follow_up_check',
-            'deactivate_bunq-for-woocommerce/bunq-for-woocommerce.php',
+            'deactivate_pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php',
             'init',
             'plugins_loaded',
             'template_redirect',
@@ -112,12 +124,12 @@ final class PluginLoadingTest extends TestCase
     {
         do_action('init');
 
-        $this->assertSame(array('bunq-for-woocommerce' => 'bunq-for-woocommerce/languages'), Environment::$loadedTextdomains);
+        $this->assertSame(array('pay-with-bunq-for-woocommerce' => 'pay-with-bunq-for-woocommerce/languages'), Environment::$loadedTextdomains);
     }
 
     public function testThePluginFileIsKnownToTheIncludes()
     {
-        $this->assertSame(realpath(dirname(__DIR__, 2) . '/bunq-for-woocommerce.php'), realpath(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE));
+        $this->assertSame(realpath(dirname(__DIR__, 2) . '/pay-with-bunq-for-woocommerce.php'), realpath(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE));
     }
 
     public function testTheVersionInThePluginHeaderIsARelease()

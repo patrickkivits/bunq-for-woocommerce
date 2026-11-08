@@ -34,5 +34,5 @@ jobs:
       - name: Run Plugin Check
         uses: wordpress/plugin-check-action@v1
         with:
-          build-dir: ./build/bunq-for-woocommerce
+          build-dir: ./build/pay-with-bunq-for-woocommerce
           strict: true

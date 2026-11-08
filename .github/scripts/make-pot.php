@@ -1,6 +1,6 @@
 <?php
 /**
- * Regenerate languages/bunq-for-woocommerce.pot from the plugin's own PHP files and email templates (vendor/ is
+ * Regenerate languages/pay-with-bunq-for-woocommerce.pot from the plugin's own PHP files and email templates (vendor/ is
  * skipped).
  *
  *   php .github/scripts/make-pot.php
@@ -11,10 +11,10 @@
  */
 
 $root = dirname(__DIR__, 2);
-$domain = 'bunq-for-woocommerce';
+$domain = 'pay-with-bunq-for-woocommerce';
 $functions = ['__', '_e', 'esc_html__', 'esc_html_e', 'esc_attr__', 'esc_attr_e'];
 
-$files = [$root.'/bunq-for-woocommerce.php', $root.'/uninstall.php'];
+$files = [$root.'/pay-with-bunq-for-woocommerce.php', $root.'/uninstall.php'];
 foreach (['src', 'templates'] as $directory) {
     $sources = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/'.$directory, FilesystemIterator::SKIP_DOTS));
     $src_files = [];
@@ -78,7 +78,7 @@ $out = <<<POT
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: bunq for WooCommerce\\n"
+"Project-Id-Version: Pay with bunq for WooCommerce\\n"
 "Report-Msgid-Bugs-To: https://github.com/patrickkivits/bunq-for-woocommerce/issues\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=UTF-8\\n"

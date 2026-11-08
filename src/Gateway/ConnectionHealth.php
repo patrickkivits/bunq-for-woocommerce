@@ -168,7 +168,7 @@ final class ConnectionHealth {
 	 */
 	public function check_now() {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'bunq-for-woocommerce' ), 403 );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'pay-with-bunq-for-woocommerce' ), 403 );
 		}
 
 		check_admin_referer( self::CHECK_NOW_ACTION );
@@ -300,7 +300,7 @@ final class ConnectionHealth {
 		}
 
 		if ( self::OK === $checked ) {
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'The connection with bunq works.', 'bunq-for-woocommerce' ) . '</p></div>';
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'The connection with bunq works.', 'pay-with-bunq-for-woocommerce' ) . '</p></div>';
 		}
 
 		// Most admin pages: nothing failed, so the gateways need not be loaded.
@@ -333,15 +333,15 @@ final class ConnectionHealth {
 			$message = sprintf(
 				$testmode
 					/* translators: %s: how long, for example "3 hours" */
-					? __( 'The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached.', 'bunq-for-woocommerce' )
+					? __( 'The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached.', 'pay-with-bunq-for-woocommerce' )
 					/* translators: %s: how long, for example "3 hours" */
-					: __( 'bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached.', 'bunq-for-woocommerce' ),
+					: __( 'bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached.', 'pay-with-bunq-for-woocommerce' ),
 				human_time_diff( $problem['failing_since'] )
 			);
 		} else {
 			$message = $testmode
-				? __( 'The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address.', 'bunq-for-woocommerce' )
-				: __( 'The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address.', 'bunq-for-woocommerce' );
+				? __( 'The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address.', 'pay-with-bunq-for-woocommerce' )
+				: __( 'The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address.', 'pay-with-bunq-for-woocommerce' );
 		}
 
 		$check_url = wp_nonce_url( add_query_arg( 'action', self::CHECK_NOW_ACTION, admin_url( 'admin-post.php' ) ), self::CHECK_NOW_ACTION );
@@ -349,18 +349,18 @@ final class ConnectionHealth {
 		ob_start();
 		?>
 		<div class="notice notice-error bunq-connection-notice">
-			<p><strong><?php esc_html_e( 'bunq for WooCommerce', 'bunq-for-woocommerce' ); ?>:</strong> <?php echo esc_html( $message ); ?></p>
+			<p><strong><?php esc_html_e( 'Pay with bunq for WooCommerce', 'pay-with-bunq-for-woocommerce' ); ?>:</strong> <?php echo esc_html( $message ); ?></p>
 			<?php if ( '' !== $problem['error'] ) : ?>
 				<p>
 					<?php
 					/* translators: %s: error message from bunq */
-					printf( esc_html__( 'bunq\'s answer: %s', 'bunq-for-woocommerce' ), '<code>' . esc_html( $problem['error'] ) . '</code>' );
+					printf( esc_html__( 'bunq\'s answer: %s', 'pay-with-bunq-for-woocommerce' ), '<code>' . esc_html( $problem['error'] ) . '</code>' );
 					?>
 				</p>
 			<?php endif; ?>
 			<p>
-				<a href="<?php echo esc_url( Gateway::settings_url() ); ?>" class="button button-primary"><?php esc_html_e( 'Go to the bunq settings', 'bunq-for-woocommerce' ); ?></a>
-				<a href="<?php echo esc_url( $check_url ); ?>" class="button"><?php esc_html_e( 'Check again', 'bunq-for-woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( Gateway::settings_url() ); ?>" class="button button-primary"><?php esc_html_e( 'Go to the bunq settings', 'pay-with-bunq-for-woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( $check_url ); ?>" class="button"><?php esc_html_e( 'Check again', 'pay-with-bunq-for-woocommerce' ); ?></a>
 			</p>
 		</div>
 		<?php
@@ -387,7 +387,7 @@ final class ConnectionHealth {
 	 */
 	public static function system_status_html( ?Gateway $gateway, ?int $next_check ): string {
 		$rows = array(
-			array( __( 'Version', 'bunq-for-woocommerce' ), 'Version', esc_html( Plugin::VERSION ) ),
+			array( __( 'Version', 'pay-with-bunq-for-woocommerce' ), 'Version', esc_html( Plugin::VERSION ) ),
 		);
 
 		if ( $gateway ) {
@@ -395,43 +395,43 @@ final class ConnectionHealth {
 			$connection = $gateway->get_connection( $mode );
 			$status     = $connection['connected'] ? self::status( $mode ) : null;
 
-			$rows[] = array( __( 'Enabled', 'bunq-for-woocommerce' ), 'Enabled', 'yes' === $gateway->enabled ? self::mark( true, __( 'Yes', 'bunq-for-woocommerce' ) ) : esc_html__( 'No', 'bunq-for-woocommerce' ) );
-			$rows[] = array( __( 'Mode', 'bunq-for-woocommerce' ), 'Mode', $gateway->testmode ? esc_html__( 'Sandbox', 'bunq-for-woocommerce' ) : esc_html__( 'Live', 'bunq-for-woocommerce' ) );
+			$rows[] = array( __( 'Enabled', 'pay-with-bunq-for-woocommerce' ), 'Enabled', 'yes' === $gateway->enabled ? self::mark( true, __( 'Yes', 'pay-with-bunq-for-woocommerce' ) ) : esc_html__( 'No', 'pay-with-bunq-for-woocommerce' ) );
+			$rows[] = array( __( 'Mode', 'pay-with-bunq-for-woocommerce' ), 'Mode', $gateway->testmode ? esc_html__( 'Sandbox', 'pay-with-bunq-for-woocommerce' ) : esc_html__( 'Live', 'pay-with-bunq-for-woocommerce' ) );
 
 			if ( ! $connection['connected'] ) {
-				$connected = self::mark( false, __( 'Not connected', 'bunq-for-woocommerce' ) );
+				$connected = self::mark( false, __( 'Not connected', 'pay-with-bunq-for-woocommerce' ) );
 			} elseif ( $connection['account_name'] ) {
 				/* translators: %s: name of the bunq user that granted access */
-				$connected = self::mark( true, sprintf( __( 'Connected as %s', 'bunq-for-woocommerce' ), $connection['account_name'] ) );
+				$connected = self::mark( true, sprintf( __( 'Connected as %s', 'pay-with-bunq-for-woocommerce' ), $connection['account_name'] ) );
 			} else {
-				$connected = self::mark( true, __( 'Connected', 'bunq-for-woocommerce' ) );
+				$connected = self::mark( true, __( 'Connected', 'pay-with-bunq-for-woocommerce' ) );
 			}
-			$rows[] = array( __( 'Connection', 'bunq-for-woocommerce' ), 'Connection', $connected );
+			$rows[] = array( __( 'Connection', 'pay-with-bunq-for-woocommerce' ), 'Connection', $connected );
 
 			if ( $connection['connected'] ) {
 				if ( ! $status ) {
-					$check = esc_html__( 'Not checked yet', 'bunq-for-woocommerce' );
+					$check = esc_html__( 'Not checked yet', 'pay-with-bunq-for-woocommerce' );
 				} elseif ( self::OK === $status['status'] ) {
-					$check = self::mark( true, __( 'Works', 'bunq-for-woocommerce' ) );
+					$check = self::mark( true, __( 'Works', 'pay-with-bunq-for-woocommerce' ) );
 				} else {
-					$label = self::BROKEN === $status['status'] ? __( 'Broken', 'bunq-for-woocommerce' ) : __( 'bunq could not be reached', 'bunq-for-woocommerce' );
+					$label = self::BROKEN === $status['status'] ? __( 'Broken', 'pay-with-bunq-for-woocommerce' ) : __( 'bunq could not be reached', 'pay-with-bunq-for-woocommerce' );
 					$check = self::mark( false, $label . ( '' !== $status['error'] ? ': ' . $status['error'] : '' ) );
 				}
 
 				$check_url = wp_nonce_url( add_query_arg( 'action', self::CHECK_NOW_ACTION, admin_url( 'admin-post.php' ) ), self::CHECK_NOW_ACTION );
-				$check    .= ' <a href="' . esc_url( $check_url ) . '">' . esc_html__( 'Check again', 'bunq-for-woocommerce' ) . '</a>';
+				$check    .= ' <a href="' . esc_url( $check_url ) . '">' . esc_html__( 'Check again', 'pay-with-bunq-for-woocommerce' ) . '</a>';
 
-				$rows[] = array( __( 'Connection check', 'bunq-for-woocommerce' ), 'Connection check', $check );
+				$rows[] = array( __( 'Connection check', 'pay-with-bunq-for-woocommerce' ), 'Connection check', $check );
 
 				if ( $status && self::OK !== $status['status'] ) {
-					$rows[] = array( __( 'Failing since', 'bunq-for-woocommerce' ), 'Failing since', esc_html( self::format_time( $status['failing_since'] ) ) );
+					$rows[] = array( __( 'Failing since', 'pay-with-bunq-for-woocommerce' ), 'Failing since', esc_html( self::format_time( $status['failing_since'] ) ) );
 				}
 
-				$rows[] = array( __( 'Last check', 'bunq-for-woocommerce' ), 'Last check', $status ? esc_html( self::format_time( $status['checked_at'] ) ) : '&ndash;' );
-				$rows[] = array( __( 'Next check', 'bunq-for-woocommerce' ), 'Next check', $next_check ? esc_html( self::format_time( $next_check ) ) : esc_html__( 'Not scheduled', 'bunq-for-woocommerce' ) );
+				$rows[] = array( __( 'Last check', 'pay-with-bunq-for-woocommerce' ), 'Last check', $status ? esc_html( self::format_time( $status['checked_at'] ) ) : '&ndash;' );
+				$rows[] = array( __( 'Next check', 'pay-with-bunq-for-woocommerce' ), 'Next check', $next_check ? esc_html( self::format_time( $next_check ) ) : esc_html__( 'Not scheduled', 'pay-with-bunq-for-woocommerce' ) );
 			}
 
-			$rows[] = array( __( 'Callback URL', 'bunq-for-woocommerce' ), 'Callback URL', '<code>' . esc_html( CallbackHandler::url() ) . '</code>' );
+			$rows[] = array( __( 'Callback URL', 'pay-with-bunq-for-woocommerce' ), 'Callback URL', '<code>' . esc_html( CallbackHandler::url() ) . '</code>' );
 		}
 
 		ob_start();
@@ -439,7 +439,7 @@ final class ConnectionHealth {
 		<table class="wc_status_table widefat" cellspacing="0" id="status-bunq">
 			<thead>
 				<tr>
-					<th colspan="3" data-export-label="bunq for WooCommerce"><h2><?php esc_html_e( 'bunq for WooCommerce', 'bunq-for-woocommerce' ); ?></h2></th>
+					<th colspan="3" data-export-label="Pay with bunq for WooCommerce"><h2><?php esc_html_e( 'Pay with bunq for WooCommerce', 'pay-with-bunq-for-woocommerce' ); ?></h2></th>
 				</tr>
 			</thead>
 			<tbody>

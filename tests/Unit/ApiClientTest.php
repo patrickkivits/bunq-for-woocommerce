@@ -229,7 +229,7 @@ final class ApiClientTest extends TestCase
         $this->assertArrayNotHasKey('X-Bunq-Client-Authentication', $installation['headers']);
         $this->assertArrayNotHasKey('X-Bunq-Client-Signature', $installation['headers']);
 
-        $this->assertSame(array('description' => 'bunq for WooCommerce', 'secret' => 'oauth-access-token', 'permitted_ips' => array()), $this->server->body(1));
+        $this->assertSame(array('description' => 'Pay with bunq for WooCommerce', 'secret' => 'oauth-access-token', 'permitted_ips' => array()), $this->server->body(1));
         $this->assertSame(array('secret' => 'oauth-access-token'), $this->server->body(2));
         foreach (array(1, 2) as $index) {
             $this->assertSame('installation-token', $this->server->requests[$index]['headers']['X-Bunq-Client-Authentication']);
@@ -362,7 +362,7 @@ final class ApiClientTest extends TestCase
                 'userPerson' => null,
                 'userApiKey' => array(
                     'id' => 42,
-                    'requested_by_user' => array('user_payment_service_provider' => array('id' => 1, 'display_name' => 'bunq for WooCommerce')),
+                    'requested_by_user' => array('user_payment_service_provider' => array('id' => 1, 'display_name' => 'Pay with bunq for WooCommerce')),
                     'granted_by_user' => array('user_company' => array('id' => 7, 'display_name' => 'Kivits Webshop')),
                 ),
                 'userPaymentServiceProvider' => null,
@@ -451,7 +451,7 @@ final class ApiClientTest extends TestCase
             array('Token' => array('id' => 4, 'token' => $token)),
             array('UserApiKey' => array(
                 'id' => 42,
-                'requested_by_user' => array('UserPaymentServiceProvider' => array('id' => 1, 'display_name' => 'bunq for WooCommerce', 'session_timeout' => 3600)),
+                'requested_by_user' => array('UserPaymentServiceProvider' => array('id' => 1, 'display_name' => 'Pay with bunq for WooCommerce', 'session_timeout' => 3600)),
                 'granted_by_user' => array('UserCompany' => array('id' => 7, 'display_name' => 'Kivits Webshop', 'session_timeout' => 604800)),
             )),
         );

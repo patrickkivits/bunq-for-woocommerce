@@ -156,7 +156,7 @@ class Gateway extends WC_Payment_Gateway {
 
 		$this->id                 = self::ID;
 		$this->method_title       = 'bunq';
-		$this->method_description = __( 'bunq payment gateway for WooCommerce', 'bunq-for-woocommerce' );
+		$this->method_description = __( 'bunq payment gateway for WooCommerce', 'pay-with-bunq-for-woocommerce' );
 		$this->supports           = array(
 			'products',
 			'refunds',
@@ -310,7 +310,7 @@ class Gateway extends WC_Payment_Gateway {
 			$this->set_credential( ( $this->testmode ? 'test_api_key' : 'api_key' ), $access_token );
 			$this->refresh_api_context();
 
-			set_transient( self::LAST_SUCCESS_TRANSIENT, __( 'bunq authorization completed. Select your bank account and save the settings.', 'bunq-for-woocommerce' ), 5 * MINUTE_IN_SECONDS );
+			set_transient( self::LAST_SUCCESS_TRANSIENT, __( 'bunq authorization completed. Select your bank account and save the settings.', 'pay-with-bunq-for-woocommerce' ), 5 * MINUTE_IN_SECONDS );
 		} catch ( Throwable $exception ) {
 			Logger::log( $exception );
 			set_transient( self::LAST_ERROR_TRANSIENT, Logger::format_error( $exception ), 5 * MINUTE_IN_SECONDS );
@@ -434,7 +434,7 @@ class Gateway extends WC_Payment_Gateway {
 	public function validate_fields() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- WooCommerce verified the checkout nonce; only compared against the known methods.
 		if ( ! empty( $_POST[ self::PAYMENT_METHOD_FIELD ] ) && ! PaymentMethods::exists( $_POST[ self::PAYMENT_METHOD_FIELD ] ) ) {
-			wc_add_notice( __( 'Payment method invalid', 'bunq-for-woocommerce' ), 'error' );
+			wc_add_notice( __( 'Payment method invalid', 'pay-with-bunq-for-woocommerce' ), 'error' );
 
 			return false;
 		}
@@ -552,7 +552,7 @@ class Gateway extends WC_Payment_Gateway {
 		$mode = sanitize_key( wp_unslash( $_GET[ self::DISCONNECT_ACTION ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
 
 		if ( ! in_array( $mode, array( 'live', 'sandbox' ), true ) || ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'bunq-for-woocommerce' ), 403 );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'pay-with-bunq-for-woocommerce' ), 403 );
 		}
 
 		check_admin_referer( self::DISCONNECT_ACTION . '_' . $mode );
@@ -584,8 +584,8 @@ class Gateway extends WC_Payment_Gateway {
 		set_transient(
 			self::LAST_SUCCESS_TRANSIENT,
 			'sandbox' === $mode
-				? __( 'Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app.', 'bunq-for-woocommerce' )
-				: __( 'Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app.', 'bunq-for-woocommerce' ),
+				? __( 'Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app.', 'pay-with-bunq-for-woocommerce' )
+				: __( 'Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app.', 'pay-with-bunq-for-woocommerce' ),
 			5 * MINUTE_IN_SECONDS
 		);
 	}
@@ -603,7 +603,7 @@ class Gateway extends WC_Payment_Gateway {
 		$client_secret = (string) $this->get_option( $prefix . 'oauth_client_secret' );
 
 		if ( '' === $client_id || '' === $client_secret ) {
-			set_transient( self::LAST_ERROR_TRANSIENT, __( 'Enter the Client ID and Client Secret of your bunq OAuth client, then click "Connect to bunq".', 'bunq-for-woocommerce' ), 5 * MINUTE_IN_SECONDS );
+			set_transient( self::LAST_ERROR_TRANSIENT, __( 'Enter the Client ID and Client Secret of your bunq OAuth client, then click "Connect to bunq".', 'pay-with-bunq-for-woocommerce' ), 5 * MINUTE_IN_SECONDS );
 
 			return null;
 		}
@@ -811,7 +811,7 @@ class Gateway extends WC_Payment_Gateway {
 
 		if ( '' !== (string) $saved ) {
 			$data['placeholder'] = '••••••••••••••••';
-			$data['description'] = __( 'Saved. Leave empty to keep it, or paste a new secret to replace it.', 'bunq-for-woocommerce' );
+			$data['description'] = __( 'Saved. Leave empty to keep it, or paste a new secret to replace it.', 'pay-with-bunq-for-woocommerce' );
 		}
 
 		$this->settings[ $key ] = '';
@@ -937,7 +937,7 @@ class Gateway extends WC_Payment_Gateway {
 		if ( $connected ) {
 			$refresh_url = wp_nonce_url( add_query_arg( self::REFRESH_ACCOUNTS_ACTION, '1', self::settings_url() ), self::REFRESH_ACCOUNTS_ACTION );
 
-			$this->form_fields['monetary_account_bank_id']['description'] .= ' <a href="' . esc_url( $refresh_url ) . '">' . esc_html__( 'Refresh bank accounts', 'bunq-for-woocommerce' ) . '</a>';
+			$this->form_fields['monetary_account_bank_id']['description'] .= ' <a href="' . esc_url( $refresh_url ) . '">' . esc_html__( 'Refresh bank accounts', 'pay-with-bunq-for-woocommerce' ) . '</a>';
 		}
 	}
 
@@ -947,7 +947,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @return array See ApiClient::get_bank_accounts().
 	 */
 	private function get_bank_accounts(): array {
-		$rejected = array( '' => __( 'bunq rejected the saved connection. Connect again.', 'bunq-for-woocommerce' ) );
+		$rejected = array( '' => __( 'bunq rejected the saved connection. Connect again.', 'pay-with-bunq-for-woocommerce' ) );
 
 		if ( ! $this->get_setting( 'api_context' ) ) {
 			return $this->api->get_bank_accounts( false );
@@ -1071,7 +1071,7 @@ class Gateway extends WC_Payment_Gateway {
 		} catch ( Throwable $exception ) {
 			// Log the real cause for the merchant; the customer only gets a generic message.
 			Logger::log( $exception );
-			wc_add_notice( __( 'The payment could not be started with bunq. Please try again or choose another payment method.', 'bunq-for-woocommerce' ), 'error' );
+			wc_add_notice( __( 'The payment could not be started with bunq. Please try again or choose another payment method.', 'pay-with-bunq-for-woocommerce' ), 'error' );
 
 			return array( 'result' => 'failure' );
 		}
@@ -1103,7 +1103,7 @@ class Gateway extends WC_Payment_Gateway {
 		$order->add_order_note(
 			sprintf(
 				/* translators: %s: bunq payment request id */
-				__( 'bunq payment request %s created', 'bunq-for-woocommerce' ),
+				__( 'bunq payment request %s created', 'pay-with-bunq-for-woocommerce' ),
 				$payment_request['id']
 			)
 		);
@@ -1174,7 +1174,7 @@ class Gateway extends WC_Payment_Gateway {
 				$order->add_order_note(
 					sprintf(
 						/* translators: %s: bunq payment request id */
-						__( 'bunq payment request %s cancelled', 'bunq-for-woocommerce' ),
+						__( 'bunq payment request %s cancelled', 'pay-with-bunq-for-woocommerce' ),
 						$payment_request_id
 					)
 				);
@@ -1202,11 +1202,11 @@ class Gateway extends WC_Payment_Gateway {
 		$payment_id = $order ? intval( $order->get_meta( self::META_PAYMENT_ID ) ) : 0;
 
 		if ( ! $payment_id ) {
-			return new WP_Error( 'bunq_refund', __( 'This order has no bunq payment that can be refunded.', 'bunq-for-woocommerce' ) );
+			return new WP_Error( 'bunq_refund', __( 'This order has no bunq payment that can be refunded.', 'pay-with-bunq-for-woocommerce' ) );
 		}
 
 		if ( ! $amount || (float) $amount <= 0 ) {
-			return new WP_Error( 'bunq_refund', __( 'The refund amount must be greater than zero.', 'bunq-for-woocommerce' ) );
+			return new WP_Error( 'bunq_refund', __( 'The refund amount must be greater than zero.', 'pay-with-bunq-for-woocommerce' ) );
 		}
 
 		try {
@@ -1218,12 +1218,12 @@ class Gateway extends WC_Payment_Gateway {
 			$iban    = $payment['counterparty_alias']['iban'] ?? null;
 
 			if ( ! $iban ) {
-				return new WP_Error( 'bunq_refund', __( 'The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead.', 'bunq-for-woocommerce' ) );
+				return new WP_Error( 'bunq_refund', __( 'The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead.', 'pay-with-bunq-for-woocommerce' ) );
 			}
 
 			$description = sprintf(
 				/* translators: 1: order number, 2: shop name */
-				__( 'Refund order %1$s %2$s', 'bunq-for-woocommerce' ),
+				__( 'Refund order %1$s %2$s', 'pay-with-bunq-for-woocommerce' ),
 				$order->get_order_number(),
 				get_bloginfo( 'name' )
 			);
@@ -1243,7 +1243,7 @@ class Gateway extends WC_Payment_Gateway {
 			$order->add_order_note(
 				sprintf(
 					/* translators: 1: refunded amount, 2: bunq draft payment id */
-					__( 'bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money.', 'bunq-for-woocommerce' ),
+					__( 'bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money.', 'pay-with-bunq-for-woocommerce' ),
 					wc_price( $amount, array( 'currency' => $order->get_currency() ) ),
 					$refund_payment_id
 				)
@@ -1258,7 +1258,7 @@ class Gateway extends WC_Payment_Gateway {
 				'bunq_refund',
 				sprintf(
 					/* translators: %s: error message from bunq */
-					__( 'bunq refund failed: %s', 'bunq-for-woocommerce' ),
+					__( 'bunq refund failed: %s', 'pay-with-bunq-for-woocommerce' ),
 					Logger::format_error( $exception )
 				)
 			);
@@ -1355,7 +1355,7 @@ class Gateway extends WC_Payment_Gateway {
 			$order->add_order_note(
 				sprintf(
 					/* translators: %s: bunq payment id */
-					__( 'bunq payment %s received', 'bunq-for-woocommerce' ),
+					__( 'bunq payment %s received', 'pay-with-bunq-for-woocommerce' ),
 					$payment['id']
 				)
 			);
@@ -1384,7 +1384,7 @@ class Gateway extends WC_Payment_Gateway {
 				'on-hold',
 				sprintf(
 					/* translators: 1: bunq payment id, 2: amount received, 3: order total */
-					__( 'bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order.', 'bunq-for-woocommerce' ),
+					__( 'bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order.', 'pay-with-bunq-for-woocommerce' ),
 					$unmatched_payment['id'],
 					$unmatched_amount['currency'] . ' ' . $unmatched_amount['value'],
 					$order->get_currency() . ' ' . $order->get_total()
@@ -1406,7 +1406,7 @@ class Gateway extends WC_Payment_Gateway {
 				'cancelled',
 				sprintf(
 					/* translators: 1: bunq payment request id, 2: status reported by bunq */
-					__( 'bunq payment request %1$s is %2$s', 'bunq-for-woocommerce' ),
+					__( 'bunq payment request %1$s is %2$s', 'pay-with-bunq-for-woocommerce' ),
 					$payment_request_id,
 					strtolower( $status )
 				)
@@ -1521,7 +1521,7 @@ class Gateway extends WC_Payment_Gateway {
 			$order->add_order_note(
 				sprintf(
 					/* translators: 1: bunq payment id, 2: amount received */
-					__( 'bunq payment %1$s of %2$s came in, but the order was cancelled. Restore the order or refund the payment.', 'bunq-for-woocommerce' ),
+					__( 'bunq payment %1$s of %2$s came in, but the order was cancelled. Restore the order or refund the payment.', 'pay-with-bunq-for-woocommerce' ),
 					$payment['id'],
 					$payment['amount']['currency'] . ' ' . $payment['amount']['value']
 				)

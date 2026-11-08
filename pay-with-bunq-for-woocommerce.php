@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: bunq for WooCommerce
+ * Plugin Name: Pay with bunq for WooCommerce
  * Description: Accept payments in your WooCommerce shop with just your bunq account.
  * Version: 2.0.1
  * Author: Patrick Kivits
@@ -8,7 +8,7 @@
  * Requires at least: 5.9
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce
- * Text Domain: bunq-for-woocommerce
+ * Text Domain: pay-with-bunq-for-woocommerce
  * Domain Path: /languages
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,6 +19,18 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Another copy is already loaded, typically the GitHub install in wp-content/plugins/bunq-for-woocommerce
+// next to this wordpress.org one. Both share their settings, so the old copy only has to be removed.
+if ( defined( 'BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE' ) ) {
+	add_action(
+		'admin_notices',
+		static function () {
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Pay with bunq for WooCommerce is installed twice. Deactivate and delete the older copy; your settings and the bunq connection are kept.', 'pay-with-bunq-for-woocommerce' ) . '</p></div>';
+		}
+	);
+	return;
+}
 
 define( 'BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
 

@@ -21,3 +21,5 @@
 /phpunit-integration.xml.dist  export-ignore
 /phpcs.xml.dist                export-ignore
 /readme.md                     export-ignore
+/.wordpress-org                export-ignore
+/.wordpress-org/**             export-ignore

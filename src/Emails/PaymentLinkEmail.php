@@ -39,8 +39,8 @@ class PaymentLinkEmail extends WC_Email {
 	public function __construct() {
 		$this->id             = self::ID;
 		$this->customer_email = true;
-		$this->title          = __( 'bunq payment link', 'bunq-for-woocommerce' );
-		$this->description    = __( 'Sent to the customer when you choose "Send bunq payment link to customer" on an unpaid order. Holds the bunq.me link to pay the order with.', 'bunq-for-woocommerce' );
+		$this->title          = __( 'bunq payment link', 'pay-with-bunq-for-woocommerce' );
+		$this->description    = __( 'Sent to the customer when you choose "Send bunq payment link to customer" on an unpaid order. Holds the bunq.me link to pay the order with.', 'pay-with-bunq-for-woocommerce' );
 		$this->template_html  = 'emails/customer-bunq-payment-link.php';
 		$this->template_plain = 'emails/plain/customer-bunq-payment-link.php';
 		$this->template_base  = plugin_dir_path( Plugin::instance()->file() ) . 'templates/';
@@ -58,7 +58,7 @@ class PaymentLinkEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( 'Pay for your {site_title} order #{order_number}', 'bunq-for-woocommerce' );
+		return __( 'Pay for your {site_title} order #{order_number}', 'pay-with-bunq-for-woocommerce' );
 	}
 
 	/**
@@ -67,7 +67,7 @@ class PaymentLinkEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
-		return __( 'Your payment link for order #{order_number}', 'bunq-for-woocommerce' );
+		return __( 'Your payment link for order #{order_number}', 'pay-with-bunq-for-woocommerce' );
 	}
 
 	/**
@@ -76,7 +76,7 @@ class PaymentLinkEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_additional_content() {
-		return __( 'Questions about your order? Just reply to this email.', 'bunq-for-woocommerce' );
+		return __( 'Questions about your order? Just reply to this email.', 'pay-with-bunq-for-woocommerce' );
 	}
 
 	/**

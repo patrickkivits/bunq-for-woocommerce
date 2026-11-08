@@ -78,7 +78,7 @@ final class PaymentDetails {
 			return;
 		}
 
-		add_meta_box( self::META_BOX_ID, __( 'bunq payment', 'bunq-for-woocommerce' ), array( $this, 'render' ), $screen_id, 'side', 'default' );
+		add_meta_box( self::META_BOX_ID, __( 'bunq payment', 'pay-with-bunq-for-woocommerce' ), array( $this, 'render' ), $screen_id, 'side', 'default' );
 	}
 
 	/**
@@ -110,10 +110,10 @@ final class PaymentDetails {
 		$rows       = array();
 
 		if ( '' !== $payment_id ) {
-			$rows[] = array( __( 'Payer', 'bunq-for-woocommerce' ), (string) $order->get_meta( Gateway::META_PAYER_NAME ) );
-			$rows[] = array( __( 'IBAN', 'bunq-for-woocommerce' ), self::format_iban( (string) $order->get_meta( Gateway::META_PAYER_IBAN ) ) );
-			$rows[] = array( __( 'Method', 'bunq-for-woocommerce' ), PaymentMethods::payment_type_label( (string) $order->get_meta( Gateway::META_PAYMENT_TYPE ) ) );
-			$rows[] = array( __( 'Payment ID', 'bunq-for-woocommerce' ), $payment_id );
+			$rows[] = array( __( 'Payer', 'pay-with-bunq-for-woocommerce' ), (string) $order->get_meta( Gateway::META_PAYER_NAME ) );
+			$rows[] = array( __( 'IBAN', 'pay-with-bunq-for-woocommerce' ), self::format_iban( (string) $order->get_meta( Gateway::META_PAYER_IBAN ) ) );
+			$rows[] = array( __( 'Method', 'pay-with-bunq-for-woocommerce' ), PaymentMethods::payment_type_label( (string) $order->get_meta( Gateway::META_PAYMENT_TYPE ) ) );
+			$rows[] = array( __( 'Payment ID', 'pay-with-bunq-for-woocommerce' ), $payment_id );
 		}
 
 		$rows = array_filter(
@@ -124,7 +124,7 @@ final class PaymentDetails {
 		$html = '';
 
 		if ( '' === $payment_id ) {
-			$html .= '<p>' . esc_html__( 'No bunq payment has been received for this order yet.', 'bunq-for-woocommerce' ) . '</p>';
+			$html .= '<p>' . esc_html__( 'No bunq payment has been received for this order yet.', 'pay-with-bunq-for-woocommerce' ) . '</p>';
 		} elseif ( $rows ) {
 			$html .= '<table class="bunq-payment-details" style="width:100%;border-collapse:collapse"><tbody>';
 			foreach ( $rows as $row ) {
@@ -136,7 +136,7 @@ final class PaymentDetails {
 
 		if ( '' !== $url ) {
 			$html .= '<p><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">'
-				. esc_html__( 'View the payment request on bunq.me', 'bunq-for-woocommerce' ) . '</a></p>';
+				. esc_html__( 'View the payment request on bunq.me', 'pay-with-bunq-for-woocommerce' ) . '</a></p>';
 		}
 
 		return $html;
@@ -198,8 +198,8 @@ final class PaymentDetails {
 	 */
 	public function add_export_props( $props, $order ) {
 		if ( $order instanceof WC_Order && Gateway::is_bunq_gateway_id( $order->get_payment_method() ) ) {
-			$props[ Gateway::META_PAYER_NAME ] = __( 'bunq payer name', 'bunq-for-woocommerce' );
-			$props[ Gateway::META_PAYER_IBAN ] = __( 'bunq payer IBAN', 'bunq-for-woocommerce' );
+			$props[ Gateway::META_PAYER_NAME ] = __( 'bunq payer name', 'pay-with-bunq-for-woocommerce' );
+			$props[ Gateway::META_PAYER_IBAN ] = __( 'bunq payer IBAN', 'pay-with-bunq-for-woocommerce' );
 		}
 
 		return $props;

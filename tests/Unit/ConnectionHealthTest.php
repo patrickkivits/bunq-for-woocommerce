@@ -54,7 +54,7 @@ final class ConnectionHealthTest extends TestCase
 
     public function testDeactivatingThePluginRemovesTheCheck()
     {
-        do_action('deactivate_bunq-for-woocommerce/bunq-for-woocommerce.php');
+        do_action('deactivate_pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php');
 
         $this->assertSame(array(ConnectionHealth::CHECK_ACTION), Environment::$unscheduledHooks);
     }
@@ -315,7 +315,7 @@ final class ConnectionHealthTest extends TestCase
 
         $html = ConnectionHealth::system_status_html(Plugin::instance()->gateway(), 1762632000);
 
-        $this->assertStringContainsString('<th colspan="3" data-export-label="bunq for WooCommerce"><h2>bunq for WooCommerce</h2></th>', $html);
+        $this->assertStringContainsString('<th colspan="3" data-export-label="Pay with bunq for WooCommerce"><h2>Pay with bunq for WooCommerce</h2></th>', $html);
         $this->assertRow('Version', Plugin::VERSION, $html);
         $this->assertRow('Mode', 'Live', $html);
         $this->assertRow('Connection', '<mark class="yes"><span class="dashicons dashicons-yes"></span> Connected as Kivits Webshop</mark>', $html);

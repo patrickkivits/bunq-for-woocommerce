@@ -1,14 +1,18 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bunq for WooCommerce\n"
+"Project-Id-Version: Pay with bunq for WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/patrickkivits/bunq-for-woocommerce/issues\n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Domain: bunq-for-woocommerce\n"
+"X-Domain: pay-with-bunq-for-woocommerce\n"
+
+#: pay-with-bunq-for-woocommerce.php:29
+msgid "Pay with bunq for WooCommerce is installed twice. Deactivate and delete the older copy; your settings and the bunq connection are kept."
+msgstr "Pay with bunq for WooCommerce is twee keer geïnstalleerd. Deactiveer en verwijder de oudere kopie; je instellingen en de koppeling met bunq blijven behouden."
 
 #: src/Blocks/CheckoutIntegration.php:129
 msgid "Payment method"
@@ -78,8 +82,8 @@ msgid "The connection with bunq stopped working, so payments with bunq fail. Con
 msgstr "De koppeling met bunq werkt niet meer, daarom mislukken betalingen met bunq. Koppel opnieuw op de bunq-instellingenpagina. Dit gebeurt als de toegang in de bunq-app is verwijderd of als de winkel nu vanaf een ander IP-adres verbinding maakt."
 
 #: src/Gateway/ConnectionHealth.php:352 src/Gateway/ConnectionHealth.php:442
-msgid "bunq for WooCommerce"
-msgstr "bunq for WooCommerce"
+msgid "Pay with bunq for WooCommerce"
+msgstr "Pay with bunq for WooCommerce"
 
 #. translators: %s: error message from bunq
 #: src/Gateway/ConnectionHealth.php:357 src/Gateway/SettingsPage.php:206

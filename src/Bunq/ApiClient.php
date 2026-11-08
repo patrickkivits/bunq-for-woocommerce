@@ -33,7 +33,7 @@ class ApiClient {
 	/**
 	 * The device description bunq shows for the API context.
 	 */
-	const DEVICE_DESCRIPTION = 'bunq for WooCommerce';
+	const DEVICE_DESCRIPTION = 'Pay with bunq for WooCommerce';
 
 	/**
 	 * The notification category of bunq.me payment requests.
@@ -383,14 +383,14 @@ class ApiClient {
 	 */
 	public function get_bank_accounts( $api_context ) {
 		if ( ! $api_context ) {
-			return array( '' => __( 'Connect your bunq account first', 'bunq-for-woocommerce' ) );
+			return array( '' => __( 'Connect your bunq account first', 'pay-with-bunq-for-woocommerce' ) );
 		}
 
 		try {
-			$bank_accounts = array( '' => __( 'Select a bank account', 'bunq-for-woocommerce' ) );
+			$bank_accounts = array( '' => __( 'Select a bank account', 'pay-with-bunq-for-woocommerce' ) );
 			$account_types = array(
 				'monetary-account-bank'  => '',
-				'monetary-account-joint' => ' ' . __( '(Joint)', 'bunq-for-woocommerce' ),
+				'monetary-account-joint' => ' ' . __( '(Joint)', 'pay-with-bunq-for-woocommerce' ),
 			);
 
 			foreach ( $account_types as $endpoint => $suffix ) {
@@ -415,7 +415,7 @@ class ApiClient {
 			return array(
 				'' => sprintf(
 					/* translators: %s: error message from bunq */
-					__( 'Error: %s', 'bunq-for-woocommerce' ),
+					__( 'Error: %s', 'pay-with-bunq-for-woocommerce' ),
 					Logger::format_error( $exception )
 				),
 			);
@@ -648,7 +648,7 @@ class ApiClient {
 
 		$headers = array(
 			'Cache-Control'      => 'no-cache',
-			'User-Agent'         => 'bunq-for-woocommerce/' . Plugin::VERSION,
+			'User-Agent'         => 'pay-with-bunq-for-woocommerce/' . Plugin::VERSION,
 			'X-Bunq-Language'    => 'en_US',
 			'X-Bunq-Region'      => 'nl_NL',
 			'X-Bunq-Geolocation' => '0 0 0 0 000',

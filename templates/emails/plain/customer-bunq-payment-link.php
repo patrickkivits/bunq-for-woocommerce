@@ -24,11 +24,11 @@ echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=================================================================\n\n";
 
 /* translators: %s: customer's first name */
-echo sprintf( esc_html__( 'Hi %s,', 'bunq-for-woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
+echo sprintf( esc_html__( 'Hi %s,', 'pay-with-bunq-for-woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 
 echo sprintf(
 	/* translators: 1: order number, 2: order total */
-	esc_html__( 'You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact.', 'bunq-for-woocommerce' ),
+	esc_html__( 'You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact.', 'pay-with-bunq-for-woocommerce' ),
 	esc_html( $order->get_order_number() ),
 	esc_html( html_entity_decode( wp_strip_all_tags( $order->get_formatted_order_total() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) )
 ) . "\n\n";

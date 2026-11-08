@@ -82,12 +82,12 @@ install_dependencies() {
 write_agent_guidance() {
   mkdir -p "$HOME/.config/amp"
   cat > "$HOME/.config/amp/AGENTS.md" <<'MD'
-# Orb notes for bunq-for-woocommerce
+# Orb notes for pay-with-bunq-for-woocommerce
 
 - PHP 8.2 (Debian) and Composer are installed; dev dependencies live in `tests/vendor` (`composer install --working-dir=tests`).
 - The plugin's own dependencies live in the root `vendor/`, which is not committed: `composer install --no-dev`
   restores it. Never add dev dependencies to the root `composer.json`; the release zip ships the root `vendor/`.
-- `.github/scripts/build-plugin.sh HEAD <dir>` builds the plugin as released (zip contents) in `<dir>/bunq-for-woocommerce`.
+- `.github/scripts/build-plugin.sh HEAD <dir>` builds the plugin as released (zip contents) in `<dir>/pay-with-bunq-for-woocommerce`.
 - MariaDB runs locally (started by `.agents/resume`; `sudo service mariadb start` if it is down) with the
   `wordpress_tests` database and root/root on 127.0.0.1, matching the defaults in `tests/wp-tests-config.php`.
 - Unit tests: `tests/vendor/bin/phpunit` (add `--exclude-group slow` while iterating).

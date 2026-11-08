@@ -50,7 +50,7 @@ if ( empty( $credentials['test_api_key'] ) ) {
 			'headers' => array(
 				'Content-Type'             => 'application/json',
 				'Cache-Control'            => 'no-cache',
-				'User-Agent'               => 'bunq-for-woocommerce-demo',
+				'User-Agent'               => 'pay-with-bunq-for-woocommerce-demo',
 				'X-Bunq-Client-Request-Id' => wp_generate_uuid4(),
 				'X-Bunq-Geolocation'       => '0 0 0 0 000',
 				'X-Bunq-Language'          => 'en_US',

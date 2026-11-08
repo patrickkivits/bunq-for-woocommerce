@@ -48,9 +48,9 @@ fi
 wp core update-db --quiet
 
 mkdir -p "$site/wp-content/plugins" "$site/wp-content/themes"
-ln -sfn "$repo" "$site/wp-content/plugins/bunq-for-woocommerce"
+ln -sfn "$repo" "$site/wp-content/plugins/pay-with-bunq-for-woocommerce"
 ln -sfn "$repo/tests/wp-content/plugins/woocommerce" "$site/wp-content/plugins/woocommerce"
-wp plugin activate woocommerce bunq-for-woocommerce --quiet
+wp plugin activate woocommerce pay-with-bunq-for-woocommerce --quiet
 
 # The core download leaves out the themes; without one the shop pages stay blank.
 # Downloaded with curl: downloads.wordpress.org refuses WordPress' own requests from this localhost site.

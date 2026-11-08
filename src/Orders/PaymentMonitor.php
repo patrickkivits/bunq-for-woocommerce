@@ -288,7 +288,7 @@ final class PaymentMonitor {
 			$order->add_order_note(
 				sprintf(
 					/* translators: %s: bunq payment request id */
-					__( 'bunq payment request %s cancelled', 'bunq-for-woocommerce' ),
+					__( 'bunq payment request %s cancelled', 'pay-with-bunq-for-woocommerce' ),
 					$payment_request_id
 				)
 			);

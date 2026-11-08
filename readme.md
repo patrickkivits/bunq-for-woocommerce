@@ -1,4 +1,4 @@
-# bunq for WooCommerce
+# Pay with bunq for WooCommerce
 
 > `readme.txt` is the readme for the WordPress.org plugin directory; keep its `Stable tag` equal to the plugin version and its changelog up to date with every release.
 
@@ -38,14 +38,16 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 ## Installation
 
-1. Download `bunq-for-woocommerce.zip` from the [latest release](https://github.com/patrickkivits/bunq-for-woocommerce/releases/latest/download/bunq-for-woocommerce.zip).
+1. Download `pay-with-bunq-for-woocommerce.zip` from the [latest release](https://github.com/patrickkivits/bunq-for-woocommerce/releases/latest/download/pay-with-bunq-for-woocommerce.zip).
 2. In your WordPress admin panel, navigate to **Plugins** > **Add New**.
 3. Click Upload Plugin.
 4. Upload the zip file that you downloaded.
 
 ### Updating
 
-Upload the new `bunq-for-woocommerce.zip` the same way. WordPress recognises the installed plugin and offers **Replace current with uploaded**, which keeps your settings.
+Upload the new `pay-with-bunq-for-woocommerce.zip` the same way. WordPress recognises the installed plugin and offers **Replace current with uploaded**, which keeps your settings.
+
+Installed before the plugin was renamed (version 2.1.0)? Its folder was `bunq-for-woocommerce`, so WordPress installs the new zip next to it instead of replacing it. Install and activate the new one, then deactivate and delete the old *bunq for WooCommerce* copy. Your settings and the bunq connection are kept.
 
 ## Configuration
 
@@ -84,7 +86,7 @@ Live mode and the sandbox each have their own OAuth client and connection; the *
 
 Every hour the plugin checks that bunq still accepts the connection of the active mode and that the selected bank account can receive payments. When bunq refuses it (the access was removed in the bunq app, the shop now connects from another IP address, or the bank account was closed), shop managers see a warning with bunq's answer on every admin page until the connection works again; click **Connect again** on the settings page to fix it. When bunq cannot be reached at all, the warning only appears after three checks in a row failed. **Check again** in the warning runs the check right away.
 
-**WooCommerce** > **Status** has a **bunq for WooCommerce** section with the mode, the connection, the outcome of the last check and when the next one runs. It is part of the system report, so include that report when asking for support.
+**WooCommerce** > **Status** has a **Pay with bunq for WooCommerce** section with the mode, the connection, the outcome of the last check and when the next one runs. It is part of the system report, so include that report when asking for support.
 
 The bank account list is cached for an hour. Click **Refresh bank accounts** below the bank account select after adding an account in the bunq app.
 
@@ -129,7 +131,7 @@ Some payment methods provided by bunq.me may take longer than that to complete. 
 
 ## Translations
 
-The plugin ships with Dutch (`nl_NL`), French (`fr_FR`) and German (`de_DE`) translations. To add a language, translate `languages/bunq-for-woocommerce.pot` with a tool such as Poedit and save the `.po` and `.mo` files as `languages/bunq-for-woocommerce-<locale>.po`. After changing strings in the code, regenerate the template with:
+The plugin ships with Dutch (`nl_NL`), French (`fr_FR`) and German (`de_DE`) translations. To add a language, translate `languages/pay-with-bunq-for-woocommerce.pot` with a tool such as Poedit and save the `.po` and `.mo` files as `languages/pay-with-bunq-for-woocommerce-<locale>.po`. After changing strings in the code, regenerate the template with:
 
 ```
 php .github/scripts/make-pot.php
@@ -139,7 +141,7 @@ The bunq.me payment page itself is hosted by bunq and follows the language of th
 
 ## Development
 
-The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForWooCommerce`), loaded through the Composer autoloader (PSR-4). `bunq-for-woocommerce.php` only defines the plugin file constant, loads the autoloader and boots `Plugin`, which registers every hook:
+The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForWooCommerce`), loaded through the Composer autoloader (PSR-4). `pay-with-bunq-for-woocommerce.php` only defines the plugin file constant, loads the autoloader and boots `Plugin`, which registers every hook:
 
 | Class | Responsibility |
 | --- | --- |
@@ -167,7 +169,7 @@ composer install --no-dev
 composer install --working-dir=tests
 ```
 
-The release workflow builds the zip with the dependencies included; `.github/scripts/build-plugin.sh HEAD build` builds the same plugin folder locally in `build/bunq-for-woocommerce/`.
+The release workflow builds the zip with the dependencies included; `.github/scripts/build-plugin.sh HEAD build` builds the same plugin folder locally in `build/pay-with-bunq-for-woocommerce/`.
 
 There are two test suites:
 
