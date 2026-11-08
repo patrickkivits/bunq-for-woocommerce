@@ -38,7 +38,7 @@ final class RequestThrottlerConfiguration {
 	 *
 	 * @var array
 	 */
-	private $limitations;
+	private readonly array $limitations;
 
 	/**
 	 * Constructor.

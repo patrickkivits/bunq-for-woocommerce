@@ -29,7 +29,7 @@ final class OrderLock {
 	 *
 	 * @var string[]
 	 */
-	private static $held = array();
+	private static array $held = array();
 
 	/**
 	 * Take the lock of an order.

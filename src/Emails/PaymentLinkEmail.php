@@ -31,7 +31,7 @@ class PaymentLinkEmail extends WC_Email {
 	 *
 	 * @var string
 	 */
-	public $payment_url = '';
+	public string $payment_url = '';
 
 	/**
 	 * Constructor.

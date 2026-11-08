@@ -69,28 +69,28 @@ class ApiClient {
 	 *
 	 * @var RequestThrottler
 	 */
-	private $throttler;
+	private readonly RequestThrottler $throttler;
 
 	/**
 	 * Sends the HTTP requests.
 	 *
 	 * @var ClientInterface
 	 */
-	private $http;
+	private readonly ClientInterface $http;
 
 	/**
 	 * The loaded API context, null until one is created or loaded.
 	 *
 	 * @var array|null
 	 */
-	private $context = null;
+	private ?array $context = null;
 
 	/**
 	 * The default monetary account of the loaded context, looked up when a call needs it.
 	 *
 	 * @var int|null
 	 */
-	private $primary_monetary_account_id = null;
+	private ?int $primary_monetary_account_id = null;
 
 	/**
 	 * Stores the loaded API context when its session changes, null when the caller does not store it.
@@ -104,7 +104,7 @@ class ApiClient {
 	 *
 	 * @var int
 	 */
-	private $call_count = 0;
+	private int $call_count = 0;
 
 	/**
 	 * Constructor.

@@ -19,14 +19,14 @@ final class Limitation {
 	 *
 	 * @var int
 	 */
-	public $number_of_allowed_requests;
+	public readonly int $number_of_allowed_requests;
 
 	/**
 	 * The sample size in number of seconds.
 	 *
 	 * @var int
 	 */
-	public $sample_size;
+	public readonly int $sample_size;
 
 	/**
 	 * Constructor.

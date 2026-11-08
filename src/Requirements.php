@@ -26,20 +26,11 @@ final class Requirements {
 	const MIN_PHP_VERSION = '8.1.0';
 
 	/**
-	 * The main plugin file.
-	 *
-	 * @var string
-	 */
-	private $plugin_file;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $plugin_file The main plugin file.
 	 */
-	public function __construct( $plugin_file ) {
-		$this->plugin_file = $plugin_file;
-	}
+	public function __construct( private readonly string $plugin_file ) {}
 
 	/**
 	 * The PHP extensions the bunq API client needs.

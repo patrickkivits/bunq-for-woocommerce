@@ -51,51 +51,42 @@ final class Plugin {
 	 *
 	 * @var Plugin|null
 	 */
-	private static $instance = null;
-
-	/**
-	 * The main plugin file.
-	 *
-	 * @var string
-	 */
-	private $file;
+	private static ?self $instance = null;
 
 	/**
 	 * The bunq API, shared so its rate limiting covers every call in the request.
 	 *
 	 * @var ApiClient|null
 	 */
-	private $api_client = null;
+	private ?ApiClient $api_client = null;
 
 	/**
 	 * Payment confirmation outside the bunq callback.
 	 *
 	 * @var PaymentMonitor|null
 	 */
-	private $payment_monitor = null;
+	private ?PaymentMonitor $payment_monitor = null;
 
 	/**
 	 * The check of the connection with bunq.
 	 *
 	 * @var ConnectionHealth|null
 	 */
-	private $connection_health = null;
+	private ?ConnectionHealth $connection_health = null;
 
 	/**
 	 * The bunq payment details on the order screen.
 	 *
 	 * @var PaymentDetails|null
 	 */
-	private $payment_details = null;
+	private ?PaymentDetails $payment_details = null;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param string $file The main plugin file.
 	 */
-	private function __construct( $file ) {
-		$this->file = $file;
-	}
+	private function __construct( private readonly string $file ) {}
 
 	/**
 	 * The plugin.

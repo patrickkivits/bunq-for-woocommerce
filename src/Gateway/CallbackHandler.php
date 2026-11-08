@@ -39,20 +39,11 @@ final class CallbackHandler {
 	const THROTTLE_TRANSIENT_PREFIX = 'bunq_for_woocommerce_callback_';
 
 	/**
-	 * The gateway that checks the payment status.
-	 *
-	 * @var Gateway
-	 */
-	private $gateway;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Gateway $gateway The gateway that checks the payment status.
 	 */
-	public function __construct( Gateway $gateway ) {
-		$this->gateway = $gateway;
-	}
+	public function __construct( private readonly Gateway $gateway ) {}
 
 	/**
 	 * The callback URL bunq calls.

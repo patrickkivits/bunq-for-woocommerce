@@ -36,20 +36,11 @@ final class PaymentDetails {
 	const FETCH_FAILED_TRANSIENT = 'bunq_for_woocommerce_details_failed_';
 
 	/**
-	 * Hands out the gateway WooCommerce registered.
-	 *
-	 * @var Plugin
-	 */
-	private $plugin;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Plugin $plugin Hands out the gateway WooCommerce registered.
 	 */
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
-	}
+	public function __construct( private readonly Plugin $plugin ) {}
 
 	/**
 	 * Hook into WordPress and WooCommerce.

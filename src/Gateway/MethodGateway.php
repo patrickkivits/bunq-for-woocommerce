@@ -28,7 +28,7 @@ class MethodGateway extends Gateway {
 	 *
 	 * @var array See PaymentMethods::all().
 	 */
-	protected $payment_method;
+	protected readonly array $payment_method;
 
 	/**
 	 * Constructor.

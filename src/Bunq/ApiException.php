@@ -21,14 +21,14 @@ class ApiException extends RuntimeException {
 	 *
 	 * @var string
 	 */
-	private $response_id;
+	private readonly string $response_id;
 
 	/**
 	 * Whether bunq refused a new session for the API context, see is_context_rejected().
 	 *
 	 * @var bool
 	 */
-	private $context_rejected;
+	private readonly bool $context_rejected;
 
 	/**
 	 * Constructor.

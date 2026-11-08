@@ -26,7 +26,7 @@ final class Logger {
 	 *
 	 * @var string[]
 	 */
-	private static $secrets = array();
+	private static array $secrets = array();
 
 	/**
 	 * Keep a value out of everything this class logs or formats. Applies for the rest of the request.

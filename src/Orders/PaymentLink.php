@@ -35,20 +35,11 @@ final class PaymentLink {
 	const EMAIL_KEY = 'WC_Email_Bunq_Payment_Link';
 
 	/**
-	 * Hands out the gateway WooCommerce registered.
-	 *
-	 * @var Plugin
-	 */
-	private $plugin;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Plugin $plugin Hands out the gateway WooCommerce registered.
 	 */
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
-	}
+	public function __construct( private readonly Plugin $plugin ) {}
 
 	/**
 	 * Hook into WooCommerce.

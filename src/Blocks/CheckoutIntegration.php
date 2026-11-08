@@ -42,7 +42,7 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 	 *
 	 * @var Gateway
 	 */
-	private $gateway;
+	private ?Gateway $gateway = null;
 
 	/**
 	 * Constructor.

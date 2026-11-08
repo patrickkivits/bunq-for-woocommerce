@@ -17,27 +17,18 @@ defined( 'ABSPATH' ) || exit;
 final class RequestThrottler {
 
 	/**
-	 * The rate limits.
-	 *
-	 * @var RequestThrottlerConfiguration
-	 */
-	private $configuration;
-
-	/**
 	 * The timestamps of the requests sent per endpoint key and request method.
 	 *
 	 * @var array
 	 */
-	private $submitted_request_timestamps = array();
+	private array $submitted_request_timestamps = array();
 
 	/**
 	 * Constructor.
 	 *
 	 * @param RequestThrottlerConfiguration $configuration The rate limits.
 	 */
-	public function __construct( RequestThrottlerConfiguration $configuration ) {
-		$this->configuration = $configuration;
-	}
+	public function __construct( private readonly RequestThrottlerConfiguration $configuration ) {}
 
 	/**
 	 * Wait until a request to the endpoint stays within bunq's rate limit, and register it.

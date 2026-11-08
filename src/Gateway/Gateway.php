@@ -135,14 +135,14 @@ class Gateway extends WC_Payment_Gateway {
 	 *
 	 * @var ApiClient
 	 */
-	protected $api;
+	protected ApiClient $api;
 
 	/**
 	 * The bunq OAuth authorization.
 	 *
 	 * @var OAuthClient
 	 */
-	protected $oauth;
+	protected OAuthClient $oauth;
 
 	/**
 	 * Constructor. WooCommerce creates the gateway without arguments.
