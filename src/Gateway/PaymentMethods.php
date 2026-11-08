@@ -95,9 +95,7 @@ final class PaymentMethods {
 
 		return array_filter(
 			$methods,
-			function ( $method ) use ( $total ) {
-				return $method['min'] <= $total && ( null === $method['max'] || $method['max'] >= $total );
-			}
+			fn( $method ) => $method['min'] <= $total && ( null === $method['max'] || $method['max'] >= $total )
 		);
 	}
 
@@ -110,7 +108,7 @@ final class PaymentMethods {
 	public static function bunqme_name( $id ) {
 		$names = array_column( self::all(), 'bunqme', 'id' );
 
-		return isset( $names[ $id ] ) ? $names[ $id ] : null;
+		return $names[ $id ] ?? null;
 	}
 
 	/**
@@ -176,7 +174,7 @@ final class PaymentMethods {
 		);
 
 		foreach ( $labels as $needle => $method_id ) {
-			if ( $type === $needle || false !== strpos( $type, $needle ) ) {
+			if ( str_contains( $type, $needle ) ) {
 				$method = self::get( $method_id );
 
 				return $method['description'];
@@ -227,8 +225,8 @@ final class PaymentMethods {
 		usort(
 			$methods,
 			function ( $a, $b ) use ( $position ) {
-				$a = isset( $position[ $a['id'] ] ) ? $position[ $a['id'] ] : PHP_INT_MAX;
-				$b = isset( $position[ $b['id'] ] ) ? $position[ $b['id'] ] : PHP_INT_MAX;
+				$a = $position[ $a['id'] ] ?? PHP_INT_MAX;
+				$b = $position[ $b['id'] ] ?? PHP_INT_MAX;
 
 				return $a === $b ? 0 : ( $a < $b ? -1 : 1 );
 			}

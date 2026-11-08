@@ -127,9 +127,7 @@ final class PaymentDetails {
 
 		$rows = array_filter(
 			$rows,
-			function ( $row ) {
-				return '' !== $row[1];
-			}
+			fn( $row ) => '' !== $row[1]
 		);
 
 		$html = '';

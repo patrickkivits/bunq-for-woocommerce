@@ -164,7 +164,7 @@ class Gateway extends WC_Payment_Gateway {
 
 		// "Refresh bank accounts" button on the settings page: drop the cached list before the fields are built.
 		if ( is_admin() && isset( $_GET[ self::REFRESH_ACCOUNTS_ACTION ] ) && current_user_can( 'manage_woocommerce' )
-			&& wp_verify_nonce( sanitize_key( wp_unslash( isset( $_GET['_wpnonce'] ) ? $_GET['_wpnonce'] : '' ) ), self::REFRESH_ACCOUNTS_ACTION ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_key().
+			&& wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), self::REFRESH_ACCOUNTS_ACTION ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_key().
 		) {
 			delete_transient( self::BANK_ACCOUNTS_TRANSIENT );
 		}
@@ -301,8 +301,8 @@ class Gateway extends WC_Payment_Gateway {
 				$this->oauth_client_secret,
 				$oauth_redirect_uri,
 				$this->testmode,
-				isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '',
-				isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : ''
+				sanitize_text_field( wp_unslash( $_GET['code'] ?? '' ) ),
+				sanitize_text_field( wp_unslash( $_GET['state'] ?? '' ) )
 			);
 			// phpcs:enable
 
@@ -477,7 +477,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function generate_title_html( $key, $data ) {
-		$view = isset( $data['view'] ) ? $data['view'] : '';
+		$view = $data['view'] ?? '';
 
 		if ( 'connection' === $view ) {
 			$testmode = 'yes' === $this->get_option( 'testmode' );
@@ -518,7 +518,7 @@ class Gateway extends WC_Payment_Gateway {
 	public function get_connection( $mode ) {
 		$prefix      = 'sandbox' === $mode ? 'test_' : '';
 		$credentials = $this->get_credentials();
-		$api_context = isset( $credentials[ $prefix . 'api_context' ] ) ? (string) $credentials[ $prefix . 'api_context' ] : '';
+		$api_context = (string) ( $credentials[ $prefix . 'api_context' ] ?? '' );
 		$active      = self::mode( 'yes' === $this->get_option( 'testmode' ) ) === $mode;
 		$problem     = '' !== $api_context && $active ? ConnectionHealth::problem( $this ) : null;
 
@@ -549,7 +549,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * Handle the "Disconnect" link and send the merchant back to the settings page. Ends the request.
 	 */
 	public function handle_disconnect() {
-		$mode = isset( $_GET[ self::DISCONNECT_ACTION ] ) ? sanitize_key( wp_unslash( $_GET[ self::DISCONNECT_ACTION ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
+		$mode = sanitize_key( wp_unslash( $_GET[ self::DISCONNECT_ACTION ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
 
 		if ( ! in_array( $mode, array( 'live', 'sandbox' ), true ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'bunq-for-woocommerce' ), 403 );
@@ -748,10 +748,10 @@ class Gateway extends WC_Payment_Gateway {
 		if ( in_array( $key, self::CREDENTIAL_KEYS, true ) ) {
 			$credentials = $this->get_credentials();
 
-			return isset( $credentials[ $key ] ) ? $credentials[ $key ] : null;
+			return $credentials[ $key ] ?? null;
 		}
 
-		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : null;
+		return $this->settings[ $key ] ?? null;
 	}
 
 	/**
@@ -807,7 +807,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function generate_password_html( $key, $data ) {
-		$saved = isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : '';
+		$saved = $this->settings[ $key ] ?? '';
 
 		if ( '' !== (string) $saved ) {
 			$data['placeholder'] = '••••••••••••••••';
@@ -959,9 +959,7 @@ class Gateway extends WC_Payment_Gateway {
 
 		try {
 			return $this->call_bunq(
-				function () {
-					return $this->api->get_bank_accounts( true );
-				}
+				fn() => $this->api->get_bank_accounts( true )
 			);
 		} catch ( Throwable $exception ) {
 			Logger::log( $exception );
@@ -1089,15 +1087,13 @@ class Gateway extends WC_Payment_Gateway {
 	 */
 	private function create_order_payment_request( $order ) {
 		$payment_request = $this->call_bunq(
-			function () use ( $order ) {
-				return $this->api->create_payment_request(
-					$order->get_total(),
-					$order->get_currency(),
-					'#' . $order->get_order_number(),
-					$this->get_return_url( $order ),
-					$this->get_monetary_account_bank_id()
-				);
-			}
+			fn() => $this->api->create_payment_request(
+				$order->get_total(),
+				$order->get_currency(),
+				'#' . $order->get_order_number(),
+				$this->get_return_url( $order ),
+				$this->get_monetary_account_bank_id()
+			)
 		);
 
 		if ( ! $payment_request || empty( $payment_request['id'] ) || empty( $payment_request['url'] ) ) {
@@ -1147,9 +1143,7 @@ class Gateway extends WC_Payment_Gateway {
 		if ( $payment_request_id && ! $order->get_meta( self::META_PAYMENT_REQUEST_STATUS ) ) {
 			$monetary_account_id = $this->get_order_monetary_account_id( $order );
 			$payment_request     = $this->call_bunq(
-				function () use ( $payment_request_id, $monetary_account_id ) {
-					return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
-				}
+				fn() => $this->api->get_payment_request( $payment_request_id, $monetary_account_id )
 			);
 
 			// The customer paid the earlier request: record that instead of asking for the money again.
@@ -1160,11 +1154,11 @@ class Gateway extends WC_Payment_Gateway {
 				);
 			}
 
-			$status = isset( $payment_request['status'] ) ? (string) $payment_request['status'] : '';
+			$status = (string) ( $payment_request['status'] ?? '' );
 
 			// Still open (bunq reports open requests as ACTIVE or WAITING_FOR_PAYMENT).
 			if ( ! in_array( $status, array( 'CANCELLED', 'EXPIRED' ), true ) ) {
-				$amount = isset( $payment_request['bunqme_tab_entry']['amount_inquired'] ) ? $payment_request['bunqme_tab_entry']['amount_inquired'] : null;
+				$amount = $payment_request['bunqme_tab_entry']['amount_inquired'] ?? null;
 
 				if ( ! empty( $payment_request['bunqme_tab_share_url'] ) && isset( $amount['value'], $amount['currency'] )
 					&& $amount['currency'] === $order->get_currency() && Money::amounts_match( $amount['value'], $order->get_total() )
@@ -1219,11 +1213,9 @@ class Gateway extends WC_Payment_Gateway {
 			$monetary_account_id = $this->get_order_monetary_account_id( $order );
 
 			$payment = $this->call_bunq(
-				function () use ( $payment_id, $monetary_account_id ) {
-					return $this->api->get_payment( $payment_id, $monetary_account_id );
-				}
+				fn() => $this->api->get_payment( $payment_id, $monetary_account_id )
 			);
-			$iban    = isset( $payment['counterparty_alias']['iban'] ) ? $payment['counterparty_alias']['iban'] : null;
+			$iban    = $payment['counterparty_alias']['iban'] ?? null;
 
 			if ( ! $iban ) {
 				return new WP_Error( 'bunq_refund', __( 'The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead.', 'bunq-for-woocommerce' ) );
@@ -1239,15 +1231,13 @@ class Gateway extends WC_Payment_Gateway {
 				$description .= ': ' . $reason;
 			}
 
-			$account_holder = isset( $payment['counterparty_alias']['display_name'] ) ? $payment['counterparty_alias']['display_name'] : '';
+			$account_holder = $payment['counterparty_alias']['display_name'] ?? '';
 			if ( ! $account_holder ) {
 				$account_holder = $order->get_formatted_billing_full_name();
 			}
 
 			$refund_payment_id = $this->call_bunq(
-				function () use ( $amount, $order, $iban, $account_holder, $description, $monetary_account_id ) {
-					return $this->api->create_refund( (float) $amount, $order->get_currency(), $iban, $account_holder, $description, $monetary_account_id );
-				}
+				fn() => $this->api->create_refund( (float) $amount, $order->get_currency(), $iban, $account_holder, $description, $monetary_account_id )
 			);
 
 			$order->add_order_note(
@@ -1323,9 +1313,7 @@ class Gateway extends WC_Payment_Gateway {
 
 			$monetary_account_id = $this->get_order_monetary_account_id( $order );
 			$payment_request     = $this->call_bunq(
-				function () use ( $payment_request_id, $monetary_account_id ) {
-					return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
-				}
+				fn() => $this->api->get_payment_request( $payment_request_id, $monetary_account_id )
 			);
 
 			return $this->apply_payment_request( $order, $payment_request_id, $payment_request );
@@ -1345,8 +1333,8 @@ class Gateway extends WC_Payment_Gateway {
 	private function apply_payment_request( $order, $payment_request_id, array $payment_request ) {
 		$unmatched_payment = null;
 
-		foreach ( isset( $payment_request['result_inquiries'] ) ? (array) $payment_request['result_inquiries'] : array() as $result_inquiry ) {
-			$payment = isset( $result_inquiry['payment'] ) ? $result_inquiry['payment'] : null;
+		foreach ( (array) ( $payment_request['result_inquiries'] ?? array() ) as $result_inquiry ) {
+			$payment = $result_inquiry['payment'] ?? null;
 
 			if ( ! isset( $payment['id'], $payment['amount']['value'], $payment['amount']['currency'] ) ) {
 				continue;
@@ -1406,7 +1394,7 @@ class Gateway extends WC_Payment_Gateway {
 			return 'on-hold';
 		}
 
-		$status = isset( $payment_request['status'] ) ? (string) $payment_request['status'] : '';
+		$status = (string) ( $payment_request['status'] ?? '' );
 
 		if ( in_array( $status, array( 'CANCELLED', 'EXPIRED' ), true ) ) {
 			Logger::log( 'bunqme-tab ' . $payment_request_id . ' is ' . $status . ', cancelling order #' . $order->get_order_number(), 'info' );
@@ -1441,8 +1429,8 @@ class Gateway extends WC_Payment_Gateway {
 	public static function record_payment_details( $order, array $payment, array $payment_request = array() ) {
 		$counterparty = isset( $payment['counterparty_alias'] ) && is_array( $payment['counterparty_alias'] ) ? $payment['counterparty_alias'] : array();
 
-		$order->update_meta_data( self::META_PAYER_NAME, isset( $counterparty['display_name'] ) ? sanitize_text_field( (string) $counterparty['display_name'] ) : '' );
-		$order->update_meta_data( self::META_PAYER_IBAN, isset( $counterparty['iban'] ) ? sanitize_text_field( (string) $counterparty['iban'] ) : '' );
+		$order->update_meta_data( self::META_PAYER_NAME, sanitize_text_field( (string) ( $counterparty['display_name'] ?? '' ) ) );
+		$order->update_meta_data( self::META_PAYER_IBAN, sanitize_text_field( (string) ( $counterparty['iban'] ?? '' ) ) );
 		// "UNKNOWN" rather than empty, so PaymentDetails does not ask bunq again for an order whose details are known.
 		$order->update_meta_data( self::META_PAYMENT_TYPE, ! empty( $payment['type'] ) ? sanitize_text_field( (string) $payment['type'] ) : 'UNKNOWN' );
 
@@ -1469,12 +1457,10 @@ class Gateway extends WC_Payment_Gateway {
 
 		// The payment request holds the payment as well as its share URL, so one call is enough.
 		$payment_request = $this->call_bunq(
-			function () use ( $payment_request_id, $monetary_account_id ) {
-				return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
-			}
+			fn() => $this->api->get_payment_request( $payment_request_id, $monetary_account_id )
 		);
 
-		foreach ( isset( $payment_request['result_inquiries'] ) ? (array) $payment_request['result_inquiries'] : array() as $result_inquiry ) {
+		foreach ( (array) ( $payment_request['result_inquiries'] ?? array() ) as $result_inquiry ) {
 			if ( isset( $result_inquiry['payment']['id'] ) && intval( $result_inquiry['payment']['id'] ) === $payment_id ) {
 				self::record_payment_details( $order, $result_inquiry['payment'], $payment_request );
 				$order->save();
@@ -1516,13 +1502,11 @@ class Gateway extends WC_Payment_Gateway {
 		$monetary_account_id = $this->get_order_monetary_account_id( $order );
 
 		$payment_request = $this->call_bunq(
-			function () use ( $payment_request_id, $monetary_account_id ) {
-				return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
-			}
+			fn() => $this->api->get_payment_request( $payment_request_id, $monetary_account_id )
 		);
 
-		foreach ( isset( $payment_request['result_inquiries'] ) ? (array) $payment_request['result_inquiries'] : array() as $result_inquiry ) {
-			$payment = isset( $result_inquiry['payment'] ) ? $result_inquiry['payment'] : null;
+		foreach ( (array) ( $payment_request['result_inquiries'] ?? array() ) as $result_inquiry ) {
+			$payment = $result_inquiry['payment'] ?? null;
 
 			if ( ! isset( $payment['id'], $payment['amount']['value'], $payment['amount']['currency'] ) ) {
 				continue;

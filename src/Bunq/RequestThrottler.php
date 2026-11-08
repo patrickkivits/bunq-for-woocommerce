@@ -89,9 +89,7 @@ final class RequestThrottler {
 		$this->submitted_request_timestamps[ $endpoint_key ][ $request_method ] = array_values(
 			array_filter(
 				$this->submitted_request_timestamps[ $endpoint_key ][ $request_method ],
-				function ( $timestamp ) use ( $threshold ) {
-					return $timestamp >= $threshold;
-				}
+				fn( $timestamp ) => $timestamp >= $threshold
 			)
 		);
 

@@ -149,7 +149,7 @@ class MethodGateway extends Gateway {
 		return isset( $settings['enabled'], $settings['separate_gateways'] )
 			&& 'yes' === $settings['enabled']
 			&& 'yes' === $settings['separate_gateways']
-			&& $this->is_allowed( PaymentMethods::allowed( isset( $settings['enabled_payment_methods'] ) ? $settings['enabled_payment_methods'] : null ) );
+			&& $this->is_allowed( PaymentMethods::allowed( $settings['enabled_payment_methods'] ?? null ) );
 	}
 
 	/**
@@ -197,7 +197,7 @@ class MethodGateway extends Gateway {
 	 */
 	public function with_enabled( array $settings, $enable ) {
 		$all     = array_column( PaymentMethods::all(), 'id' );
-		$saved   = isset( $settings['enabled_payment_methods'] ) ? $settings['enabled_payment_methods'] : null;
+		$saved   = $settings['enabled_payment_methods'] ?? null;
 		$enabled = is_array( $saved ) && ! empty( $saved ) ? array_values( $saved ) : $all;
 		$id      = $this->get_payment_method_id();
 

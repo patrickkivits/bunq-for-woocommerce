@@ -198,7 +198,7 @@ final class ConnectionHealth {
 	 */
 	public static function record( $mode, ?Throwable $exception = null ) {
 		$statuses = self::statuses();
-		$previous = isset( $statuses[ $mode ] ) ? $statuses[ $mode ] : null;
+		$previous = $statuses[ $mode ] ?? null;
 		$failing  = $previous && self::OK !== $previous['status'];
 		$now      = time();
 
@@ -264,7 +264,7 @@ final class ConnectionHealth {
 	public static function status( $mode ) {
 		$statuses = self::statuses();
 
-		return isset( $statuses[ $mode ] ) ? $statuses[ $mode ] : null;
+		return $statuses[ $mode ] ?? null;
 	}
 
 	/**

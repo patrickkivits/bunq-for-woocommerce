@@ -395,7 +395,7 @@ class ApiClient {
 
 			foreach ( $account_types as $endpoint => $suffix ) {
 				foreach ( $this->list_monetary_accounts( $endpoint ) as $account ) {
-					foreach ( isset( $account['alias'] ) ? (array) $account['alias'] : array() as $alias ) {
+					foreach ( (array) ( $account['alias'] ?? array() ) as $alias ) {
 						if ( isset( $alias['type'], $alias['value'] ) && 'IBAN' === $alias['type'] ) {
 							$bank_accounts[ $account['id'] ] = $alias['value'] . ' - ' . $account['description'] . $suffix;
 						}
@@ -461,7 +461,7 @@ class ApiClient {
 			// One NotificationFilterUrl per filter. 200 is the largest page bunq returns; the POST replaces the whole list,
 			// so a filter left out would be removed.
 			foreach ( $this->request( 'GET', $path . '?count=200' ) as $item ) {
-				$filter = isset( $item['NotificationFilterUrl'] ) ? $item['NotificationFilterUrl'] : array();
+				$filter = $item['NotificationFilterUrl'] ?? array();
 
 				if ( ! isset( $filter['category'], $filter['notification_target'] ) ) {
 					continue;
@@ -605,7 +605,7 @@ class ApiClient {
 		$users = array();
 		foreach ( $response as $item ) {
 			$type = key( $item );
-			if ( 0 === strpos( (string) $type, 'User' ) && is_array( $item[ $type ] ) ) {
+			if ( str_starts_with( (string) $type, 'User' ) && is_array( $item[ $type ] ) ) {
 				$users[ $type ] = $item[ $type ];
 			}
 		}
@@ -617,7 +617,7 @@ class ApiClient {
 
 		// An OAuth key's session lasts as long as the app that requested it (requested_by_user) allows.
 		$timeout_user = isset( $users['UserApiKey'] ) ? self::anchored_user( $users['UserApiKey'], 'requested_by_user' ) : $user;
-		$timeout      = isset( $timeout_user['session_timeout'] ) ? (int) $timeout_user['session_timeout'] : HOUR_IN_SECONDS;
+		$timeout      = (int) ( $timeout_user['session_timeout'] ?? HOUR_IN_SECONDS );
 
 		$context['session_context'] = array(
 			'token'        => $token['token'],
@@ -643,7 +643,7 @@ class ApiClient {
 	 */
 	private function send( array $context, $method, $path, $body = null ) {
 		$production   = 'PRODUCTION' === $context['environment_type'];
-		$installation = isset( $context['installation_context'] ) ? $context['installation_context'] : null;
+		$installation = $context['installation_context'] ?? null;
 		$body_string  = in_array( $method, array( 'POST', 'PUT' ), true ) ? wp_json_encode( $body ? $body : new \stdClass() ) : '';
 
 		$headers = array(
@@ -828,7 +828,7 @@ class ApiClient {
 		foreach ( array( 'api_key', 'environment_type', 'installation_context.token', 'installation_context.private_key_client', 'installation_context.public_key_server' ) as $field ) {
 			$value = $context;
 			foreach ( explode( '.', $field ) as $key ) {
-				$value = is_array( $value ) && isset( $value[ $key ] ) ? $value[ $key ] : null;
+				$value = is_array( $value ) ? ( $value[ $key ] ?? null ) : null;
 			}
 
 			if ( null === $value ) {
@@ -836,7 +836,7 @@ class ApiClient {
 			}
 		}
 
-		$session = isset( $context['session_context'] ) ? $context['session_context'] : null;
+		$session = $context['session_context'] ?? null;
 
 		$context['installation_context'] = array_intersect_key( $context['installation_context'], array_flip( array( 'token', 'private_key_client', 'public_key_server' ) ) );
 		unset( $context['session_context'], $context['proxy_url'] );
@@ -895,7 +895,7 @@ class ApiClient {
 		} elseif ( isset( $users['usercompany'] ) ) {
 			$user = $users['usercompany'];
 		} else {
-			$user = isset( $users['userperson'] ) ? $users['userperson'] : null;
+			$user = $users['userperson'] ?? null;
 		}
 
 		return isset( $user['display_name'] ) && is_string( $user['display_name'] ) ? $user['display_name'] : null;
@@ -909,7 +909,7 @@ class ApiClient {
 	 * @return array|null
 	 */
 	private static function anchored_user( array $user_api_key, $field ) {
-		foreach ( isset( $user_api_key[ $field ] ) ? (array) $user_api_key[ $field ] : array() as $user ) {
+		foreach ( (array) ( $user_api_key[ $field ] ?? array() ) as $user ) {
 			if ( is_array( $user ) ) {
 				return $user;
 			}

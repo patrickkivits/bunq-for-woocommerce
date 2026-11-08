@@ -54,9 +54,7 @@ final class Logger {
 		// Longest first, so a secret that contains another one is replaced as a whole.
 		uksort(
 			$secrets,
-			function ( $a, $b ) {
-				return strlen( $b ) - strlen( $a );
-			}
+			fn( $a, $b ) => strlen( $b ) - strlen( $a )
 		);
 
 		foreach ( $secrets as $secret => $label ) {

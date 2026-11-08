@@ -209,7 +209,7 @@ final class PaymentMonitor {
 		}
 
 		global $wp;
-		$order_id = absint( isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0 );
+		$order_id = absint( $wp->query_vars['order-received'] ?? 0 );
 		$order    = $order_id ? wc_get_order( $order_id ) : null;
 
 		if ( ! self::order_awaits_payment( $order ) ) {
@@ -217,7 +217,7 @@ final class PaymentMonitor {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The order key authorizes the check.
-		$order_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+		$order_key = sanitize_text_field( wp_unslash( $_GET['key'] ?? '' ) );
 
 		if ( ! is_string( $order_key ) || '' === $order_key || ! hash_equals( (string) $order->get_order_key(), $order_key ) ) {
 			return;
