@@ -319,7 +319,6 @@ final class MethodGatewayTest extends TestCase
         $method->initialize();
 
         $property = new \ReflectionProperty(CheckoutIntegration::class, 'gateway');
-        $property->setAccessible(true);
         $gateway = $property->getValue($method);
 
         $this->assertInstanceOf(MethodGateway::class, $gateway);

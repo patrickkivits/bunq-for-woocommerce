@@ -241,7 +241,7 @@ class ApiClient {
 	 * @param string   $description         Shown to the payer.
 	 * @param string   $return_url          Where bunq.me sends the payer after paying.
 	 * @param int|null $monetary_account_id The receiving account, null for the default account.
-	 * @return array The share URL ("url") and the id ("id") of the request.
+	 * @return array The share URL ("url"), the id ("id") and the account ("monetary_account_id") of the request.
 	 */
 	public function create_payment_request( $amount, $currency, $description, $return_url, $monetary_account_id = null ) {
 		$response = $this->request(
@@ -263,8 +263,9 @@ class ApiClient {
 		$payment_request = $this->get_payment_request( self::id( $response ), $monetary_account_id );
 
 		return array(
-			'url' => $payment_request['bunqme_tab_share_url'],
-			'id'  => $payment_request['id'],
+			'url'                 => $payment_request['bunqme_tab_share_url'],
+			'id'                  => $payment_request['id'],
+			'monetary_account_id' => $monetary_account_id ? (int) $monetary_account_id : $this->primary_monetary_account_id(),
 		);
 	}
 

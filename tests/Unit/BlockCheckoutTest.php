@@ -120,7 +120,6 @@ final class BlockCheckoutTest extends TestCase
     private function gatewayOf(CheckoutIntegration $method)
     {
         $property = new \ReflectionProperty(CheckoutIntegration::class, 'gateway');
-        $property->setAccessible(true);
 
         return $property->getValue($method);
     }

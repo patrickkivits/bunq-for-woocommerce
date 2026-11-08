@@ -175,7 +175,6 @@ final class PluginLoadingTest extends TestCase
         $class = new \ReflectionClass(Plugin::class);
         $plugin = $class->newInstanceWithoutConstructor();
         $file = $class->getProperty('file');
-        $file->setAccessible(true);
         $file->setValue($plugin, BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
 
         return $plugin;

@@ -135,9 +135,6 @@ final class RequestThrottlerTest extends TestCase
 
     private function timestampsProperty()
     {
-        $property = new \ReflectionProperty(RequestThrottler::class, 'submitted_request_timestamps');
-        $property->setAccessible(true);
-
-        return $property;
+        return new \ReflectionProperty(RequestThrottler::class, 'submitted_request_timestamps');
     }
 }

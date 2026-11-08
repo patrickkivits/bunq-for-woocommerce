@@ -86,7 +86,6 @@ final class Environment
         // Secrets the logger learned in an earlier test (the plugin is not loaded yet on the first reset).
         if (class_exists(\PatrickKivits\BunqForWooCommerce\Logger::class)) {
             $secrets = new \ReflectionProperty(\PatrickKivits\BunqForWooCommerce\Logger::class, 'secrets');
-            $secrets->setAccessible(true);
             $secrets->setValue(null, array());
         }
         self::$isSsl = false;

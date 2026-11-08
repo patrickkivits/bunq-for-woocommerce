@@ -2,12 +2,12 @@
     "config": {
         "platform-check": false,
         "platform": {
-            "php": "7.3.0"
+            "php": "8.1.0"
         }
     },
     "require": {
         "league/oauth2-client": "^2.6",
-        "php": "^7.3 || ^8.0",
+        "php": "^8.1",
         "ext-openssl": "*",
         "ext-curl": "*",
         "ext-json": "*",

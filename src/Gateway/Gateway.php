@@ -657,12 +657,18 @@ class Gateway extends WC_Payment_Gateway {
 		ConnectionHealth::record( self::mode( $testmode ) );
 		Logger::log( 'bunq API context created for ' . ( $testmode ? 'sandbox' : 'production' ), 'info' );
 
-		if ( ! $register_callback ) {
-			return;
+		if ( $register_callback ) {
+			$this->register_callback();
 		}
+	}
 
-		// Register the callback URL at bunq so payments are confirmed automatically. A callback URL that only
-		// resolves locally (development sites) cannot be reached by bunq, so skip it there.
+	/**
+	 * Register the callback URL at bunq for the selected bank account, so its payments are confirmed automatically.
+	 * bunq keeps the callbacks per bank account, so this runs again when the merchant selects another one. Failures
+	 * are logged: payments still work, only the automatic payment confirmation is affected.
+	 */
+	public function register_callback() {
+		// A callback URL that only resolves locally (development sites) cannot be reached by bunq, so skip it there.
 		$callback_url = CallbackHandler::url();
 
 		if ( Url::is_local( $callback_url ) ) {
@@ -672,10 +678,13 @@ class Gateway extends WC_Payment_Gateway {
 		}
 
 		try {
-			$this->api->create_notification_filters( $this->get_monetary_account_bank_id() );
+			$this->call_bunq(
+				function () {
+					$this->api->create_notification_filters( $this->get_monetary_account_bank_id() );
+				}
+			);
 			Logger::log( 'bunq callback URL registered: ' . $callback_url, 'info' );
 		} catch ( Throwable $exception ) {
-			// Not fatal for the setup: payments still work, only the automatic payment confirmation is affected.
 			Logger::log( $exception, 'warning' );
 		}
 	}
@@ -685,6 +694,8 @@ class Gateway extends WC_Payment_Gateway {
 	 * the settings were saved with "Connect to bunq".
 	 */
 	public function process_admin_options() {
+		$previous_account = $this->get_monetary_account_bank_id();
+
 		parent::process_admin_options();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verified the settings nonce.
@@ -706,6 +717,11 @@ class Gateway extends WC_Payment_Gateway {
 			$this->set_credential( 'api_key', '' );
 			delete_transient( self::BANK_ACCOUNTS_TRANSIENT );
 			ConnectionHealth::forget( 'live' );
+		}
+
+		// The callback was registered for the bank account selected when connecting, often before one was selected.
+		if ( $this->get_monetary_account_bank_id() !== $previous_account && $this->get_setting( 'api_context' ) ) {
+			$this->register_callback();
 		}
 	}
 
@@ -879,6 +895,19 @@ class Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * The bunq monetary account of an order's payment request: the one it was created on, which stays right when the
+	 * merchant selects another bank account later.
+	 *
+	 * @param WC_Order $order The order.
+	 * @return int|null Null for the account's default.
+	 */
+	public function get_order_monetary_account_id( $order ) {
+		$monetary_account_id = intval( $order->get_meta( self::META_MONETARY_ACCOUNT_ID ) );
+
+		return $monetary_account_id > 0 ? $monetary_account_id : $this->get_monetary_account_bank_id();
+	}
+
+	/**
 	 * Define the settings form. The bank accounts are only looked up on the admin side.
 	 */
 	public function init_form_fields() {
@@ -1019,13 +1048,23 @@ class Gateway extends WC_Payment_Gateway {
 			// The block checkout does not call validate_fields(); bunqme_name() only knows the valid methods.
 			$bunqme_payment_method = $this->get_requested_bunqme_payment_method();
 
-			$payment_request = $this->create_order_payment_request( $order );
+			// A second attempt for the same order (the customer came back from bunq.me) reuses the open payment request,
+			// or cancels it: a payment through a forgotten request would not be matched to the order any more.
+			$link = $this->get_payment_link( $order );
+
+			// The customer paid the earlier request already.
+			if ( null === $link['url'] ) {
+				return array(
+					'result'   => 'success',
+					'redirect' => $this->get_return_url( $order ),
+				);
+			}
 
 			// Direct gateway: bunq.me opens the chosen method straight away when it is passed as ?paymentMethod= (it
 			// used to be a path segment, which bunq.me now ignores).
 			$redirect = $bunqme_payment_method
-				? add_query_arg( 'paymentMethod', $bunqme_payment_method, $payment_request['url'] )
-				: $payment_request['url'];
+				? add_query_arg( 'paymentMethod', $bunqme_payment_method, $link['url'] )
+				: $link['url'];
 
 			return array(
 				'result'   => 'success',
@@ -1074,6 +1113,13 @@ class Gateway extends WC_Payment_Gateway {
 		);
 		$order->update_meta_data( self::META_PAYMENT_REQUEST_ID, $payment_request['id'] );
 		$order->update_meta_data( self::META_PAYMENT_REQUEST_URL, $payment_request['url'] );
+		// The account the request lives on, to look it up there after the merchant selects another bank account.
+		$monetary_account_id = ! empty( $payment_request['monetary_account_id'] ) ? (int) $payment_request['monetary_account_id'] : $this->get_monetary_account_bank_id();
+		if ( $monetary_account_id ) {
+			$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, $monetary_account_id );
+		} else {
+			$order->delete_meta_data( self::META_MONETARY_ACCOUNT_ID );
+		}
 		// The final state of an earlier payment request of the order does not apply to this one.
 		$order->delete_meta_data( self::META_PAYMENT_REQUEST_STATUS );
 		$order->save();
@@ -1085,7 +1131,7 @@ class Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * A bunq.me link the customer can pay the order with, for a payment link the merchant sends (see
+	 * A bunq.me link the customer can pay the order with: at checkout, and for a payment link the merchant sends (see
 	 * Orders\PaymentLink). The order's payment request is reused while it can still be paid and asks for the order
 	 * total; otherwise it is cancelled and a new one is created.
 	 *
@@ -1099,9 +1145,10 @@ class Gateway extends WC_Payment_Gateway {
 
 		// bunq reported the earlier request as cancelled or expired: it can no longer be paid.
 		if ( $payment_request_id && ! $order->get_meta( self::META_PAYMENT_REQUEST_STATUS ) ) {
-			$payment_request = $this->call_bunq(
-				function () use ( $payment_request_id ) {
-					return $this->api->get_payment_request( $payment_request_id, $this->get_monetary_account_bank_id() );
+			$monetary_account_id = $this->get_order_monetary_account_id( $order );
+			$payment_request     = $this->call_bunq(
+				function () use ( $payment_request_id, $monetary_account_id ) {
+					return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
 				}
 			);
 
@@ -1129,7 +1176,7 @@ class Gateway extends WC_Payment_Gateway {
 				}
 
 				// The order total changed since: the old link must not be paid any more.
-				$this->cancel_payment_request( $payment_request_id );
+				$this->cancel_payment_request( $payment_request_id, $monetary_account_id );
 				$order->add_order_note(
 					sprintf(
 						/* translators: %s: bunq payment request id */
@@ -1169,10 +1216,7 @@ class Gateway extends WC_Payment_Gateway {
 		}
 
 		try {
-			$monetary_account_id = intval( $order->get_meta( self::META_MONETARY_ACCOUNT_ID ) );
-			if ( ! $monetary_account_id ) {
-				$monetary_account_id = $this->get_monetary_account_bank_id();
-			}
+			$monetary_account_id = $this->get_order_monetary_account_id( $order );
 
 			$payment = $this->call_bunq(
 				function () use ( $payment_id, $monetary_account_id ) {
@@ -1277,9 +1321,10 @@ class Gateway extends WC_Payment_Gateway {
 				return 'settled';
 			}
 
-			$payment_request = $this->call_bunq(
-				function () use ( $payment_request_id ) {
-					return $this->api->get_payment_request( $payment_request_id, $this->get_monetary_account_bank_id() );
+			$monetary_account_id = $this->get_order_monetary_account_id( $order );
+			$payment_request     = $this->call_bunq(
+				function () use ( $payment_request_id, $monetary_account_id ) {
+					return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
 				}
 			);
 
@@ -1328,7 +1373,9 @@ class Gateway extends WC_Payment_Gateway {
 			);
 			$order->update_meta_data( self::META_PAYMENT_ID, $payment['id'] );
 			// The account the money landed on, so a refund still works after the merchant changes the setting.
-			$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, isset( $payment['monetary_account_id'] ) ? $payment['monetary_account_id'] : null );
+			if ( isset( $payment['monetary_account_id'] ) ) {
+				$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, $payment['monetary_account_id'] );
+			}
 			self::record_payment_details( $order, $payment, $payment_request );
 			$order->save();
 			$order->payment_complete( (string) $payment['id'] );
@@ -1340,7 +1387,9 @@ class Gateway extends WC_Payment_Gateway {
 		if ( $unmatched_payment ) {
 			$unmatched_amount = $unmatched_payment['amount'];
 			$order->update_meta_data( self::META_PAYMENT_ID, $unmatched_payment['id'] );
-			$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, isset( $unmatched_payment['monetary_account_id'] ) ? $unmatched_payment['monetary_account_id'] : null );
+			if ( isset( $unmatched_payment['monetary_account_id'] ) ) {
+				$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, $unmatched_payment['monetary_account_id'] );
+			}
 			self::record_payment_details( $order, $unmatched_payment, $payment_request );
 			$order->save();
 			$order->update_status(
@@ -1412,14 +1461,10 @@ class Gateway extends WC_Payment_Gateway {
 	public function fetch_payment_details( $order ) {
 		$payment_request_id  = intval( $order->get_meta( self::META_PAYMENT_REQUEST_ID ) );
 		$payment_id          = intval( $order->get_meta( self::META_PAYMENT_ID ) );
-		$monetary_account_id = intval( $order->get_meta( self::META_MONETARY_ACCOUNT_ID ) );
+		$monetary_account_id = $this->get_order_monetary_account_id( $order );
 
 		if ( ! $payment_request_id || ! $payment_id ) {
 			return false;
-		}
-
-		if ( ! $monetary_account_id ) {
-			$monetary_account_id = $this->get_monetary_account_bank_id();
 		}
 
 		// The payment request holds the payment as well as its share URL, so one call is enough.
@@ -1444,15 +1489,65 @@ class Gateway extends WC_Payment_Gateway {
 	/**
 	 * Cancel a bunq payment request at bunq so it can no longer be paid.
 	 *
-	 * @param int $payment_request_id The payment request.
+	 * @param int      $payment_request_id  The payment request.
+	 * @param int|null $monetary_account_id Its account (get_order_monetary_account_id()); the selected one by default.
 	 * @throws Throwable When bunq could not be reached.
 	 */
-	public function cancel_payment_request( $payment_request_id ) {
+	public function cancel_payment_request( $payment_request_id, $monetary_account_id = null ) {
+		$monetary_account_id = $monetary_account_id ? $monetary_account_id : $this->get_monetary_account_bank_id();
+
 		$this->call_bunq(
-			function () use ( $payment_request_id ) {
-				$this->api->cancel_payment_request( $payment_request_id, $this->get_monetary_account_bank_id() );
+			function () use ( $payment_request_id, $monetary_account_id ) {
+				$this->api->cancel_payment_request( $payment_request_id, $monetary_account_id );
 			}
 		);
+	}
+
+	/**
+	 * Before the payment request of a cancelled order is cancelled at bunq: record a payment that came in anyway, for
+	 * example just before WooCommerce cancelled the unpaid order, so the merchant sees it and can refund it.
+	 *
+	 * @param WC_Order $order The cancelled order.
+	 * @return bool Whether a payment came in.
+	 * @throws Throwable When bunq could not be reached.
+	 */
+	public function record_late_payment( $order ) {
+		$payment_request_id  = intval( $order->get_meta( self::META_PAYMENT_REQUEST_ID ) );
+		$monetary_account_id = $this->get_order_monetary_account_id( $order );
+
+		$payment_request = $this->call_bunq(
+			function () use ( $payment_request_id, $monetary_account_id ) {
+				return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
+			}
+		);
+
+		foreach ( isset( $payment_request['result_inquiries'] ) ? (array) $payment_request['result_inquiries'] : array() as $result_inquiry ) {
+			$payment = isset( $result_inquiry['payment'] ) ? $result_inquiry['payment'] : null;
+
+			if ( ! isset( $payment['id'], $payment['amount']['value'], $payment['amount']['currency'] ) ) {
+				continue;
+			}
+
+			$order->update_meta_data( self::META_PAYMENT_ID, $payment['id'] );
+			if ( isset( $payment['monetary_account_id'] ) ) {
+				$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, $payment['monetary_account_id'] );
+			}
+			self::record_payment_details( $order, $payment, $payment_request );
+			$order->save();
+			$order->add_order_note(
+				sprintf(
+					/* translators: 1: bunq payment id, 2: amount received */
+					__( 'bunq payment %1$s of %2$s came in, but the order was cancelled. Restore the order or refund the payment.', 'bunq-for-woocommerce' ),
+					$payment['id'],
+					$payment['amount']['currency'] . ' ' . $payment['amount']['value']
+				)
+			);
+			Logger::log( 'bunqme-tab ' . $payment_request_id . ': payment ' . $payment['id'] . ' came in for cancelled order #' . $order->get_order_number(), 'warning' );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

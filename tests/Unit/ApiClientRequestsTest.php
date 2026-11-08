@@ -69,7 +69,7 @@ final class ApiClientRequestsTest extends TestCase
 
         $payment_request = $this->client->create_payment_request('24.95', 'EUR', '#1001', 'https://shop.example/return', 456);
 
-        $this->assertSame(array('url' => 'https://bunq.me/t/abc', 'id' => 55), $payment_request);
+        $this->assertSame(array('url' => 'https://bunq.me/t/abc', 'id' => 55, 'monetary_account_id' => 456), $payment_request);
         $this->assertSame(array('POST', 'GET'), array_column($this->server->requests, 'method'));
         $this->assertSame(array('user/7/monetary-account/456/bunqme-tab', 'user/7/monetary-account/456/bunqme-tab/55'), array_column($this->server->requests, 'path'));
         $this->assertSame(array('bunqme_tab_entry' => array(
