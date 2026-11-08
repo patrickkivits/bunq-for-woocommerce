@@ -129,9 +129,12 @@ final class PluginLoadingTest extends TestCase
 
         $this->assertSame($this->field($header, ' * Version'), $this->field($readme, 'Stable tag'));
         $this->assertStringContainsString('= ' . Plugin::VERSION . " =\n", $readme, 'The changelog covers this version');
-        foreach (array('Requires at least', 'Requires PHP', 'Tested up to') as $field) {
+        foreach (array('Requires at least', 'Requires PHP') as $field) {
             $this->assertSame($this->field($header, ' * ' . $field), $this->field($readme, $field), $field);
         }
+        // Plugin Check refuses "Tested up to" in the plugin header: it belongs in readme.txt only.
+        $this->assertStringNotContainsString(' * Tested up to:', $header);
+        $this->field($readme, 'Tested up to');
         $this->assertSame(Requirements::MIN_WP_VERSION, $this->field($header, ' * Requires at least'), 'The requirements check enforces the declared minimum');
         $this->assertSame('=== ' . $this->field($header, ' * Plugin Name') . ' ===', strtok($readme, "\n"));
     }

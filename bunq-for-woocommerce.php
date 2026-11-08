@@ -8,7 +8,6 @@
  * Requires at least: 4.7
  * Requires PHP: 7.3
  * Requires Plugins: woocommerce
- * Tested up to: 7.1
  * Text Domain: bunq-for-woocommerce
  * Domain Path: /languages
  * License: GPLv2 or later
