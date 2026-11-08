@@ -110,6 +110,11 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
         return $this->draftPaymentId;
     }
 
+    public function check_connection($monetary_account_bank_id = null)
+    {
+        $this->record(__FUNCTION__, func_get_args());
+    }
+
     public function create_notification_filters($monetary_account_bank_id = null)
     {
         $this->record(__FUNCTION__, func_get_args());

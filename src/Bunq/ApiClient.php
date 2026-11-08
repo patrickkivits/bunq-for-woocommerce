@@ -422,6 +422,28 @@ class ApiClient {
 	}
 
 	/**
+	 * Check that the loaded API context still works: bunq accepts it and it still has access to the bank account the
+	 * payments are received on, and that account is active. Costs one call (two for the default account), plus a
+	 * new session when the stored one expired.
+	 *
+	 * @param int|null $monetary_account_id The receiving account, null for the default account.
+	 * @throws ApiException When bunq refuses (is_context_rejected() for a revoked key or another IP address).
+	 * @throws Throwable When bunq cannot be reached or the account cannot receive payments.
+	 */
+	public function check_connection( $monetary_account_id = null ) {
+		$response = $this->request( 'GET', rtrim( $this->account_path( $monetary_account_id, '' ), '/' ) );
+
+		// MonetaryAccountBank, MonetaryAccountJoint, MonetaryAccountSavings, ...
+		foreach ( $response as $item ) {
+			$account = is_array( $item ) ? reset( $item ) : null;
+
+			if ( is_array( $account ) && isset( $account['status'] ) && 'ACTIVE' !== $account['status'] ) {
+				throw new RuntimeException( 'The bunq bank account that receives the payments is ' . strtolower( (string) $account['status'] ) . '. Select another bank account in the bunq settings.' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
+			}
+		}
+	}
+
+	/**
 	 * Register the WooCommerce callback URL for bunq.me payment requests on the monetary account.
 	 *
 	 * @param int|null $monetary_account_id The account, null for the default account.

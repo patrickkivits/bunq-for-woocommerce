@@ -68,8 +68,12 @@ final class PluginLoadingTest extends TestCase
 
         $this->assertSame(array(
             'admin_init',
+            'admin_notices',
+            'admin_post_bunq_check_connection',
             'before_woocommerce_init',
+            'bunq_for_woocommerce_connection_check',
             'bunq_for_woocommerce_follow_up_check',
+            'deactivate_bunq-for-woocommerce/bunq-for-woocommerce.php',
             'init',
             'plugins_loaded',
             'template_redirect',
@@ -83,6 +87,7 @@ final class PluginLoadingTest extends TestCase
             'woocommerce_order_status_cancelled',
             'woocommerce_payment_gateways',
             'woocommerce_rest_prepare_payment_gateway',
+            'woocommerce_system_status_report',
         ), $this->sortedHookNames());
     }
 

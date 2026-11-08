@@ -23,6 +23,42 @@ final class ApiClientRequestsTest extends TestCase
         $this->client->load_api_context_from_json(FakeBunqServer::context());
     }
 
+    // --- Connection check ------------------------------------------------------------------------------------
+
+    public function testTheConnectionCheckReadsTheReceivingBankAccount()
+    {
+        $this->server->respond(array(array('MonetaryAccountBank' => array('id' => 456, 'status' => 'ACTIVE'))));
+
+        $this->client->check_connection(456);
+
+        $this->assertSame(array('GET'), array_column($this->server->requests, 'method'));
+        $this->assertSame(array('user/7/monetary-account/456'), array_column($this->server->requests, 'path'));
+    }
+
+    public function testTheConnectionCheckFailsForABankAccountThatCannotReceivePayments()
+    {
+        $this->server->respond(array(array('MonetaryAccountJoint' => array('id' => 456, 'status' => 'CANCELLED'))));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('The bunq bank account that receives the payments is cancelled.');
+
+        $this->client->check_connection(456);
+    }
+
+    public function testTheConnectionCheckFailsWhenBunqRefusesANewSession()
+    {
+        $this->server
+            ->respondWithError(401, 'Insufficient authentication.')
+            ->respondWithError(400, 'Incorrect API key or IP address.');
+
+        try {
+            $this->client->check_connection(456);
+            $this->fail('The check should have failed');
+        } catch (\PatrickKivits\BunqForWooCommerce\Bunq\ApiException $exception) {
+            $this->assertTrue($exception->is_context_rejected());
+        }
+    }
+
     // --- Payment requests -----------------------------------------------------------------------------------
 
     public function testAPaymentRequestIsABunqMeTabWhoseShareUrlTheCustomerIsSentTo()

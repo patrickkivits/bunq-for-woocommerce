@@ -30,6 +30,8 @@ final class Environment
     public static $deactivatedPlugins = array();
     public static $loadedTextdomains = array();
     public static $redirects = array();
+    /** What wp_get_referer() returns. */
+    public static $referer = false;
     public static $isAdmin = false;
     public static $doingAjax = false;
     public static $isSsl = false;
@@ -62,6 +64,7 @@ final class Environment
         self::$deactivatedPlugins = array();
         self::$loadedTextdomains = array();
         self::$redirects = array();
+        self::$referer = false;
         self::$isAdmin = false;
         self::$doingAjax = false;
         $GLOBALS['pagenow'] = 'index.php';

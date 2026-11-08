@@ -211,6 +211,13 @@ function get_bloginfo($show = '') { return isset(Environment::$blogInfo[$show]) 
 function admin_url($path = '') { return 'https://shop.example/wp-admin/' . ltrim($path, '/'); }
 function wp_generate_uuid4() { return '00000000-0000-4000-8000-000000000000'; }
 function wp_parse_url($url, $component = -1) { return parse_url($url, $component); }
+function wp_get_referer() { return Environment::$referer; }
+function human_time_diff($from, $to = 0)
+{
+    $hours = (int) round(abs(($to ? $to : time()) - $from) / HOUR_IN_SECONDS);
+
+    return $hours . ' ' . ($hours === 1 ? 'hour' : 'hours');
+}
 function trailingslashit($value) { return rtrim($value, '/\\') . '/'; }
 
 function wp_safe_redirect($location, $status = 302)
@@ -263,6 +270,11 @@ function plugin_basename($file)
     $plugin_root = dirname(BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
 
     return 'bunq-for-woocommerce' . substr($file, strlen($plugin_root));
+}
+
+function register_deactivation_hook($file, $callback)
+{
+    add_action('deactivate_' . plugin_basename($file), $callback);
 }
 
 function plugin_dir_path($file) { return trailingslashit(dirname($file)); }
@@ -415,6 +427,13 @@ function woocommerce_form_field($key, $args, $value = null)
 function as_schedule_single_action($timestamp, $hook, $args = array(), $group = '')
 {
     Environment::$scheduledActions[] = compact('timestamp', 'hook', 'args', 'group');
+
+    return count(Environment::$scheduledActions);
+}
+
+function as_schedule_recurring_action($timestamp, $interval, $hook, $args = array(), $group = '')
+{
+    Environment::$scheduledActions[] = compact('timestamp', 'interval', 'hook', 'args', 'group');
 
     return count(Environment::$scheduledActions);
 }
