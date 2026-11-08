@@ -130,8 +130,11 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 2.0.0 =
+* Requires PHP 8.1 and WordPress 5.9 or newer. Shops on older versions stay on 1.11.0, which has the same features and fixes.
+* The code uses PHP 8.1: typed properties, native parameter and return types and newer syntax. No change in behavior.
+
 = 1.11.0 =
-* Requires PHP 8.1 and WordPress 5.9 or newer.
 * New order action **Send bunq payment link to customer**: emails the customer a bunq.me link for an unpaid order, for example one taken by phone or sent as an invoice.
 * The order screen shows who paid with bunq and how: the payer's name and IBAN, the payment method and a link to the payment request.
 * Warns in the admin when the connection with bunq stops working, with the details in WooCommerce > Status.
@@ -221,8 +224,11 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Upgrade Notice ==
 
+= 2.0.0 =
+Requires PHP 8.1 and WordPress 5.9 or newer: check your versions before updating. On older versions, keep 1.11.0. No other changes; no need to connect again.
+
 = 1.11.0 =
-Requires PHP 8.1 and WordPress 5.9 or newer: check your versions before updating. Adds payment links and the bunq payment details on the order screen, and fixes payments not being confirmed after changing the bank account. No need to connect again.
+Adds payment links and the bunq payment details on the order screen, and fixes payments not being confirmed after changing the bank account. Still supports PHP 7.3 and WordPress 4.7; version 2.0 will require PHP 8.1 and WordPress 5.9. No need to connect again.
 
 = 1.10.0 =
 Shows the iDEAL | Wero, card and Bancontact logos at checkout and can offer them as separate payment options. bunq is hidden for carts that are not in euros. No need to connect again.
