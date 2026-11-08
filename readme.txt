@@ -2,7 +2,7 @@
 Contributors: patrickkivits
 Donate link: https://bunq.me/patrickkivits
 Tags: woocommerce, payment gateway, bunq, ideal, bancontact
-Requires at least: 4.7
+Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 1.10.0

@@ -22,7 +22,7 @@ final class Requirements {
 	 */
 	const OPTION = 'wc_bunq_gateway.requirements';
 
-	const MIN_WP_VERSION  = '4.7';
+	const MIN_WP_VERSION  = '5.9';
 	const MIN_PHP_VERSION = '8.1.0';
 
 	/**

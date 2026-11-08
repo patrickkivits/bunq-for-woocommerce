@@ -5,7 +5,7 @@
  * Version: 1.10.0
  * Author: Patrick Kivits
  * Author URI: https://www.patrickkivits.nl
- * Requires at least: 4.7
+ * Requires at least: 5.9
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce
  * Text Domain: bunq-for-woocommerce
