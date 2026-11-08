@@ -38,7 +38,7 @@ final class OrderLock {
 	 * @param int $seconds  After this long the lock counts as left behind by a request that died.
 	 * @return bool Whether this request holds the lock now.
 	 */
-	public static function acquire( $order_id, $seconds ) {
+	public static function acquire( int $order_id, int $seconds ): bool {
 		global $wpdb;
 
 		$order_id = (int) $order_id;
@@ -76,7 +76,7 @@ final class OrderLock {
 	 *
 	 * @param int $order_id Order id.
 	 */
-	public static function release( $order_id ) {
+	public static function release( int $order_id ): void {
 		global $wpdb;
 
 		$order_id = (int) $order_id;
@@ -102,7 +102,7 @@ final class OrderLock {
 	 * @param WC_Order $order The order as this request loaded it.
 	 * @return bool
 	 */
-	public static function stored_order_needs_payment( WC_Order $order ) {
+	public static function stored_order_needs_payment( WC_Order $order ): bool {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Past every cache on purpose; the table name comes from WooCommerce.

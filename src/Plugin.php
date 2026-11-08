@@ -93,7 +93,7 @@ final class Plugin {
 	 *
 	 * @return Plugin
 	 */
-	public static function instance() {
+	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self( BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE );
 		}

@@ -50,7 +50,7 @@ final class CallbackHandler {
 	 *
 	 * @return string
 	 */
-	public static function url() {
+	public static function url(): string {
 		return WC()->api_request_url( self::API_REQUEST );
 	}
 

@@ -167,7 +167,7 @@ class OAuthClient {
 	 * @param string $body Response body.
 	 * @return string
 	 */
-	private static function error_descriptions( $body ) {
+	private static function error_descriptions( string $body ): string {
 		$decoded      = json_decode( $body, true );
 		$descriptions = array();
 

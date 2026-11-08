@@ -29,7 +29,7 @@ final class SettingsPage {
 	/**
 	 * Load the script and styles of the settings page.
 	 */
-	public static function enqueue_assets() {
+	public static function enqueue_assets(): void {
 		$plugin_file = Plugin::instance()->file();
 		$base_url    = plugin_dir_url( $plugin_file );
 
@@ -52,7 +52,7 @@ final class SettingsPage {
 	 * @param array $notices Message by "error" or "success".
 	 * @return string
 	 */
-	public static function notices_html( $notices ) {
+	public static function notices_html( array $notices ): string {
 		ob_start();
 
 		if ( ! empty( $notices['error'] ) ) {
@@ -87,7 +87,7 @@ final class SettingsPage {
 	 * @param string $heading_html The heading as WooCommerce draws it.
 	 * @return string
 	 */
-	public static function account_heading_html( $heading_html ) {
+	public static function account_heading_html( string $heading_html ): string {
 		// The first submit button of the form is the one Enter presses: keep that a plain save rather than one of the
 		// connect buttons below.
 		return '<button type="submit" name="save" value="save" class="bunq-default-submit" tabindex="-1" aria-hidden="true"></button>' . $heading_html;
@@ -101,7 +101,7 @@ final class SettingsPage {
 	 * @param string  $saved_mode  The mode of the saved settings.
 	 * @return string
 	 */
-	public static function connection_html( $connections, $saved_mode ) {
+	public static function connection_html( array $connections, string $saved_mode ): string {
 		ob_start();
 
 		foreach ( $connections as $mode => $connection ) {
@@ -141,7 +141,7 @@ final class SettingsPage {
 	 *
 	 * @return string
 	 */
-	public static function connect_html() {
+	public static function connect_html(): string {
 		ob_start();
 		?>
 		<tr valign="top" class="bunq-connect-row">
@@ -163,7 +163,7 @@ final class SettingsPage {
 	 * @param array  $connection Gateway::get_connection().
 	 * @param bool   $hidden     Whether the row starts hidden (the settings page shows the active mode's).
 	 */
-	private static function status_row( $mode, $connection, $hidden ) {
+	private static function status_row( string $mode, array $connection, bool $hidden ): void {
 		$sandbox = 'sandbox' === $mode;
 		?>
 		<tr valign="top" class="bunq-connection-row" data-bunq-mode="<?php echo esc_attr( $mode ); ?>" data-bunq-connected="<?php echo $connection['connected'] ? '1' : '0'; ?>"<?php echo $hidden ? ' hidden' : ''; ?>>

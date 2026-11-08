@@ -31,7 +31,7 @@ final class SettingsFields {
 	 * @param bool  $connected     Whether the active mode has an API context.
 	 * @return array[]
 	 */
-	public static function get( $bank_accounts, $connected = false ) {
+	public static function get( array $bank_accounts, bool $connected = false ): array {
 		$fields = self::base( $bank_accounts );
 
 		$fields['enabled']['description'] = $connected ? '' : __( 'Customers see bunq at checkout once your bunq account is connected.', 'bunq-for-woocommerce' );
@@ -98,7 +98,7 @@ final class SettingsFields {
 	 * @param array $bank_accounts Options of the bank account select.
 	 * @return array[]
 	 */
-	public static function base( $bank_accounts ) {
+	public static function base( array $bank_accounts ): array {
 		return array(
 			'enabled'                  => array(
 				'title'       => __( 'Enable/Disable', 'bunq-for-woocommerce' ),
@@ -158,7 +158,7 @@ final class SettingsFields {
 	 * @param string $mode "live" or "sandbox".
 	 * @return array
 	 */
-	private static function client_id_field( $mode ) {
+	private static function client_id_field( string $mode ): array {
 		return array(
 			'title'             => 'sandbox' === $mode ? __( 'Sandbox Client ID', 'bunq-for-woocommerce' ) : __( 'Client ID', 'bunq-for-woocommerce' ),
 			'type'              => 'text',
@@ -176,7 +176,7 @@ final class SettingsFields {
 	 * @param string $mode "live" or "sandbox".
 	 * @return array
 	 */
-	private static function client_secret_field( $mode ) {
+	private static function client_secret_field( string $mode ): array {
 		return array(
 			'title'             => 'sandbox' === $mode ? __( 'Sandbox Client Secret', 'bunq-for-woocommerce' ) : __( 'Client Secret', 'bunq-for-woocommerce' ),
 			'type'              => 'password',

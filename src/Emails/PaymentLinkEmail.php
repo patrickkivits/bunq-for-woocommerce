@@ -137,7 +137,7 @@ class PaymentLinkEmail extends WC_Email {
 	 * @param bool $plain_text Whether this is the plain text email.
 	 * @return array
 	 */
-	private function template_args( $plain_text ) {
+	private function template_args( bool $plain_text ): array {
 		return array(
 			'order'              => $this->object,
 			'payment_url'        => $this->payment_url,

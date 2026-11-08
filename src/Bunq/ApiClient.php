@@ -558,7 +558,7 @@ class ApiClient {
 	 * @param array         $context The API context.
 	 * @param callable|null $save    Stores the API context when its session changes.
 	 */
-	private function load( array $context, $save ) {
+	private function load( array $context, ?callable $save ): void {
 		if ( ! $this->context || $this->context['api_key'] !== $context['api_key'] ) {
 			$this->primary_monetary_account_id = null;
 		}
@@ -572,7 +572,7 @@ class ApiClient {
 	 *
 	 * @throws ApiException When bunq refuses (is_context_rejected() for a revoked key or another IP address).
 	 */
-	private function renew_session() {
+	private function renew_session(): void {
 		try {
 			$this->context = $this->start_session( $this->context );
 		} catch ( ApiException $exception ) {
@@ -595,7 +595,7 @@ class ApiClient {
 	 * @param array $context The API context, with or without a session.
 	 * @return array The API context with the new session.
 	 */
-	private function start_session( array $context ) {
+	private function start_session( array $context ): array {
 		unset( $context['session_context'] );
 
 		$response = $this->send( $context, 'POST', 'session-server', array( 'secret' => $context['api_key'] ) );
@@ -641,7 +641,7 @@ class ApiClient {
 	 * @throws ApiException When bunq answers with an error.
 	 * @throws Throwable When bunq cannot be reached or its answer cannot be trusted.
 	 */
-	private function send( array $context, $method, $path, $body = null ) {
+	private function send( array $context, string $method, string $path, ?array $body = null ): array {
 		$production   = 'PRODUCTION' === $context['environment_type'];
 		$installation = $context['installation_context'] ?? null;
 		$body_string  = in_array( $method, array( 'POST', 'PUT' ), true ) ? wp_json_encode( $body ? $body : new \stdClass() ) : '';
@@ -734,7 +734,7 @@ class ApiClient {
 	 * @param string   $path                Path below the account.
 	 * @return string
 	 */
-	private function account_path( $monetary_account_id, $path ) {
+	private function account_path( ?int $monetary_account_id, string $path ): string {
 		if ( ! $monetary_account_id ) {
 			$monetary_account_id = $this->primary_monetary_account_id();
 		}
@@ -748,7 +748,7 @@ class ApiClient {
 	 * @return int
 	 * @throws RuntimeException When the user has no active bank account.
 	 */
-	private function primary_monetary_account_id() {
+	private function primary_monetary_account_id(): int {
 		if ( ! $this->primary_monetary_account_id ) {
 			foreach ( $this->list_monetary_accounts( 'monetary-account-bank' ) as $account ) {
 				if ( isset( $account['status'] ) && 'ACTIVE' === $account['status'] ) {
@@ -771,7 +771,7 @@ class ApiClient {
 	 * @param string $endpoint "monetary-account-bank" or "monetary-account-joint".
 	 * @return array[]
 	 */
-	private function list_monetary_accounts( $endpoint ) {
+	private function list_monetary_accounts( string $endpoint ): array {
 		$type     = 'monetary-account-bank' === $endpoint ? 'MonetaryAccountBank' : 'MonetaryAccountJoint';
 		$accounts = array();
 
@@ -818,7 +818,7 @@ class ApiClient {
 	 * @return array
 	 * @throws Exception When it is not a complete API context.
 	 */
-	private static function parse_context( $json ) {
+	private static function parse_context( string $json ): array {
 		$context = json_decode( $json, true );
 
 		if ( ! is_array( $context ) ) {
@@ -859,7 +859,7 @@ class ApiClient {
 	 * @param array $context The API context.
 	 * @return string
 	 */
-	private static function to_json( array $context ) {
+	private static function to_json( array $context ): string {
 		return wp_json_encode( $context );
 	}
 
@@ -869,7 +869,7 @@ class ApiClient {
 	 * @param array $context The API context.
 	 * @return bool
 	 */
-	private static function is_session_active( array $context ) {
+	private static function is_session_active( array $context ): bool {
 		if ( ! isset( $context['session_context']['expiry_time'] ) ) {
 			return false;
 		}
@@ -887,7 +887,7 @@ class ApiClient {
 	 *                     as the bunq SDK stored them.
 	 * @return string|null
 	 */
-	private static function display_name( array $users ) {
+	private static function display_name( array $users ): ?string {
 		$users = array_change_key_case( array_filter( $users, 'is_array' ) );
 
 		if ( isset( $users['userapikey'] ) ) {
@@ -908,7 +908,7 @@ class ApiClient {
 	 * @param string $field        "granted_by_user" or "requested_by_user".
 	 * @return array|null
 	 */
-	private static function anchored_user( array $user_api_key, $field ) {
+	private static function anchored_user( array $user_api_key, string $field ): ?array {
 		foreach ( (array) ( $user_api_key[ $field ] ?? array() ) as $user ) {
 			if ( is_array( $user ) ) {
 				return $user;

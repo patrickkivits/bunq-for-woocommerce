@@ -37,7 +37,7 @@ final class Requirements {
 	 *
 	 * @return string[]
 	 */
-	public static function extensions() {
+	public static function extensions(): array {
 		return array( 'openssl', 'curl', 'json', 'mbstring' );
 	}
 

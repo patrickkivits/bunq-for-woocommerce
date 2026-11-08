@@ -158,7 +158,7 @@ class MethodGateway extends Gateway {
 	 * @param array[] $methods See PaymentMethods::all().
 	 * @return bool
 	 */
-	private function is_allowed( array $methods ) {
+	private function is_allowed( array $methods ): bool {
 		return in_array( $this->get_payment_method_id(), array_column( $methods, 'id' ), true );
 	}
 

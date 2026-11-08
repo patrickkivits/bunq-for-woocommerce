@@ -777,7 +777,7 @@ class Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return array Values by CREDENTIAL_KEYS key.
 	 */
-	private function get_credentials() {
+	private function get_credentials(): array {
 		$credentials = get_option( self::CREDENTIALS_OPTION, array() );
 
 		return is_array( $credentials ) ? $credentials : array();
@@ -789,7 +789,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @param string $key   One of CREDENTIAL_KEYS.
 	 * @param string $value The value.
 	 */
-	private function set_credential( $key, $value ) {
+	private function set_credential( string $key, string $value ): void {
 		$credentials         = $this->get_credentials();
 		$credentials[ $key ] = $value;
 		update_option( self::CREDENTIALS_OPTION, $credentials, false );
@@ -946,7 +946,7 @@ class Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return array See ApiClient::get_bank_accounts().
 	 */
-	private function get_bank_accounts() {
+	private function get_bank_accounts(): array {
 		$rejected = array( '' => __( 'bunq rejected the saved connection. Connect again.', 'bunq-for-woocommerce' ) );
 
 		if ( ! $this->get_setting( 'api_context' ) ) {
@@ -1085,7 +1085,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @return array The share URL ("url") and the id ("id") of the request.
 	 * @throws Throwable When bunq could not be reached or did not return a payment request.
 	 */
-	private function create_order_payment_request( $order ) {
+	private function create_order_payment_request( WC_Order $order ): array {
 		$payment_request = $this->call_bunq(
 			fn() => $this->api->create_payment_request(
 				$order->get_total(),
@@ -1330,7 +1330,7 @@ class Gateway extends WC_Payment_Gateway {
 	 * @param array    $payment_request    The bunq.me payment request (ApiClient::get_payment_request()).
 	 * @return string See check_payment_status().
 	 */
-	private function apply_payment_request( $order, $payment_request_id, array $payment_request ) {
+	private function apply_payment_request( WC_Order $order, int $payment_request_id, array $payment_request ): string {
 		$unmatched_payment = null;
 
 		foreach ( (array) ( $payment_request['result_inquiries'] ?? array() ) as $result_inquiry ) {
@@ -1606,7 +1606,7 @@ class Gateway extends WC_Payment_Gateway {
 	 *
 	 * @throws Throwable When it could not be recreated.
 	 */
-	private function recreate_api_context() {
+	private function recreate_api_context(): void {
 		$mode = self::mode( 'yes' === $this->get_setting( 'testmode' ) );
 
 		try {

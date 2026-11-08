@@ -111,7 +111,7 @@ final class ConnectionHealth {
 	/**
 	 * Remove the recurring check (plugin deactivation and uninstall).
 	 */
-	public static function unschedule() {
+	public static function unschedule(): void {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( self::CHECK_ACTION );
 		}
@@ -187,7 +187,7 @@ final class ConnectionHealth {
 	 * @param string         $mode      "live" or "sandbox".
 	 * @param Throwable|null $exception Why the connection failed; null when it works.
 	 */
-	public static function record( $mode, ?Throwable $exception = null ) {
+	public static function record( string $mode, ?Throwable $exception = null ): void {
 		$statuses = self::statuses();
 		$previous = $statuses[ $mode ] ?? null;
 		$failing  = $previous && self::OK !== $previous['status'];
@@ -224,7 +224,7 @@ final class ConnectionHealth {
 	 *
 	 * @param string $mode "live" or "sandbox".
 	 */
-	public static function record_success( $mode ) {
+	public static function record_success( string $mode ): void {
 		$status = self::status( $mode );
 
 		if ( $status && self::OK !== $status['status'] ) {
@@ -237,7 +237,7 @@ final class ConnectionHealth {
 	 *
 	 * @param string $mode "live" or "sandbox".
 	 */
-	public static function forget( $mode ) {
+	public static function forget( string $mode ): void {
 		$statuses = self::statuses();
 
 		if ( isset( $statuses[ $mode ] ) ) {
@@ -252,7 +252,7 @@ final class ConnectionHealth {
 	 * @param string $mode "live" or "sandbox".
 	 * @return array|null Null when the mode was not checked yet.
 	 */
-	public static function status( $mode ) {
+	public static function status( string $mode ): ?array {
 		$statuses = self::statuses();
 
 		return $statuses[ $mode ] ?? null;
@@ -265,7 +265,7 @@ final class ConnectionHealth {
 	 * @param Gateway $gateway The bunq gateway.
 	 * @return array|null The outcome of the last check (see the class description), or null when there is none.
 	 */
-	public static function problem( Gateway $gateway ) {
+	public static function problem( Gateway $gateway ): ?array {
 		if ( 'yes' !== $gateway->enabled || ! $gateway->get_setting( 'api_context' ) ) {
 			return null;
 		}
@@ -328,7 +328,7 @@ final class ConnectionHealth {
 	 * @param bool  $testmode Whether the sandbox is used.
 	 * @return string
 	 */
-	public static function notice_html( array $problem, $testmode ) {
+	public static function notice_html( array $problem, bool $testmode ): string {
 		if ( self::UNREACHABLE === $problem['status'] ) {
 			$message = sprintf(
 				$testmode
@@ -385,7 +385,7 @@ final class ConnectionHealth {
 	 * @param int|null     $next_check When the next check runs.
 	 * @return string
 	 */
-	public static function system_status_html( $gateway, $next_check ) {
+	public static function system_status_html( ?Gateway $gateway, ?int $next_check ): string {
 		$rows = array(
 			array( __( 'Version', 'bunq-for-woocommerce' ), 'Version', esc_html( Plugin::VERSION ) ),
 		);
@@ -462,7 +462,7 @@ final class ConnectionHealth {
 	 *
 	 * @return int|null Null when none is queued.
 	 */
-	private static function next_check() {
+	private static function next_check(): ?int {
 		if ( ! function_exists( 'as_next_scheduled_action' ) ) {
 			return null;
 		}
@@ -479,7 +479,7 @@ final class ConnectionHealth {
 	 * @param Throwable $exception Why the connection failed.
 	 * @return string self::BROKEN or self::UNREACHABLE.
 	 */
-	private static function classify( Throwable $exception ) {
+	private static function classify( Throwable $exception ): string {
 		// No answer at all: a timeout, DNS or TLS failure.
 		if ( $exception instanceof GuzzleException ) {
 			return self::UNREACHABLE;
@@ -498,7 +498,7 @@ final class ConnectionHealth {
 	 *
 	 * @return array[]
 	 */
-	private static function statuses() {
+	private static function statuses(): array {
 		$statuses = get_option( self::OPTION, array() );
 
 		return is_array( $statuses ) ? array_filter( $statuses, 'is_array' ) : array();
@@ -509,7 +509,7 @@ final class ConnectionHealth {
 	 *
 	 * @return bool
 	 */
-	private static function is_settings_page() {
+	private static function is_settings_page(): bool {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Only decides where a notice is shown.
 		return isset( $_GET['page'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && Gateway::ID === $_GET['section'];
 		// phpcs:enable
@@ -522,7 +522,7 @@ final class ConnectionHealth {
 	 * @param string $text The value.
 	 * @return string
 	 */
-	private static function mark( $ok, $text ) {
+	private static function mark( bool $ok, string $text ): string {
 		return $ok
 			? '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $text ) . '</mark>'
 			: '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html( $text ) . '</mark>';
@@ -534,7 +534,7 @@ final class ConnectionHealth {
 	 * @param int $timestamp Unix time.
 	 * @return string
 	 */
-	private static function format_time( $timestamp ) {
+	private static function format_time( int $timestamp ): string {
 		return gmdate( 'Y-m-d H:i', (int) $timestamp ) . ' UTC';
 	}
 }

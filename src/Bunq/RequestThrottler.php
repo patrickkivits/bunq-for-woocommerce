@@ -62,7 +62,7 @@ final class RequestThrottler {
 	 * @param string $endpoint Endpoint URL.
 	 * @return string
 	 */
-	private function get_endpoint_key( $endpoint ) {
+	private function get_endpoint_key( string $endpoint ): string {
 		return current( explode( '/', $endpoint ) );
 	}
 
@@ -74,7 +74,7 @@ final class RequestThrottler {
 	 * @param int    $sample_size    Seconds to consider.
 	 * @return int
 	 */
-	private function get_number_of_submitted_requests( $endpoint_key, $request_method, $sample_size ) {
+	private function get_number_of_submitted_requests( string $endpoint_key, string $request_method, int $sample_size ): int {
 		$threshold = microtime( true ) - $sample_size;
 
 		$this->submitted_request_timestamps[ $endpoint_key ][ $request_method ] = array_values(
@@ -95,7 +95,7 @@ final class RequestThrottler {
 	 * @param int    $sample_size    Seconds to consider.
 	 * @return int
 	 */
-	private function get_number_of_seconds_to_sleep( $endpoint_key, $request_method, $sample_size ) {
+	private function get_number_of_seconds_to_sleep( string $endpoint_key, string $request_method, int $sample_size ): int {
 		$available_again = min( $this->submitted_request_timestamps[ $endpoint_key ][ $request_method ] ) + $sample_size;
 		$now             = microtime( true );
 
