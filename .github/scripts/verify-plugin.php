@@ -41,7 +41,7 @@ WP_CLI::log( sprintf(
 
 // Environment the workflow is supposed to have set up.
 $check( defined( 'WC_VERSION' ), 'WooCommerce is loaded' );
-$check( is_plugin_active( 'bunq-for-woocommerce/bunq-for-woocommerce.php' ), 'bunq for WooCommerce is active' );
+$check( is_plugin_active( 'pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php' ), 'Pay with bunq for WooCommerce is active' );
 
 // The plugin's classes are autoloaded from src/.
 $check( class_exists( Plugin::class ), 'Plugin class is autoloaded' );
@@ -89,12 +89,12 @@ $check( function_exists( 'as_schedule_single_action' ), 'Action Scheduler is ava
 // and load the Dutch file directly (switch_to_locale() would need nl_NL installed site-wide).
 global $wp_textdomain_registry;
 if ( $wp_textdomain_registry instanceof WP_Textdomain_Registry ) {
-    $check( false !== $wp_textdomain_registry->get( 'bunq-for-woocommerce', 'nl_NL' ), 'plugin registered languages/ for just-in-time translation loading' );
+    $check( false !== $wp_textdomain_registry->get( 'pay-with-bunq-for-woocommerce', 'nl_NL' ), 'plugin registered languages/ for just-in-time translation loading' );
 }
-$dutch_mo = WP_PLUGIN_DIR . '/bunq-for-woocommerce/languages/bunq-for-woocommerce-nl_NL.mo';
-$loaded   = load_textdomain( 'bunq-for-woocommerce', $dutch_mo, 'nl_NL' );
-$check( $loaded && 'Bankrekening' === __( 'Bank account', 'bunq-for-woocommerce' ), 'Dutch translation file loads' );
-unload_textdomain( 'bunq-for-woocommerce' );
+$dutch_mo = WP_PLUGIN_DIR . '/pay-with-bunq-for-woocommerce/languages/pay-with-bunq-for-woocommerce-nl_NL.mo';
+$loaded   = load_textdomain( 'pay-with-bunq-for-woocommerce', $dutch_mo, 'nl_NL' );
+$check( $loaded && 'Bankrekening' === __( 'Bank account', 'pay-with-bunq-for-woocommerce' ), 'Dutch translation file loads' );
+unload_textdomain( 'pay-with-bunq-for-woocommerce' );
 if ( class_exists( 'WP_Translation_Controller' ) ) {
     WP_Translation_Controller::get_instance()->set_locale( determine_locale() );
 }
@@ -103,7 +103,7 @@ if ( class_exists( 'WP_Translation_Controller' ) ) {
 if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' )
     && class_exists( 'Automattic\WooCommerce\Internal\Features\FeaturesController' )
 ) {
-    $plugin_file    = 'bunq-for-woocommerce/bunq-for-woocommerce.php';
+    $plugin_file    = 'pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php';
     $known_features = wc_get_container()
         ->get( Automattic\WooCommerce\Internal\Features\FeaturesController::class )
         ->get_features( false, true );
@@ -149,4 +149,4 @@ if ( $failures ) {
     WP_CLI::error( count( $failures ) . ' check(s) failed:' . PHP_EOL . ' - ' . implode( PHP_EOL . ' - ', $failures ) );
 }
 
-WP_CLI::success( 'bunq for WooCommerce loads and registers correctly.' );
+WP_CLI::success( 'Pay with bunq for WooCommerce loads and registers correctly.' );

@@ -126,7 +126,7 @@ final class CheckoutIntegration extends AbstractPaymentMethodType {
 			'direct_gateway'  => $this->gateway->direct_gateway,
 			'icons'           => $this->gateway->get_icons( $total ),
 			'limits'          => $this->gateway->get_amount_limits(),
-			'select_label'    => __( 'Payment method', 'bunq-for-woocommerce' ),
+			'select_label'    => __( 'Payment method', 'pay-with-bunq-for-woocommerce' ),
 			'supports'        => array_values( array_filter( $this->gateway->supports, array( $this->gateway, 'supports' ) ) ),
 		);
 	}

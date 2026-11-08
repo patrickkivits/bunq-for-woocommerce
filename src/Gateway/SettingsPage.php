@@ -19,7 +19,7 @@ final class SettingsPage {
 
 	const SCRIPT_PATH = 'assets/js/admin-settings.js';
 	const STYLE_PATH  = 'assets/css/admin-settings.css';
-	const HANDLE      = 'bunq-for-woocommerce-admin-settings';
+	const HANDLE      = 'pay-with-bunq-for-woocommerce-admin-settings';
 
 	/**
 	 * The bunq Help article about setting up the plugin.
@@ -39,9 +39,9 @@ final class SettingsPage {
 			self::HANDLE,
 			'bunqForWooCommerceSettings',
 			array(
-				'copiedAnnouncement' => __( 'Redirect URL copied to the clipboard.', 'bunq-for-woocommerce' ),
-				'saveToSwitchMode'   => __( 'Save the settings to choose from the bank accounts of the other mode.', 'bunq-for-woocommerce' ),
-				'confirmDisconnect'  => __( 'Disconnect the shop from bunq? Customers can no longer pay with bunq until you connect again.', 'bunq-for-woocommerce' ),
+				'copiedAnnouncement' => __( 'Redirect URL copied to the clipboard.', 'pay-with-bunq-for-woocommerce' ),
+				'saveToSwitchMode'   => __( 'Save the settings to choose from the bank accounts of the other mode.', 'pay-with-bunq-for-woocommerce' ),
+				'confirmDisconnect'  => __( 'Disconnect the shop from bunq? Customers can no longer pay with bunq until you connect again.', 'pay-with-bunq-for-woocommerce' ),
 			)
 		);
 	}
@@ -58,13 +58,13 @@ final class SettingsPage {
 		if ( ! empty( $notices['error'] ) ) {
 			?>
 			<div class="notice notice-error inline">
-				<p><strong><?php esc_html_e( 'bunq could not be connected:', 'bunq-for-woocommerce' ); ?></strong> <?php echo esc_html( $notices['error'] ); ?></p>
+				<p><strong><?php esc_html_e( 'bunq could not be connected:', 'pay-with-bunq-for-woocommerce' ); ?></strong> <?php echo esc_html( $notices['error'] ); ?></p>
 				<p>
 					<?php
 					printf(
 						/* translators: %s: link to the WooCommerce log page */
-						esc_html__( 'Details are logged in %s (source: bunq).', 'bunq-for-woocommerce' ),
-						'<a href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) . '">' . esc_html__( 'WooCommerce > Status > Logs', 'bunq-for-woocommerce' ) . '</a>'
+						esc_html__( 'Details are logged in %s (source: bunq).', 'pay-with-bunq-for-woocommerce' ),
+						'<a href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) . '">' . esc_html__( 'WooCommerce > Status > Logs', 'pay-with-bunq-for-woocommerce' ) . '</a>'
 					);
 					?>
 				</p>
@@ -110,22 +110,22 @@ final class SettingsPage {
 		?>
 		<tr valign="top" class="bunq-redirect-row">
 			<th scope="row" class="titledesc">
-				<label for="bunq-redirect-url"><?php esc_html_e( 'Redirect URL', 'bunq-for-woocommerce' ); ?></label>
+				<label for="bunq-redirect-url"><?php esc_html_e( 'Redirect URL', 'pay-with-bunq-for-woocommerce' ); ?></label>
 			</th>
 			<td class="forminp">
 				<span class="bunq-copy-field">
 					<input type="text" id="bunq-redirect-url" class="regular-text code bunq-redirect-url" value="<?php echo esc_attr( Gateway::settings_url() ); ?>" readonly />
-					<button type="button" class="button bunq-copy" data-bunq-copy="bunq-redirect-url"><?php esc_html_e( 'Copy', 'bunq-for-woocommerce' ); ?></button>
+					<button type="button" class="button bunq-copy" data-bunq-copy="bunq-redirect-url"><?php esc_html_e( 'Copy', 'pay-with-bunq-for-woocommerce' ); ?></button>
 				</span>
-				<span class="success hidden" aria-hidden="true"><?php esc_html_e( 'Copied!', 'bunq-for-woocommerce' ); ?></span>
+				<span class="success hidden" aria-hidden="true"><?php esc_html_e( 'Copied!', 'pay-with-bunq-for-woocommerce' ); ?></span>
 				<p class="description">
 					<?php
 					printf(
 						/* translators: 1: menu path in the bunq app, 2: action in the bunq app, 3: action in the bunq app */
-						esc_html__( 'In the bunq app, go to %1$s, tap %2$s and enter this URL. Then tap %3$s and copy the Client ID and Client Secret into the fields below.', 'bunq-for-woocommerce' ),
-						'<strong>' . esc_html__( 'Developers › OAuth', 'bunq-for-woocommerce' ) . '</strong>',
-						'<strong>' . esc_html__( 'Add Redirect URL', 'bunq-for-woocommerce' ) . '</strong>',
-						'<strong>' . esc_html__( 'Show Client Details', 'bunq-for-woocommerce' ) . '</strong>'
+						esc_html__( 'In the bunq app, go to %1$s, tap %2$s and enter this URL. Then tap %3$s and copy the Client ID and Client Secret into the fields below.', 'pay-with-bunq-for-woocommerce' ),
+						'<strong>' . esc_html__( 'Developers › OAuth', 'pay-with-bunq-for-woocommerce' ) . '</strong>',
+						'<strong>' . esc_html__( 'Add Redirect URL', 'pay-with-bunq-for-woocommerce' ) . '</strong>',
+						'<strong>' . esc_html__( 'Show Client Details', 'pay-with-bunq-for-woocommerce' ) . '</strong>'
 					);
 					?>
 				</p>
@@ -147,8 +147,8 @@ final class SettingsPage {
 		<tr valign="top" class="bunq-connect-row">
 			<th scope="row" class="titledesc"></th>
 			<td class="forminp">
-				<button type="submit" name="save" value="<?php echo esc_attr( Gateway::CONNECT_ACTION ); ?>" class="button bunq-connect-button"><?php esc_html_e( 'Connect to bunq', 'bunq-for-woocommerce' ); ?></button>
-				<p class="description"><?php esc_html_e( 'Saves your settings and opens bunq, which shows a QR code. Scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq then sends you back here.', 'bunq-for-woocommerce' ); ?></p>
+				<button type="submit" name="save" value="<?php echo esc_attr( Gateway::CONNECT_ACTION ); ?>" class="button bunq-connect-button"><?php esc_html_e( 'Connect to bunq', 'pay-with-bunq-for-woocommerce' ); ?></button>
+				<p class="description"><?php esc_html_e( 'Saves your settings and opens bunq, which shows a QR code. Scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq then sends you back here.', 'pay-with-bunq-for-woocommerce' ); ?></p>
 			</td>
 		</tr>
 		<?php
@@ -167,7 +167,7 @@ final class SettingsPage {
 		$sandbox = 'sandbox' === $mode;
 		?>
 		<tr valign="top" class="bunq-connection-row" data-bunq-mode="<?php echo esc_attr( $mode ); ?>" data-bunq-connected="<?php echo $connection['connected'] ? '1' : '0'; ?>"<?php echo $hidden ? ' hidden' : ''; ?>>
-			<th scope="row" class="titledesc"><?php esc_html_e( 'Connection', 'bunq-for-woocommerce' ); ?></th>
+			<th scope="row" class="titledesc"><?php esc_html_e( 'Connection', 'pay-with-bunq-for-woocommerce' ); ?></th>
 			<td class="forminp">
 				<?php if ( $connection['connected'] ) : ?>
 					<p class="bunq-connection-status">
@@ -180,10 +180,10 @@ final class SettingsPage {
 						if ( $connection['account_name'] ) {
 							if ( $sandbox ) {
 								/* translators: %s: name of the bunq user that granted access */
-								$format = esc_html__( 'Connected to the bunq sandbox as %s.', 'bunq-for-woocommerce' );
+								$format = esc_html__( 'Connected to the bunq sandbox as %s.', 'pay-with-bunq-for-woocommerce' );
 							} else {
 								/* translators: %s: name of the bunq user that granted access */
-								$format = esc_html__( 'Connected to bunq as %s.', 'bunq-for-woocommerce' );
+								$format = esc_html__( 'Connected to bunq as %s.', 'pay-with-bunq-for-woocommerce' );
 							}
 
 							// No second period after names such as "Example Shop B.V.".
@@ -193,35 +193,35 @@ final class SettingsPage {
 
 							printf( $format, '<strong>' . esc_html( $connection['account_name'] ) . '</strong>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 						} else {
-							echo $sandbox ? esc_html__( 'Connected to the bunq sandbox.', 'bunq-for-woocommerce' ) : esc_html__( 'Connected to bunq.', 'bunq-for-woocommerce' );
+							echo $sandbox ? esc_html__( 'Connected to the bunq sandbox.', 'pay-with-bunq-for-woocommerce' ) : esc_html__( 'Connected to bunq.', 'pay-with-bunq-for-woocommerce' );
 						}
 						?>
 					</p>
 					<?php if ( $connection['failed'] ) : ?>
 						<?php if ( ! empty( $connection['error'] ) ) : ?>
 							<p class="description">
-								<?php esc_html_e( 'The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it.', 'bunq-for-woocommerce' ); ?>
+								<?php esc_html_e( 'The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it.', 'pay-with-bunq-for-woocommerce' ); ?>
 								<?php
 								/* translators: %s: error message from bunq */
-								printf( esc_html__( 'bunq\'s answer: %s', 'bunq-for-woocommerce' ), '<code>' . esc_html( $connection['error'] ) . '</code>' );
+								printf( esc_html__( 'bunq\'s answer: %s', 'pay-with-bunq-for-woocommerce' ), '<code>' . esc_html( $connection['error'] ) . '</code>' );
 								?>
 							</p>
 						<?php else : ?>
-							<p class="description"><?php esc_html_e( 'bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it.', 'bunq-for-woocommerce' ); ?></p>
+							<p class="description"><?php esc_html_e( 'bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it.', 'pay-with-bunq-for-woocommerce' ); ?></p>
 						<?php endif; ?>
 					<?php endif; ?>
 					<p class="bunq-connection-actions">
-						<button type="submit" name="save" value="<?php echo esc_attr( Gateway::CONNECT_ACTION ); ?>" class="button bunq-connect-button"><?php esc_html_e( 'Connect again', 'bunq-for-woocommerce' ); ?></button>
-						<button type="button" class="button-link bunq-edit-client"><?php esc_html_e( 'Change OAuth client', 'bunq-for-woocommerce' ); ?></button>
-						<a href="<?php echo esc_url( $connection['disconnect_url'] ); ?>" class="button-link button-link-delete bunq-disconnect"><?php esc_html_e( 'Disconnect', 'bunq-for-woocommerce' ); ?></a>
+						<button type="submit" name="save" value="<?php echo esc_attr( Gateway::CONNECT_ACTION ); ?>" class="button bunq-connect-button"><?php esc_html_e( 'Connect again', 'pay-with-bunq-for-woocommerce' ); ?></button>
+						<button type="button" class="button-link bunq-edit-client"><?php esc_html_e( 'Change OAuth client', 'pay-with-bunq-for-woocommerce' ); ?></button>
+						<a href="<?php echo esc_url( $connection['disconnect_url'] ); ?>" class="button-link button-link-delete bunq-disconnect"><?php esc_html_e( 'Disconnect', 'pay-with-bunq-for-woocommerce' ); ?></a>
 					</p>
 				<?php else : ?>
-					<p class="bunq-connection-status"><?php echo $sandbox ? esc_html__( 'Not connected to the bunq sandbox.', 'bunq-for-woocommerce' ) : esc_html__( 'Not connected to bunq.', 'bunq-for-woocommerce' ); ?></p>
+					<p class="bunq-connection-status"><?php echo $sandbox ? esc_html__( 'Not connected to the bunq sandbox.', 'pay-with-bunq-for-woocommerce' ) : esc_html__( 'Not connected to bunq.', 'pay-with-bunq-for-woocommerce' ); ?></p>
 					<p class="description">
 						<?php
 						echo $connection['client_saved']
-							? esc_html__( 'Click "Connect to bunq" below and scan the QR code with the bunq app.', 'bunq-for-woocommerce' )
-							: esc_html__( 'Register the redirect URL in the bunq app and enter the Client ID and Client Secret of your OAuth client below.', 'bunq-for-woocommerce' );
+							? esc_html__( 'Click "Connect to bunq" below and scan the QR code with the bunq app.', 'pay-with-bunq-for-woocommerce' )
+							: esc_html__( 'Register the redirect URL in the bunq app and enter the Client ID and Client Secret of your OAuth client below.', 'pay-with-bunq-for-woocommerce' );
 						?>
 					</p>
 				<?php endif; ?>

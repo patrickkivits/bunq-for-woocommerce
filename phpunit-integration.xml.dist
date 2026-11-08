@@ -9,7 +9,7 @@
          backupGlobals="false"
          failOnWarning="true">
     <testsuites>
-        <testsuite name="bunq for WooCommerce integration">
+        <testsuite name="Pay with bunq for WooCommerce integration">
             <directory>tests/Integration</directory>
         </testsuite>
     </testsuites>

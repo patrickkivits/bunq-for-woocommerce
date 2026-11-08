@@ -23,6 +23,6 @@ define( 'WP_DEBUG', true );
 
 define( 'WP_TESTS_DOMAIN', 'shop.example' );
 define( 'WP_TESTS_EMAIL', 'admin@shop.example' );
-define( 'WP_TESTS_TITLE', 'bunq for WooCommerce tests' );
+define( 'WP_TESTS_TITLE', 'Pay with bunq for WooCommerce tests' );
 define( 'WP_PHP_BINARY', 'php' );
 define( 'WPLANG', '' );

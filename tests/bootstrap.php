@@ -18,7 +18,7 @@ BunqTest\Environment::reset();
 // PHP/OpenSSL build; seed that so loading the plugin does not depend on it (RequirementsTest covers the check).
 BunqTest\Environment::$options['wc_bunq_gateway.requirements'] = md5(PHP_VERSION . '|' . (defined('OPENSSL_VERSION_TEXT') ? OPENSSL_VERSION_TEXT : ''));
 
-require dirname(__DIR__) . '/bunq-for-woocommerce.php';
+require dirname(__DIR__) . '/pay-with-bunq-for-woocommerce.php';
 
 do_action('woocommerce_blocks_loaded');  // registers the block checkout integration
 

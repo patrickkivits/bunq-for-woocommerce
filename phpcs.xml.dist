@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="bunq for WooCommerce">
+<ruleset name="Pay with bunq for WooCommerce">
     <description>WordPress Coding Standards for the plugin code; tests and development scripts follow their own style.</description>
 
     <file>.</file>
@@ -36,7 +36,7 @@
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
-                <element value="bunq-for-woocommerce"/>
+                <element value="pay-with-bunq-for-woocommerce"/>
             </property>
         </properties>
     </rule>

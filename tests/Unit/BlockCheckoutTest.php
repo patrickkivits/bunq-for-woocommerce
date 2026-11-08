@@ -71,7 +71,7 @@ final class BlockCheckoutTest extends TestCase
         $this->assertSame(array('wc-bunq-blocks-integration'), $method->get_payment_method_script_handles());
 
         $script = Environment::$registeredScripts['wc-bunq-blocks-integration'];
-        $this->assertSame('https://shop.example/wp-content/plugins/bunq-for-woocommerce/assets/js/block-checkout.js', $script['src']);
+        $this->assertSame('https://shop.example/wp-content/plugins/pay-with-bunq-for-woocommerce/assets/js/block-checkout.js', $script['src']);
         $this->assertSame(array('wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'), $script['deps']);
         $this->assertSame((string) filemtime(dirname(__DIR__, 2) . '/assets/js/block-checkout.js'), $script['ver'], 'Cache busting by modification time');
         $this->assertTrue($script['in_footer']);
@@ -97,7 +97,7 @@ final class BlockCheckoutTest extends TestCase
             'direct_gateway' => true,
             'icons' => array(array(
                 'id' => 'ideal',
-                'src' => 'https://shop.example/wp-content/plugins/bunq-for-woocommerce/assets/images/ideal-wero.svg',
+                'src' => 'https://shop.example/wp-content/plugins/pay-with-bunq-for-woocommerce/assets/images/ideal-wero.svg',
                 'alt' => 'iDEAL | Wero',
             )),
             'limits' => null,

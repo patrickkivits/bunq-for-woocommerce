@@ -28,24 +28,24 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 <p>
 	<?php
 	/* translators: %s: customer's first name */
-	printf( esc_html__( 'Hi %s,', 'bunq-for-woocommerce' ), esc_html( $order->get_billing_first_name() ) );
+	printf( esc_html__( 'Hi %s,', 'pay-with-bunq-for-woocommerce' ), esc_html( $order->get_billing_first_name() ) );
 	?>
 </p>
 <p>
 	<?php
 	printf(
 		/* translators: 1: order number, 2: order total */
-		esc_html__( 'You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact.', 'bunq-for-woocommerce' ),
+		esc_html__( 'You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact.', 'pay-with-bunq-for-woocommerce' ),
 		esc_html( $order->get_order_number() ),
 		wp_kses_post( $order->get_formatted_order_total() )
 	);
 	?>
 </p>
 <p style="margin: 24px 0;">
-	<a href="<?php echo esc_url( $payment_url ); ?>" style="display: inline-block; padding: 12px 24px; border-radius: 4px; background-color: <?php echo esc_attr( $bunq_for_woocommerce_button_color ); ?>; color: <?php echo esc_attr( $bunq_for_woocommerce_button_text ); ?>; font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Pay now', 'bunq-for-woocommerce' ); ?></a>
+	<a href="<?php echo esc_url( $payment_url ); ?>" style="display: inline-block; padding: 12px 24px; border-radius: 4px; background-color: <?php echo esc_attr( $bunq_for_woocommerce_button_color ); ?>; color: <?php echo esc_attr( $bunq_for_woocommerce_button_text ); ?>; font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Pay now', 'pay-with-bunq-for-woocommerce' ); ?></a>
 </p>
 <p>
-	<?php esc_html_e( 'Does the button not work? Copy this link into your browser:', 'bunq-for-woocommerce' ); ?>
+	<?php esc_html_e( 'Does the button not work? Copy this link into your browser:', 'pay-with-bunq-for-woocommerce' ); ?>
 	<br>
 	<a href="<?php echo esc_url( $payment_url ); ?>"><?php echo esc_html( $payment_url ); ?></a>
 </p>

@@ -74,7 +74,7 @@ final class PaymentLink {
 		}
 
 		if ( self::can_send( $order ) && $this->connected_gateway() ) {
-			$actions[ self::ACTION ] = __( 'Send bunq payment link to customer', 'bunq-for-woocommerce' );
+			$actions[ self::ACTION ] = __( 'Send bunq payment link to customer', 'pay-with-bunq-for-woocommerce' );
 		}
 
 		return $actions;
@@ -102,19 +102,19 @@ final class PaymentLink {
 		$gateway = $this->connected_gateway();
 
 		if ( ! $gateway ) {
-			$this->report_error( __( 'The bunq payment link was not sent: connect your bunq account in the bunq payment settings first.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link was not sent: connect your bunq account in the bunq payment settings first.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
 
 		if ( ! self::can_send( $order ) ) {
-			$this->report_error( __( 'The bunq payment link was not sent: only unpaid orders in euros can be paid with a bunq payment link.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link was not sent: only unpaid orders in euros can be paid with a bunq payment link.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
 
 		if ( ! $order->get_billing_email() ) {
-			$this->report_error( __( 'The bunq payment link was not sent: the order has no billing email address.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link was not sent: the order has no billing email address.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
@@ -122,7 +122,7 @@ final class PaymentLink {
 		$email = $this->email();
 
 		if ( ! $email || ! $email->is_enabled() ) {
-			$this->report_error( __( 'The bunq payment link was not sent: the "bunq payment link" email is disabled in WooCommerce > Settings > Emails.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link was not sent: the "bunq payment link" email is disabled in WooCommerce > Settings > Emails.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
@@ -131,13 +131,13 @@ final class PaymentLink {
 			$link = $gateway->get_payment_link( $order );
 		} catch ( Throwable $exception ) {
 			Logger::log( $exception );
-			$this->report_error( __( 'The bunq payment link could not be created. The WooCommerce logs (source: bunq) have the details.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link could not be created. The WooCommerce logs (source: bunq) have the details.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
 
 		if ( null === $link['url'] ) {
-			$this->report_error( __( 'The bunq payment link was not sent: a payment for this order already came in through bunq. Check the order notes.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link was not sent: a payment for this order already came in through bunq. Check the order notes.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
@@ -149,7 +149,7 @@ final class PaymentLink {
 		}
 
 		if ( ! $email->trigger( $order->get_id(), $order, $link['url'] ) ) {
-			$this->report_error( __( 'The bunq payment link could not be emailed to the customer. Check that your site can send email.', 'bunq-for-woocommerce' ) );
+			$this->report_error( __( 'The bunq payment link could not be emailed to the customer. Check that your site can send email.', 'pay-with-bunq-for-woocommerce' ) );
 
 			return;
 		}
@@ -157,7 +157,7 @@ final class PaymentLink {
 		$order->add_order_note(
 			sprintf(
 				/* translators: %s: customer's email address */
-				__( 'bunq payment link sent to %s', 'bunq-for-woocommerce' ),
+				__( 'bunq payment link sent to %s', 'pay-with-bunq-for-woocommerce' ),
 				$order->get_billing_email()
 			)
 		);

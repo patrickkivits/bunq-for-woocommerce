@@ -78,7 +78,7 @@ jobs:
           PHP
           wp core install \
             --url=http://localhost \
-            --title="bunq for WooCommerce CI" \
+            --title="Pay with bunq for WooCommerce CI" \
             --admin_user=admin \
             --admin_password=admin \
             --admin_email=admin@example.com \
@@ -95,12 +95,12 @@ jobs:
           wp plugin list --name=woocommerce
 
       # The files of the release zip, including the dependencies in vendor/.
-      - name: Install and activate bunq for WooCommerce
+      - name: Install and activate Pay with bunq for WooCommerce
         run: |
           .github/scripts/build-plugin.sh HEAD "$WP_PATH/wp-content/plugins"
-          wp plugin activate bunq-for-woocommerce
-          wp plugin list --name=bunq-for-woocommerce
-          test "$(wp plugin list --name=bunq-for-woocommerce --field=status)" = "active"
+          wp plugin activate pay-with-bunq-for-woocommerce
+          wp plugin list --name=pay-with-bunq-for-woocommerce
+          test "$(wp plugin list --name=pay-with-bunq-for-woocommerce --field=status)" = "active"
 
       - name: Verify the gateway is registered with WooCommerce
         run: wp eval-file "$GITHUB_WORKSPACE/.github/scripts/verify-plugin.php"
@@ -122,8 +122,8 @@ jobs:
           cat "$log"
           echo "::endgroup::"
 
-          plugin_entries=$(grep 'plugins/bunq-for-woocommerce/' "$log" \
-            | grep -v 'plugins/bunq-for-woocommerce/vendor/' || true)
+          plugin_entries=$(grep 'plugins/pay-with-bunq-for-woocommerce/' "$log" \
+            | grep -v 'plugins/pay-with-bunq-for-woocommerce/vendor/' || true)
 
           if [ -n "$plugin_entries" ]; then
             echo "::error::The plugin raised PHP notices or warnings:"

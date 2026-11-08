@@ -54,12 +54,12 @@ class MethodGateway extends Gateway {
 		$this->description  = '';
 		$this->method_title = sprintf(
 			/* translators: %s: payment method, such as "Bancontact" */
-			__( '%s (bunq)', 'bunq-for-woocommerce' ),
+			__( '%s (bunq)', 'pay-with-bunq-for-woocommerce' ),
 			$this->payment_method['description']
 		);
 		$this->method_description = sprintf(
 			/* translators: %s: payment method, such as "Bancontact" */
-			__( 'Offers %s as a payment option of its own. It uses the connection and settings of the bunq payment method.', 'bunq-for-woocommerce' ),
+			__( 'Offers %s as a payment option of its own. It uses the connection and settings of the bunq payment method.', 'pay-with-bunq-for-woocommerce' ),
 			$this->payment_method['description']
 		);
 		$this->direct_gateway = false;
@@ -103,7 +103,7 @@ class MethodGateway extends Gateway {
 	public function admin_options() {
 		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		echo wpautop( esc_html( $this->get_method_description() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by esc_html().
-		echo '<p><a class="button" href="' . esc_url( self::settings_url() ) . '">' . esc_html__( 'Open the bunq settings', 'bunq-for-woocommerce' ) . '</a></p>';
+		echo '<p><a class="button" href="' . esc_url( self::settings_url() ) . '">' . esc_html__( 'Open the bunq settings', 'pay-with-bunq-for-woocommerce' ) . '</a></p>';
 	}
 
 	/**

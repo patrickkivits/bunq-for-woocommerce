@@ -8,9 +8,9 @@
          failOnRisky="true"
          beStrictAboutOutputDuringTests="true">
     <testsuites>
-        <testsuite name="bunq for WooCommerce">
+        <testsuite name="Pay with bunq for WooCommerce">
             <!-- Not "tests": PHPUnit walks a directory completely before applying excludes, and the integration
-                 bootstrap symlinks tests/wp-content/plugins/bunq-for-woocommerce back to the repository root,
+                 bootstrap symlinks tests/wp-content/plugins/pay-with-bunq-for-woocommerce back to the repository root,
                  which would make that walk loop. -->
             <directory>tests/Unit</directory>
         </testsuite>

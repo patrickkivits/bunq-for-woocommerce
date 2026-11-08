@@ -35,7 +35,7 @@ final class Plugin {
 	/**
 	 * The text domain.
 	 */
-	const TEXT_DOMAIN = 'bunq-for-woocommerce';
+	const TEXT_DOMAIN = 'pay-with-bunq-for-woocommerce';
 
 	/**
 	 * Class names of earlier versions, still available for code that refers to them, with the WooCommerce class

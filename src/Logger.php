@@ -83,7 +83,7 @@ final class Logger {
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Only under WP_DEBUG.
-			error_log( '[bunq for WooCommerce] ' . $message );
+			error_log( '[Pay with bunq for WooCommerce] ' . $message );
 		}
 	}
 

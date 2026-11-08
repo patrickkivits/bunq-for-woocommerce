@@ -65,7 +65,7 @@ final class RequirementsTest extends TestCase
 
         $this->requirements()->disable_plugin();
 
-        $this->assertSame(array('bunq-for-woocommerce/bunq-for-woocommerce.php'), Environment::$deactivatedPlugins);
+        $this->assertSame(array('pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php'), Environment::$deactivatedPlugins);
         $this->assertArrayNotHasKey('activate', $_GET);
     }
 
@@ -94,7 +94,7 @@ final class RequirementsTest extends TestCase
         $notice = ob_get_clean();
 
         $this->assertStringContainsString('class="error"', $notice);
-        $this->assertStringContainsString('bunq for WooCommerce', $notice);
+        $this->assertStringContainsString('Pay with bunq for WooCommerce', $notice);
         $this->assertStringContainsString('cannot be activated due to incompatible environment.', $notice);
     }
 

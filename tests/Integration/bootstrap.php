@@ -22,9 +22,9 @@ if ( ! getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) ) {
 }
 
 // The plugin is loaded from the plugins directory like any other plugin, so that everything keyed on the plugin
-// basename (feature compatibility, is_plugin_active) sees "bunq-for-woocommerce/bunq-for-woocommerce.php".
-if ( ! file_exists( $plugins_dir . '/bunq-for-woocommerce' ) ) {
-    symlink( '../../..', $plugins_dir . '/bunq-for-woocommerce' );
+// basename (feature compatibility, is_plugin_active) sees "pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php".
+if ( ! file_exists( $plugins_dir . '/pay-with-bunq-for-woocommerce' ) ) {
+    symlink( '../../..', $plugins_dir . '/pay-with-bunq-for-woocommerce' );
 }
 
 // WordPress registers its theme directory only when it exists; the "no content" core package ships none.
@@ -35,7 +35,7 @@ if ( ! is_dir( dirname( __DIR__ ) . '/wp-content/themes' ) ) {
 // Both plugins are active, in the order WordPress loads them on a real site (alphabetical).
 $GLOBALS['wp_tests_options'] = array(
     'active_plugins' => array(
-        'bunq-for-woocommerce/bunq-for-woocommerce.php',
+        'pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php',
         'woocommerce/woocommerce.php',
     ),
 );

@@ -15,7 +15,7 @@ use PatrickKivits\BunqForWooCommerce\Plugin;
  */
 final class MethodGatewayTest extends TestCase
 {
-    const IMAGES = 'https://shop.example/wp-content/plugins/bunq-for-woocommerce/assets/images/';
+    const IMAGES = 'https://shop.example/wp-content/plugins/pay-with-bunq-for-woocommerce/assets/images/';
 
     // --- Logos --------------------------------------------------------------------------------------------------
 
