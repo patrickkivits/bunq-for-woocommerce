@@ -56,6 +56,27 @@ final class ApiClientTest extends TestCase
         $this->assertStringContainsString('BEGIN PUBLIC KEY', file_get_contents(ApiClient::PINNED_PUBLIC_KEY_FILE));
     }
 
+    /**
+     * Guzzle 8 only accepts an allow-list of raw cURL options and throws on CURLOPT_PINNEDPUBLICKEY before
+     * connecting, which broke every production call in 2.0.1 and 2.1.0. The fake server above never reaches
+     * Guzzle's cURL handler, so the production options go through the real one here: to a closed local port,
+     * where getting as far as the connection proves the options were accepted.
+     */
+    public function testTheBundledGuzzleAcceptsTheProductionRequestOptions()
+    {
+        $this->api->load_api_context_from_json(FakeBunqServer::context(array('environment_type' => 'PRODUCTION')));
+        $this->server->respond(array());
+        $this->api->request('GET', 'user/7/monetary-account-bank');
+        // The recorded options also hold the fake server's own client config (its handler); keep the request's.
+        $options = array_intersect_key($this->server->requests[0]['options'], array_flip(array('headers', 'http_errors', 'allow_redirects', 'timeout', 'body', 'curl')));
+        $this->assertArrayHasKey('curl', $options);
+
+        $client = new \GuzzleHttp\Client(array('handler' => \GuzzleHttp\HandlerStack::create(new \GuzzleHttp\Handler\CurlHandler())));
+
+        $this->expectException(\GuzzleHttp\Exception\ConnectException::class);
+        $client->request('GET', 'http://127.0.0.1:1/', $options + array('connect_timeout' => 2));
+    }
+
     public function testAnAnswerNotSignedByBunqIsRejected()
     {
         $this->api->load_api_context_from_json(FakeBunqServer::context());
