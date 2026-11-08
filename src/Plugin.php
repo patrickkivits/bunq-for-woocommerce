@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PatrickKivits\BunqForWooCommerce\Blocks\CheckoutIntegration;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
+use PatrickKivits\BunqForWooCommerce\Gateway\ConnectionHealth;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\PaymentMethods;
@@ -72,6 +73,13 @@ final class Plugin {
 	private $payment_monitor = null;
 
 	/**
+	 * The check of the connection with bunq.
+	 *
+	 * @var ConnectionHealth|null
+	 */
+	private $connection_health = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $file The main plugin file.
@@ -123,6 +131,8 @@ final class Plugin {
 		}
 		add_action( 'woocommerce_blocks_loaded', array( $this, 'register_block_checkout' ) );
 		$this->payment_monitor()->register_hooks();
+		$this->connection_health()->register_hooks();
+		register_deactivation_hook( $this->file, array( ConnectionHealth::class, 'unschedule' ) );
 	}
 
 	/**
@@ -158,6 +168,19 @@ final class Plugin {
 		}
 
 		return $this->payment_monitor;
+	}
+
+	/**
+	 * The check of the connection with bunq.
+	 *
+	 * @return ConnectionHealth
+	 */
+	public function connection_health() {
+		if ( null === $this->connection_health ) {
+			$this->connection_health = new ConnectionHealth( $this );
+		}
+
+		return $this->connection_health;
 	}
 
 	/**

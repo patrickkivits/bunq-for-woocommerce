@@ -68,8 +68,12 @@ final class PluginLoadingTest extends TestCase
 
         $this->assertSame(array(
             'admin_init',
+            'admin_notices',
+            'admin_post_bunq_check_connection',
             'before_woocommerce_init',
+            'bunq_for_woocommerce_connection_check',
             'bunq_for_woocommerce_follow_up_check',
+            'deactivate_bunq-for-woocommerce/bunq-for-woocommerce.php',
             'init',
             'plugins_loaded',
             'template_redirect',
@@ -83,6 +87,7 @@ final class PluginLoadingTest extends TestCase
             'woocommerce_order_status_cancelled',
             'woocommerce_payment_gateways',
             'woocommerce_rest_prepare_payment_gateway',
+            'woocommerce_system_status_report',
         ), $this->sortedHookNames());
     }
 
@@ -124,9 +129,12 @@ final class PluginLoadingTest extends TestCase
 
         $this->assertSame($this->field($header, ' * Version'), $this->field($readme, 'Stable tag'));
         $this->assertStringContainsString('= ' . Plugin::VERSION . " =\n", $readme, 'The changelog covers this version');
-        foreach (array('Requires at least', 'Requires PHP', 'Tested up to') as $field) {
+        foreach (array('Requires at least', 'Requires PHP') as $field) {
             $this->assertSame($this->field($header, ' * ' . $field), $this->field($readme, $field), $field);
         }
+        // Plugin Check refuses "Tested up to" in the plugin header: it belongs in readme.txt only.
+        $this->assertStringNotContainsString(' * Tested up to:', $header);
+        $this->field($readme, 'Tested up to');
         $this->assertSame(Requirements::MIN_WP_VERSION, $this->field($header, ' * Requires at least'), 'The requirements check enforces the declared minimum');
         $this->assertSame('=== ' . $this->field($header, ' * Plugin Name') . ' ===', strtok($readme, "\n"));
     }
@@ -135,6 +143,20 @@ final class PluginLoadingTest extends TestCase
     {
         foreach (glob(dirname(__DIR__, 2) . '/languages/*.po') as $po) {
             $this->assertFileExists(substr($po, 0, -3) . '.mo', basename($po) . ' has no compiled .mo file');
+        }
+    }
+
+    /**
+     * WordPress before 6.5 takes the end of the translations table from the hash table offset, also when there is no
+     * hash table; a file with offset 0 there does not load at all.
+     */
+    public function testTheShippedTranslationsLoadInOlderWordPressVersions()
+    {
+        foreach (glob(dirname(__DIR__, 2) . '/languages/*.mo') as $mo) {
+            $header = unpack('Vmagic/Vrevision/Vtotal/Voriginals/Vtranslations/Vhash_length/Vhash_addr', file_get_contents($mo, false, null, 0, 28));
+
+            $this->assertSame(0x950412de, $header['magic'], basename($mo));
+            $this->assertSame($header['translations'] + 8 * $header['total'], $header['hash_addr'], basename($mo) . ': the hash table offset must end the translations table');
         }
     }
 

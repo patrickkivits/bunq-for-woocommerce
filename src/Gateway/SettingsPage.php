@@ -198,7 +198,17 @@ final class SettingsPage {
 						?>
 					</p>
 					<?php if ( $connection['failed'] ) : ?>
-						<p class="description"><?php esc_html_e( 'bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it.', 'bunq-for-woocommerce' ); ?></p>
+						<?php if ( ! empty( $connection['error'] ) ) : ?>
+							<p class="description">
+								<?php esc_html_e( 'The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it.', 'bunq-for-woocommerce' ); ?>
+								<?php
+								/* translators: %s: error message from bunq */
+								printf( esc_html__( 'bunq\'s answer: %s', 'bunq-for-woocommerce' ), '<code>' . esc_html( $connection['error'] ) . '</code>' );
+								?>
+							</p>
+						<?php else : ?>
+							<p class="description"><?php esc_html_e( 'bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it.', 'bunq-for-woocommerce' ); ?></p>
+						<?php endif; ?>
 					<?php endif; ?>
 					<p class="bunq-connection-actions">
 						<button type="submit" name="save" value="<?php echo esc_attr( Gateway::CONNECT_ACTION ); ?>" class="button bunq-connect-button"><?php esc_html_e( 'Connect again', 'bunq-for-woocommerce' ); ?></button>

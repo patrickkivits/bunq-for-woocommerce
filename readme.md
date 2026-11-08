@@ -17,6 +17,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 - Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 - Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
+- An hourly check of the connection with bunq: when bunq stops accepting it (access removed in the bunq app, a new IP address, a closed bank account), every admin page shows a warning before checkouts fail. The outcome is in **WooCommerce** > **Status**.
 - Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
 - Translated into Dutch, French and German; other languages can be added from the `languages/` template.
 
@@ -77,6 +78,12 @@ Once the shop is connected, the settings page hides the Client ID and Client Sec
 
 Live mode and the sandbox each have their own OAuth client and connection; the **Test mode** checkbox switches between them. The Client Secret is never shown again after saving it: leave the field empty to keep it.
 
+### Connection check
+
+Every hour the plugin checks that bunq still accepts the connection of the active mode and that the selected bank account can receive payments. When bunq refuses it (the access was removed in the bunq app, the shop now connects from another IP address, or the bank account was closed), shop managers see a warning with bunq's answer on every admin page until the connection works again; click **Connect again** on the settings page to fix it. When bunq cannot be reached at all, the warning only appears after three checks in a row failed. **Check again** in the warning runs the check right away.
+
+**WooCommerce** > **Status** has a **bunq for WooCommerce** section with the mode, the connection, the outcome of the last check and when the next one runs. It is part of the system report, so include that report when asking for support.
+
 The bank account list is cached for an hour. Click **Refresh bank accounts** below the bank account select after adding an account in the bunq app.
 
 ## Refunds
@@ -135,6 +142,7 @@ The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForW
 | `Gateway\Gateway` | The WooCommerce payment gateway: settings, checkout, payments, refunds, payment status |
 | `Gateway\CallbackHandler` | The callback bunq sends to `/wc-api/wc_bunq_gateway/` |
 | `Gateway\PaymentMethods`, `Gateway\SettingsFields` | The bunq.me payment methods and the settings form |
+| `Gateway\ConnectionHealth` | The hourly connection check (Action Scheduler), the admin notice when it fails and the **WooCommerce** > **Status** section |
 | `Orders\PaymentMonitor` | Payment checks on return and from Action Scheduler; cancels the bunq payment request of cancelled orders |
 | `Orders\OrderLock` | Lets one payment check per order run at a time (callback, return and scheduled checks can coincide) |
 | `Blocks\CheckoutIntegration` | The block checkout payment method (script in `assets/js/block-checkout.js`) |

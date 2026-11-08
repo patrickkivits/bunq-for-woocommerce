@@ -504,7 +504,8 @@ class Gateway extends WC_Payment_Gateway {
 	 * @param string $mode "live" or "sandbox".
 	 * @return array {
 	 *     @type bool        $connected     Whether there is an API context.
-	 *     @type bool        $failed        Whether bunq recently rejected it.
+	 *     @type bool        $failed        Whether bunq recently rejected it, or the connection check failed.
+	 *     @type string      $error         Why the connection check failed.
 	 *     @type bool        $client_saved  Whether the OAuth client id and secret are saved.
 	 *     @type string|null $account_name  The bunq user that granted access.
 	 *     @type string      $disconnect_url Where the "Disconnect" link goes.
@@ -515,10 +516,12 @@ class Gateway extends WC_Payment_Gateway {
 		$credentials = $this->get_credentials();
 		$api_context = isset( $credentials[ $prefix . 'api_context' ] ) ? (string) $credentials[ $prefix . 'api_context' ] : '';
 		$active      = self::mode( 'yes' === $this->get_option( 'testmode' ) ) === $mode;
+		$problem     = '' !== $api_context && $active ? ConnectionHealth::problem( $this ) : null;
 
 		return array(
 			'connected'      => '' !== $api_context,
-			'failed'         => '' !== $api_context && $active && (bool) get_transient( self::CONTEXT_FAILED_TRANSIENT ),
+			'failed'         => '' !== $api_context && $active && ( $problem || get_transient( self::CONTEXT_FAILED_TRANSIENT ) ),
+			'error'          => $problem ? $problem['error'] : '',
 			'client_saved'   => '' !== (string) $this->get_option( $prefix . 'oauth_client_id' ) && '' !== (string) $this->get_option( $prefix . 'oauth_client_secret' ),
 			'account_name'   => '' !== $api_context ? $this->api->get_account_name( $api_context ) : null,
 			'disconnect_url' => wp_nonce_url( add_query_arg( self::DISCONNECT_ACTION, $mode, self::settings_url() ), self::DISCONNECT_ACTION . '_' . $mode ),
@@ -570,6 +573,7 @@ class Gateway extends WC_Payment_Gateway {
 		delete_transient( self::BANK_ACCOUNTS_TRANSIENT );
 		delete_transient( self::CONTEXT_FAILED_TRANSIENT );
 		delete_transient( self::LAST_ERROR_TRANSIENT );
+		ConnectionHealth::forget( $mode );
 
 		Logger::log( 'Disconnected from bunq ' . ( 'sandbox' === $mode ? 'sandbox' : 'production' ), 'info' );
 
@@ -646,6 +650,7 @@ class Gateway extends WC_Payment_Gateway {
 		// the caller can show them to the admin instead of silently leaving the API context empty.
 		$this->set_credential( ( $testmode ? 'test_api_context' : 'api_context' ), $this->api->create_api_context( $api_key, $testmode ) );
 		delete_transient( self::CONTEXT_FAILED_TRANSIENT );
+		ConnectionHealth::record( self::mode( $testmode ) );
 		Logger::log( 'bunq API context created for ' . ( $testmode ? 'sandbox' : 'production' ), 'info' );
 
 		if ( ! $register_callback ) {
@@ -689,12 +694,14 @@ class Gateway extends WC_Payment_Gateway {
 			$this->set_credential( 'test_api_context', '' );
 			$this->set_credential( 'test_api_key', '' );
 			delete_transient( self::BANK_ACCOUNTS_TRANSIENT );
+			ConnectionHealth::forget( 'sandbox' );
 		}
 
 		if ( empty( $this->settings['oauth_client_id'] ) || empty( $this->settings['oauth_client_secret'] ) ) {
 			$this->set_credential( 'api_context', '' );
 			$this->set_credential( 'api_key', '' );
 			delete_transient( self::BANK_ACCOUNTS_TRANSIENT );
+			ConnectionHealth::forget( 'live' );
 		}
 	}
 
@@ -1315,7 +1322,7 @@ class Gateway extends WC_Payment_Gateway {
 		$call_count = $this->api->get_call_count();
 
 		try {
-			return $calls();
+			$result = $calls();
 		} catch ( ApiException $exception ) {
 			// Only when none of the calls went through: repeating one that did could, for example, create a second
 			// payment request. And not while a recent recreation failed: that costs several bunq calls per request.
@@ -1325,9 +1332,26 @@ class Gateway extends WC_Payment_Gateway {
 
 			Logger::log( 'bunq refused a new session (' . Logger::format_error( $exception ) . '), recreating the API context from the saved API key', 'warning' );
 			$this->recreate_api_context();
+			$result = $calls();
 		}
 
-		return $calls();
+		ConnectionHealth::record_success( self::mode( 'yes' === $this->get_setting( 'testmode' ) ) );
+
+		return $result;
+	}
+
+	/**
+	 * Check that the connection with bunq works: the API context of the active mode, the access it was granted and
+	 * the selected bank account. Recreates the API context like the other calls when bunq refuses its session.
+	 *
+	 * @throws Throwable When it does not.
+	 */
+	public function check_connection() {
+		$this->call_bunq(
+			function () {
+				$this->api->check_connection( $this->get_monetary_account_bank_id() );
+			}
+		);
 	}
 
 	/**
@@ -1357,16 +1381,21 @@ class Gateway extends WC_Payment_Gateway {
 	 * @throws Throwable When it could not be recreated.
 	 */
 	private function recreate_api_context() {
+		$mode = self::mode( 'yes' === $this->get_setting( 'testmode' ) );
+
 		try {
 			$this->refresh_api_context( false );
 		} catch ( Throwable $exception ) {
 			set_transient( self::CONTEXT_FAILED_TRANSIENT, 1, 5 * MINUTE_IN_SECONDS );
+			ConnectionHealth::record( $mode, $exception );
 			throw $exception;
 		}
 
 		if ( ! $this->load_api_context() ) {
+			$exception = new Exception( 'bunq API context is not available. Complete the OAuth authorization in WooCommerce > Settings > Payments > bunq.' );
 			set_transient( self::CONTEXT_FAILED_TRANSIENT, 1, 5 * MINUTE_IN_SECONDS );
-			throw new Exception( 'bunq API context is not available. Complete the OAuth authorization in WooCommerce > Settings > Payments > bunq.' );
+			ConnectionHealth::record( $mode, $exception );
+			throw $exception;
 		}
 	}
 

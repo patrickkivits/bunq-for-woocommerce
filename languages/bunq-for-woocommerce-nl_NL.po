@@ -405,3 +405,127 @@ msgstr "Toon betaalmethoden apart"
 #: src/Gateway/SettingsFields.php:150
 msgid "Customers see each payment method with its own logo at checkout, instead of one bunq option, and go straight to it on bunq.me. Title, description and direct gateway then do not apply, and payments from a bunq account are not offered separately."
 msgstr "Klanten zien bij het afrekenen elke betaalmethode met een eigen logo in plaats van één bunq-optie, en gaan op bunq.me direct naar die methode. Titel, omschrijving en directe gateway gelden dan niet, en betalen vanaf een bunq-rekening wordt niet apart aangeboden."
+
+#: src/Gateway/ConnectionHealth.php:312
+msgid "The connection with bunq works."
+msgstr "De koppeling met bunq werkt."
+
+#. translators: %s: how long, for example "3 hours"
+#: src/Gateway/ConnectionHealth.php:345
+msgid "The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached."
+msgstr "De bunq-sandbox is al %s niet bereikbaar. Betalingen met bunq mislukken zolang hij niet bereikbaar is."
+
+#. translators: %s: how long, for example "3 hours"
+#: src/Gateway/ConnectionHealth.php:347
+msgid "bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached."
+msgstr "bunq is al %s niet bereikbaar. Betalingen met bunq mislukken zolang bunq niet bereikbaar is."
+
+#: src/Gateway/ConnectionHealth.php:352
+msgid "The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
+msgstr "De koppeling met de bunq-sandbox werkt niet meer, daarom mislukken betalingen met bunq. Koppel opnieuw op de bunq-instellingenpagina. Dit gebeurt als de toegang in de bunq-app is verwijderd of als de winkel nu vanaf een ander IP-adres verbinding maakt."
+
+#: src/Gateway/ConnectionHealth.php:353
+msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
+msgstr "De koppeling met bunq werkt niet meer, daarom mislukken betalingen met bunq. Koppel opnieuw op de bunq-instellingenpagina. Dit gebeurt als de toegang in de bunq-app is verwijderd of als de winkel nu vanaf een ander IP-adres verbinding maakt."
+
+#: src/Gateway/ConnectionHealth.php:361
+msgid "bunq for WooCommerce"
+msgstr "bunq for WooCommerce"
+
+#. translators: %s: error message from bunq
+#: src/Gateway/ConnectionHealth.php:366
+msgid "bunq's answer: %s"
+msgstr "Antwoord van bunq: %s"
+
+#: src/Gateway/ConnectionHealth.php:371
+msgid "Go to the bunq settings"
+msgstr "Naar de bunq-instellingen"
+
+#: src/Gateway/ConnectionHealth.php:372
+msgid "Check again"
+msgstr "Opnieuw controleren"
+
+#: src/Gateway/ConnectionHealth.php:399
+msgid "Version"
+msgstr "Versie"
+
+#: src/Gateway/ConnectionHealth.php:407
+msgid "Enabled"
+msgstr "Ingeschakeld"
+
+#: src/Gateway/ConnectionHealth.php:407
+msgid "Yes"
+msgstr "Ja"
+
+#: src/Gateway/ConnectionHealth.php:407
+msgid "No"
+msgstr "Nee"
+
+#: src/Gateway/ConnectionHealth.php:408
+msgid "Mode"
+msgstr "Modus"
+
+#: src/Gateway/ConnectionHealth.php:408
+msgid "Sandbox"
+msgstr "Sandbox"
+
+#: src/Gateway/ConnectionHealth.php:408
+msgid "Live"
+msgstr "Live"
+
+#: src/Gateway/ConnectionHealth.php:411
+msgid "Not connected"
+msgstr "Niet gekoppeld"
+
+#. translators: %s: name of the bunq user that granted access
+#: src/Gateway/ConnectionHealth.php:414
+msgid "Connected as %s"
+msgstr "Gekoppeld als %s"
+
+#: src/Gateway/ConnectionHealth.php:416
+msgid "Connected"
+msgstr "Gekoppeld"
+
+#: src/Gateway/ConnectionHealth.php:422
+msgid "Not checked yet"
+msgstr "Nog niet gecontroleerd"
+
+#: src/Gateway/ConnectionHealth.php:424
+msgid "Works"
+msgstr "Werkt"
+
+#: src/Gateway/ConnectionHealth.php:426
+msgid "Broken"
+msgstr "Werkt niet"
+
+#: src/Gateway/ConnectionHealth.php:426
+msgid "bunq could not be reached"
+msgstr "bunq is niet bereikbaar"
+
+#: src/Gateway/ConnectionHealth.php:433
+msgid "Connection check"
+msgstr "Controle van de koppeling"
+
+#: src/Gateway/ConnectionHealth.php:436
+msgid "Failing since"
+msgstr "Werkt niet sinds"
+
+#: src/Gateway/ConnectionHealth.php:439
+msgid "Last check"
+msgstr "Laatste controle"
+
+#: src/Gateway/ConnectionHealth.php:440
+msgid "Next check"
+msgstr "Volgende controle"
+
+#: src/Gateway/ConnectionHealth.php:440
+msgid "Not scheduled"
+msgstr "Niet ingepland"
+
+#: src/Gateway/ConnectionHealth.php:443
+msgid "Callback URL"
+msgstr "Callback-URL"
+
+#: src/Gateway/SettingsPage.php:203
+msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it."
+msgstr "De koppeling met bunq werkt niet meer, daarom mislukken betalingen met bunq. Koppel opnieuw om dit te herstellen."

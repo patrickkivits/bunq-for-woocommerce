@@ -13,17 +13,19 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'woocommerce_bunq_settings' );
 delete_option( 'bunq_for_woocommerce_credentials' );
 delete_option( 'wc_bunq_gateway.requirements' );
+delete_option( 'bunq_for_woocommerce_connection_health' );
 
 delete_transient( 'wc_bunq_gateway.bunq_get_bank_accounts' );
 delete_transient( 'wc_bunq_gateway.last_error' );
 delete_transient( 'wc_bunq_gateway.last_success' );
 delete_transient( 'wc_bunq_gateway.context_failed' );
 
-// Pending background payment checks (Action Scheduler is available while WooCommerce is active).
+// Pending background payment checks and the connection check (Action Scheduler is available while WooCommerce is active).
 if ( function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'wc_bunq_check_payment' );
 	as_unschedule_all_actions( 'wc_bunq_cancel_payment_request' );
 	as_unschedule_all_actions( 'bunq_for_woocommerce_follow_up_check' );
+	as_unschedule_all_actions( 'bunq_for_woocommerce_connection_check' );
 }
 
 // The OAuth state per user, the payment check lock per order and the callback throttle per payment request.

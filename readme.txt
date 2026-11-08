@@ -21,6 +21,7 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 * Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 * Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
+* An hourly check of the connection with bunq warns on every admin page when bunq stops accepting it, before checkouts fail. The outcome is in WooCommerce > Status.
 * Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
 * Translated into Dutch, French and German.
 
@@ -98,6 +99,10 @@ WooCommerce records the refund as soon as the draft is created, so an unapproved
 = An order does not change status. Where do I look? =
 
 Everything the plugin does with bunq (callbacks received, payments matched, refunds, errors) is written to **WooCommerce** > **Status** > **Logs** (source: `bunq`).
+
+= An admin notice says "The connection with bunq stopped working" =
+
+The plugin checks the connection with bunq every hour. bunq no longer accepts it: the access was removed in the bunq app, the shop now connects from another IP address, or the selected bank account was closed. The notice shows bunq's answer. Click **Connect again** on the bunq settings page and scan the QR code; **Check again** in the notice confirms the fix. WooCommerce > Status shows the outcome of the last check.
 
 = The settings page still says "Not connected" after the authorization, or the bank account list says "bunq rejected the saved connection" =
 
