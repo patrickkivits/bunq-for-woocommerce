@@ -144,6 +144,20 @@ final class PluginLoadingTest extends TestCase
     }
 
     /**
+     * WordPress before 6.5 takes the end of the translations table from the hash table offset, also when there is no
+     * hash table; a file with offset 0 there does not load at all.
+     */
+    public function testTheShippedTranslationsLoadInOlderWordPressVersions()
+    {
+        foreach (glob(dirname(__DIR__, 2) . '/languages/*.mo') as $mo) {
+            $header = unpack('Vmagic/Vrevision/Vtotal/Voriginals/Vtranslations/Vhash_length/Vhash_addr', file_get_contents($mo, false, null, 0, 28));
+
+            $this->assertSame(0x950412de, $header['magic'], basename($mo));
+            $this->assertSame($header['translations'] + 8 * $header['total'], $header['hash_addr'], basename($mo) . ': the hash table offset must end the translations table');
+        }
+    }
+
+    /**
      * A plugin instance that has not registered anything yet.
      */
     private function freshPlugin()
