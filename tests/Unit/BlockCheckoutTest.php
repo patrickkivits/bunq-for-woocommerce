@@ -120,9 +120,6 @@ final class BlockCheckoutTest extends TestCase
     private function gatewayOf(CheckoutIntegration $method)
     {
         $property = new \ReflectionProperty(CheckoutIntegration::class, 'gateway');
-        if (PHP_VERSION_ID < 80100) { // Needed up to PHP 8.0; deprecated since PHP 8.5.
-            $property->setAccessible(true);
-        }
 
         return $property->getValue($method);
     }

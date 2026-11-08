@@ -135,11 +135,6 @@ final class RequestThrottlerTest extends TestCase
 
     private function timestampsProperty()
     {
-        $property = new \ReflectionProperty(RequestThrottler::class, 'submitted_request_timestamps');
-        if (PHP_VERSION_ID < 80100) { // Needed up to PHP 8.0; deprecated since PHP 8.5.
-            $property->setAccessible(true);
-        }
-
-        return $property;
+        return new \ReflectionProperty(RequestThrottler::class, 'submitted_request_timestamps');
     }
 }

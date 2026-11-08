@@ -15,7 +15,7 @@
     <arg value="sp"/>
 
     <!-- The minimum versions from the plugin header. -->
-    <config name="testVersion" value="7.3-"/>
+    <config name="testVersion" value="8.1-"/>
     <config name="minimum_wp_version" value="4.7"/>
 
     <rule ref="WordPress">

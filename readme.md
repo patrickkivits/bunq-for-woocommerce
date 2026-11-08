@@ -31,7 +31,7 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 - [bunq account](https://bunq.com/invite/patrickkivits)
 - HTTPS/SSL certificate (for callbacks/payment processing to work)
-- PHP version: >= 7.3 (up to and including 8.5)
+- PHP version: >= 8.1 (up to and including 8.5)
 - PHP extensions: openssl, curl, json, mbstring
 - WordPress version: >= 4.7
 - WooCommerce version: >= 2.2
@@ -171,7 +171,7 @@ The release workflow builds the zip with the dependencies included; `.github/scr
 
 There are two test suites:
 
-**Unit tests** run without WordPress: `tests/stubs/` stands in for the WordPress and WooCommerce functions the plugin calls, and nothing talks to bunq. They cover the pure logic (rate limiting, retries, description sanitising, scheduling) and run on PHP 7.3 up to 8.5.
+**Unit tests** run without WordPress: `tests/stubs/` stands in for the WordPress and WooCommerce functions the plugin calls, and nothing talks to bunq. They cover the pure logic (rate limiting, retries, description sanitising, scheduling) and run on PHP 8.1 up to 8.5.
 
 ```
 tests/vendor/bin/phpunit
@@ -188,7 +188,7 @@ tests/vendor/bin/phpunit -c phpunit-integration.xml.dist
 
 The unit and integration suites share `tests/FakeBunqApi.php`, which stands in for bunq so the payment, payment status, refund and API context flows run without a bunq account.
 
-The code follows the [WordPress Coding Standards](https://github.com/WordPress/WordPress-Coding-Standards) and stays compatible with PHP 7.3 (configured in `phpcs.xml.dist`):
+The code follows the [WordPress Coding Standards](https://github.com/WordPress/WordPress-Coding-Standards) and stays compatible with PHP 8.1 (configured in `phpcs.xml.dist`):
 
 ```
 tests/vendor/bin/phpcs
