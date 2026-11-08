@@ -22,31 +22,22 @@ final class Requirements {
 	 */
 	const OPTION = 'wc_bunq_gateway.requirements';
 
-	const MIN_WP_VERSION  = '4.7';
+	const MIN_WP_VERSION  = '5.9';
 	const MIN_PHP_VERSION = '8.1.0';
-
-	/**
-	 * The main plugin file.
-	 *
-	 * @var string
-	 */
-	private $plugin_file;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param string $plugin_file The main plugin file.
 	 */
-	public function __construct( $plugin_file ) {
-		$this->plugin_file = $plugin_file;
-	}
+	public function __construct( private readonly string $plugin_file ) {}
 
 	/**
 	 * The PHP extensions the bunq API client needs.
 	 *
 	 * @return string[]
 	 */
-	public static function extensions() {
+	public static function extensions(): array {
 		return array( 'openssl', 'curl', 'json', 'mbstring' );
 	}
 

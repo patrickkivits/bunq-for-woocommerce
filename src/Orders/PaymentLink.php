@@ -35,20 +35,11 @@ final class PaymentLink {
 	const EMAIL_KEY = 'WC_Email_Bunq_Payment_Link';
 
 	/**
-	 * Hands out the gateway WooCommerce registered.
-	 *
-	 * @var Plugin
-	 */
-	private $plugin;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Plugin $plugin Hands out the gateway WooCommerce registered.
 	 */
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
-	}
+	public function __construct( private readonly Plugin $plugin ) {}
 
 	/**
 	 * Hook into WooCommerce.
@@ -65,7 +56,7 @@ final class PaymentLink {
 	 * @param mixed $order The order.
 	 * @return bool
 	 */
-	public static function can_send( $order ) {
+	public static function can_send( $order ): bool {
 		return $order instanceof WC_Order && $order->needs_payment() && Gateway::CURRENCY === $order->get_currency();
 	}
 
@@ -177,7 +168,7 @@ final class PaymentLink {
 	 *
 	 * @return Gateway|null
 	 */
-	private function connected_gateway() {
+	private function connected_gateway(): ?Gateway {
 		$gateway = $this->plugin->gateway();
 
 		return $gateway && $gateway->get_setting( 'api_context' ) ? $gateway : null;
@@ -188,7 +179,7 @@ final class PaymentLink {
 	 *
 	 * @return PaymentLinkEmail|null
 	 */
-	private function email() {
+	private function email(): ?PaymentLinkEmail {
 		if ( ! function_exists( 'WC' ) || ! WC()->mailer() ) {
 			return null;
 		}
@@ -203,7 +194,7 @@ final class PaymentLink {
 	 *
 	 * @param string $message The problem.
 	 */
-	private function report_error( $message ) {
+	private function report_error( string $message ): void {
 		Logger::log( $message, 'warning' );
 
 		if ( class_exists( WC_Admin_Meta_Boxes::class ) ) {

@@ -42,20 +42,11 @@ final class PaymentMonitor {
 	const ACTION_GROUP = 'bunq';
 
 	/**
-	 * Hands out the gateway WooCommerce registered.
-	 *
-	 * @var Plugin
-	 */
-	private $plugin;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Plugin $plugin Hands out the gateway WooCommerce registered.
 	 */
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
-	}
+	public function __construct( private readonly Plugin $plugin ) {}
 
 	/**
 	 * Hook into WordPress, WooCommerce and Action Scheduler.
@@ -75,7 +66,7 @@ final class PaymentMonitor {
 	 * @param mixed $order The order.
 	 * @return bool
 	 */
-	public static function order_awaits_payment( $order ) {
+	public static function order_awaits_payment( $order ): bool {
 		return $order instanceof WC_Order
 			&& Gateway::is_bunq_gateway_id( $order->get_payment_method() )
 			&& $order->needs_payment()
@@ -88,7 +79,7 @@ final class PaymentMonitor {
 	 *
 	 * @return int[]
 	 */
-	public static function check_delays() {
+	public static function check_delays(): array {
 		return array(
 			10 * MINUTE_IN_SECONDS,
 			30 * MINUTE_IN_SECONDS,
@@ -105,7 +96,7 @@ final class PaymentMonitor {
 	 * @param int $order_id Order id.
 	 * @param int $attempt  Number of checks that ran before.
 	 */
-	public static function schedule_check( $order_id, $attempt = 0 ) {
+	public static function schedule_check( int $order_id, int $attempt = 0 ): void {
 		if ( ! function_exists( 'as_schedule_single_action' ) ) {
 			return;
 		}
@@ -125,7 +116,7 @@ final class PaymentMonitor {
 	 * @param int $order_id Order id.
 	 * @param int $delay    Seconds from now.
 	 */
-	public static function schedule_follow_up_check( $order_id, $delay ) {
+	public static function schedule_follow_up_check( int $order_id, int $delay ): void {
 		if ( ! function_exists( 'as_schedule_single_action' ) || ! function_exists( 'as_next_scheduled_action' ) ) {
 			return;
 		}
@@ -209,7 +200,7 @@ final class PaymentMonitor {
 		}
 
 		global $wp;
-		$order_id = absint( isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0 );
+		$order_id = absint( $wp->query_vars['order-received'] ?? 0 );
 		$order    = $order_id ? wc_get_order( $order_id ) : null;
 
 		if ( ! self::order_awaits_payment( $order ) ) {
@@ -217,7 +208,7 @@ final class PaymentMonitor {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The order key authorizes the check.
-		$order_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+		$order_key = sanitize_text_field( wp_unslash( $_GET['key'] ?? '' ) );
 
 		if ( ! is_string( $order_key ) || '' === $order_key || ! hash_equals( (string) $order->get_order_key(), $order_key ) ) {
 			return;

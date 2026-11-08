@@ -39,27 +39,18 @@ final class CallbackHandler {
 	const THROTTLE_TRANSIENT_PREFIX = 'bunq_for_woocommerce_callback_';
 
 	/**
-	 * The gateway that checks the payment status.
-	 *
-	 * @var Gateway
-	 */
-	private $gateway;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Gateway $gateway The gateway that checks the payment status.
 	 */
-	public function __construct( Gateway $gateway ) {
-		$this->gateway = $gateway;
-	}
+	public function __construct( private readonly Gateway $gateway ) {}
 
 	/**
 	 * The callback URL bunq calls.
 	 *
 	 * @return string
 	 */
-	public static function url() {
+	public static function url(): string {
 		return WC()->api_request_url( self::API_REQUEST );
 	}
 
@@ -76,8 +67,8 @@ final class CallbackHandler {
 		$notification = $body ? json_decode( $body ) : null;
 
 		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- bunq's JSON.
-		$category           = isset( $notification->NotificationUrl->category ) ? $notification->NotificationUrl->category : null;
-		$payment_request_id = isset( $notification->NotificationUrl->object->BunqMeTab->id ) ? $notification->NotificationUrl->object->BunqMeTab->id : null;
+		$category           = $notification->NotificationUrl->category ?? null;
+		$payment_request_id = $notification->NotificationUrl->object->BunqMeTab->id ?? null;
 		// phpcs:enable
 
 		if ( ApiClient::NOTIFICATION_CATEGORY !== $category || ! is_numeric( $payment_request_id ) ) {

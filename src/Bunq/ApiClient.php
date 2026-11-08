@@ -69,42 +69,42 @@ class ApiClient {
 	 *
 	 * @var RequestThrottler
 	 */
-	private $throttler;
+	private readonly RequestThrottler $throttler;
 
 	/**
 	 * Sends the HTTP requests.
 	 *
 	 * @var ClientInterface
 	 */
-	private $http;
+	private readonly ClientInterface $http;
 
 	/**
 	 * The loaded API context, null until one is created or loaded.
 	 *
 	 * @var array|null
 	 */
-	private $context = null;
+	private ?array $context = null;
 
 	/**
 	 * The default monetary account of the loaded context, looked up when a call needs it.
 	 *
 	 * @var int|null
 	 */
-	private $primary_monetary_account_id = null;
+	private ?int $primary_monetary_account_id = null;
 
 	/**
 	 * Stores the loaded API context when its session changes, null when the caller does not store it.
 	 *
-	 * @var callable|null
+	 * @var \Closure|null
 	 */
-	private $save = null;
+	private ?\Closure $save = null;
 
 	/**
 	 * The calls bunq answered successfully so far.
 	 *
 	 * @var int
 	 */
-	private $call_count = 0;
+	private int $call_count = 0;
 
 	/**
 	 * Constructor.
@@ -395,7 +395,7 @@ class ApiClient {
 
 			foreach ( $account_types as $endpoint => $suffix ) {
 				foreach ( $this->list_monetary_accounts( $endpoint ) as $account ) {
-					foreach ( isset( $account['alias'] ) ? (array) $account['alias'] : array() as $alias ) {
+					foreach ( (array) ( $account['alias'] ?? array() ) as $alias ) {
 						if ( isset( $alias['type'], $alias['value'] ) && 'IBAN' === $alias['type'] ) {
 							$bank_accounts[ $account['id'] ] = $alias['value'] . ' - ' . $account['description'] . $suffix;
 						}
@@ -461,7 +461,7 @@ class ApiClient {
 			// One NotificationFilterUrl per filter. 200 is the largest page bunq returns; the POST replaces the whole list,
 			// so a filter left out would be removed.
 			foreach ( $this->request( 'GET', $path . '?count=200' ) as $item ) {
-				$filter = isset( $item['NotificationFilterUrl'] ) ? $item['NotificationFilterUrl'] : array();
+				$filter = $item['NotificationFilterUrl'] ?? array();
 
 				if ( ! isset( $filter['category'], $filter['notification_target'] ) ) {
 					continue;
@@ -558,13 +558,13 @@ class ApiClient {
 	 * @param array         $context The API context.
 	 * @param callable|null $save    Stores the API context when its session changes.
 	 */
-	private function load( array $context, $save ) {
+	private function load( array $context, ?callable $save ): void {
 		if ( ! $this->context || $this->context['api_key'] !== $context['api_key'] ) {
 			$this->primary_monetary_account_id = null;
 		}
 
 		$this->context = $context;
-		$this->save    = $save;
+		$this->save    = null === $save ? null : \Closure::fromCallable( $save );
 	}
 
 	/**
@@ -572,7 +572,7 @@ class ApiClient {
 	 *
 	 * @throws ApiException When bunq refuses (is_context_rejected() for a revoked key or another IP address).
 	 */
-	private function renew_session() {
+	private function renew_session(): void {
 		try {
 			$this->context = $this->start_session( $this->context );
 		} catch ( ApiException $exception ) {
@@ -585,7 +585,7 @@ class ApiClient {
 		}
 
 		if ( $this->save ) {
-			call_user_func( $this->save, self::to_json( $this->context ) );
+			( $this->save )( self::to_json( $this->context ) );
 		}
 	}
 
@@ -595,7 +595,7 @@ class ApiClient {
 	 * @param array $context The API context, with or without a session.
 	 * @return array The API context with the new session.
 	 */
-	private function start_session( array $context ) {
+	private function start_session( array $context ): array {
 		unset( $context['session_context'] );
 
 		$response = $this->send( $context, 'POST', 'session-server', array( 'secret' => $context['api_key'] ) );
@@ -605,7 +605,7 @@ class ApiClient {
 		$users = array();
 		foreach ( $response as $item ) {
 			$type = key( $item );
-			if ( 0 === strpos( (string) $type, 'User' ) && is_array( $item[ $type ] ) ) {
+			if ( str_starts_with( (string) $type, 'User' ) && is_array( $item[ $type ] ) ) {
 				$users[ $type ] = $item[ $type ];
 			}
 		}
@@ -617,7 +617,7 @@ class ApiClient {
 
 		// An OAuth key's session lasts as long as the app that requested it (requested_by_user) allows.
 		$timeout_user = isset( $users['UserApiKey'] ) ? self::anchored_user( $users['UserApiKey'], 'requested_by_user' ) : $user;
-		$timeout      = isset( $timeout_user['session_timeout'] ) ? (int) $timeout_user['session_timeout'] : HOUR_IN_SECONDS;
+		$timeout      = (int) ( $timeout_user['session_timeout'] ?? HOUR_IN_SECONDS );
 
 		$context['session_context'] = array(
 			'token'        => $token['token'],
@@ -641,9 +641,9 @@ class ApiClient {
 	 * @throws ApiException When bunq answers with an error.
 	 * @throws Throwable When bunq cannot be reached or its answer cannot be trusted.
 	 */
-	private function send( array $context, $method, $path, $body = null ) {
+	private function send( array $context, string $method, string $path, ?array $body = null ): array {
 		$production   = 'PRODUCTION' === $context['environment_type'];
-		$installation = isset( $context['installation_context'] ) ? $context['installation_context'] : null;
+		$installation = $context['installation_context'] ?? null;
 		$body_string  = in_array( $method, array( 'POST', 'PUT' ), true ) ? wp_json_encode( $body ? $body : new \stdClass() ) : '';
 
 		$headers = array(
@@ -734,7 +734,7 @@ class ApiClient {
 	 * @param string   $path                Path below the account.
 	 * @return string
 	 */
-	private function account_path( $monetary_account_id, $path ) {
+	private function account_path( ?int $monetary_account_id, string $path ): string {
 		if ( ! $monetary_account_id ) {
 			$monetary_account_id = $this->primary_monetary_account_id();
 		}
@@ -748,7 +748,7 @@ class ApiClient {
 	 * @return int
 	 * @throws RuntimeException When the user has no active bank account.
 	 */
-	private function primary_monetary_account_id() {
+	private function primary_monetary_account_id(): int {
 		if ( ! $this->primary_monetary_account_id ) {
 			foreach ( $this->list_monetary_accounts( 'monetary-account-bank' ) as $account ) {
 				if ( isset( $account['status'] ) && 'ACTIVE' === $account['status'] ) {
@@ -771,7 +771,7 @@ class ApiClient {
 	 * @param string $endpoint "monetary-account-bank" or "monetary-account-joint".
 	 * @return array[]
 	 */
-	private function list_monetary_accounts( $endpoint ) {
+	private function list_monetary_accounts( string $endpoint ): array {
 		$type     = 'monetary-account-bank' === $endpoint ? 'MonetaryAccountBank' : 'MonetaryAccountJoint';
 		$accounts = array();
 
@@ -818,7 +818,7 @@ class ApiClient {
 	 * @return array
 	 * @throws Exception When it is not a complete API context.
 	 */
-	private static function parse_context( $json ) {
+	private static function parse_context( string $json ): array {
 		$context = json_decode( $json, true );
 
 		if ( ! is_array( $context ) ) {
@@ -828,7 +828,7 @@ class ApiClient {
 		foreach ( array( 'api_key', 'environment_type', 'installation_context.token', 'installation_context.private_key_client', 'installation_context.public_key_server' ) as $field ) {
 			$value = $context;
 			foreach ( explode( '.', $field ) as $key ) {
-				$value = is_array( $value ) && isset( $value[ $key ] ) ? $value[ $key ] : null;
+				$value = is_array( $value ) ? ( $value[ $key ] ?? null ) : null;
 			}
 
 			if ( null === $value ) {
@@ -836,7 +836,7 @@ class ApiClient {
 			}
 		}
 
-		$session = isset( $context['session_context'] ) ? $context['session_context'] : null;
+		$session = $context['session_context'] ?? null;
 
 		$context['installation_context'] = array_intersect_key( $context['installation_context'], array_flip( array( 'token', 'private_key_client', 'public_key_server' ) ) );
 		unset( $context['session_context'], $context['proxy_url'] );
@@ -859,8 +859,9 @@ class ApiClient {
 	 * @param array $context The API context.
 	 * @return string
 	 */
-	private static function to_json( array $context ) {
-		return wp_json_encode( $context );
+	private static function to_json( array $context ): string {
+		// Empty when it cannot be encoded: an empty stored context is recreated on the next call.
+		return (string) wp_json_encode( $context );
 	}
 
 	/**
@@ -869,7 +870,7 @@ class ApiClient {
 	 * @param array $context The API context.
 	 * @return bool
 	 */
-	private static function is_session_active( array $context ) {
+	private static function is_session_active( array $context ): bool {
 		if ( ! isset( $context['session_context']['expiry_time'] ) ) {
 			return false;
 		}
@@ -887,7 +888,7 @@ class ApiClient {
 	 *                     as the bunq SDK stored them.
 	 * @return string|null
 	 */
-	private static function display_name( array $users ) {
+	private static function display_name( array $users ): ?string {
 		$users = array_change_key_case( array_filter( $users, 'is_array' ) );
 
 		if ( isset( $users['userapikey'] ) ) {
@@ -895,7 +896,7 @@ class ApiClient {
 		} elseif ( isset( $users['usercompany'] ) ) {
 			$user = $users['usercompany'];
 		} else {
-			$user = isset( $users['userperson'] ) ? $users['userperson'] : null;
+			$user = $users['userperson'] ?? null;
 		}
 
 		return isset( $user['display_name'] ) && is_string( $user['display_name'] ) ? $user['display_name'] : null;
@@ -908,8 +909,8 @@ class ApiClient {
 	 * @param string $field        "granted_by_user" or "requested_by_user".
 	 * @return array|null
 	 */
-	private static function anchored_user( array $user_api_key, $field ) {
-		foreach ( isset( $user_api_key[ $field ] ) ? (array) $user_api_key[ $field ] : array() as $user ) {
+	private static function anchored_user( array $user_api_key, string $field ): ?array {
+		foreach ( (array) ( $user_api_key[ $field ] ?? array() ) as $user ) {
 			if ( is_array( $user ) ) {
 				return $user;
 			}

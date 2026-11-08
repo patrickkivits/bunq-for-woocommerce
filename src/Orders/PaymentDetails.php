@@ -36,20 +36,11 @@ final class PaymentDetails {
 	const FETCH_FAILED_TRANSIENT = 'bunq_for_woocommerce_details_failed_';
 
 	/**
-	 * Hands out the gateway WooCommerce registered.
-	 *
-	 * @var Plugin
-	 */
-	private $plugin;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Plugin $plugin Hands out the gateway WooCommerce registered.
 	 */
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
-	}
+	public function __construct( private readonly Plugin $plugin ) {}
 
 	/**
 	 * Hook into WordPress and WooCommerce.
@@ -66,7 +57,7 @@ final class PaymentDetails {
 	 *
 	 * @return string
 	 */
-	public static function order_screen_id() {
+	public static function order_screen_id(): string {
 		return function_exists( 'wc_get_page_screen_id' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
 	}
 
@@ -113,7 +104,7 @@ final class PaymentDetails {
 	 * @param WC_Order $order The order.
 	 * @return string
 	 */
-	public static function html( $order ) {
+	public static function html( WC_Order $order ): string {
 		$payment_id = (string) $order->get_meta( Gateway::META_PAYMENT_ID );
 		$url        = (string) $order->get_meta( Gateway::META_PAYMENT_REQUEST_URL );
 		$rows       = array();
@@ -127,9 +118,7 @@ final class PaymentDetails {
 
 		$rows = array_filter(
 			$rows,
-			function ( $row ) {
-				return '' !== $row[1];
-			}
+			fn( $row ) => '' !== $row[1]
 		);
 
 		$html = '';
@@ -193,7 +182,7 @@ final class PaymentDetails {
 	 * @param string $iban The IBAN.
 	 * @return string
 	 */
-	public static function format_iban( $iban ) {
+	public static function format_iban( string $iban ): string {
 		$iban = strtoupper( preg_replace( '/\s+/', '', (string) $iban ) );
 
 		return trim( chunk_split( $iban, 4, ' ' ) );
@@ -252,7 +241,7 @@ final class PaymentDetails {
 	 * @param mixed $post_or_order The post of the order, or the order.
 	 * @return WC_Order|null
 	 */
-	private static function order( $post_or_order ) {
+	private static function order( $post_or_order ): ?WC_Order {
 		if ( $post_or_order instanceof WC_Order ) {
 			return $post_or_order;
 		}

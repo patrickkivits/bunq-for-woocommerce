@@ -16,7 +16,7 @@
 
     <!-- The minimum versions from the plugin header. -->
     <config name="testVersion" value="8.1-"/>
-    <config name="minimum_wp_version" value="4.7"/>
+    <config name="minimum_wp_version" value="5.9"/>
 
     <rule ref="WordPress">
         <!-- src/ follows PSR-4 (one class per file, named after the class), as WooCommerce's own src/ does. -->

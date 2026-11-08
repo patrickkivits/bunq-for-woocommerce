@@ -26,7 +26,7 @@ final class Logger {
 	 *
 	 * @var string[]
 	 */
-	private static $secrets = array();
+	private static array $secrets = array();
 
 	/**
 	 * Keep a value out of everything this class logs or formats. Applies for the rest of the request.
@@ -34,7 +34,7 @@ final class Logger {
 	 * @param string $secret The value (an OAuth client secret, an API key, ...).
 	 * @param string $label  What to show instead, e.g. "client secret".
 	 */
-	public static function add_secret( $secret, $label ) {
+	public static function add_secret( $secret, string $label ): void {
 		$secret = is_scalar( $secret ) ? (string) $secret : '';
 
 		// Very short values would mask ordinary words.
@@ -49,14 +49,12 @@ final class Logger {
 	 * @param string $text Text to clean.
 	 * @return string
 	 */
-	public static function redact( $text ) {
+	public static function redact( $text ): string {
 		$secrets = self::$secrets;
 		// Longest first, so a secret that contains another one is replaced as a whole.
 		uksort(
 			$secrets,
-			function ( $a, $b ) {
-				return strlen( $b ) - strlen( $a );
-			}
+			fn( $a, $b ) => strlen( $b ) - strlen( $a )
 		);
 
 		foreach ( $secrets as $secret => $label ) {
@@ -72,7 +70,7 @@ final class Logger {
 	 * @param string|Throwable $message Message or exception to log.
 	 * @param string           $level   One of the WC_Log_Levels constants (error, warning, info, debug).
 	 */
-	public static function log( $message, $level = 'error' ) {
+	public static function log( $message, string $level = 'error' ): void {
 		if ( $message instanceof Throwable ) {
 			$message = get_class( $message ) . ': ' . $message->getMessage() . ' in ' . $message->getFile() . ':' . $message->getLine();
 		}
@@ -95,7 +93,7 @@ final class Logger {
 	 * @param Throwable $throwable The error.
 	 * @return string
 	 */
-	public static function format_error( Throwable $throwable ) {
+	public static function format_error( Throwable $throwable ): string {
 		$message = trim( self::redact( $throwable->getMessage() ) );
 
 		if ( '' === $message ) {

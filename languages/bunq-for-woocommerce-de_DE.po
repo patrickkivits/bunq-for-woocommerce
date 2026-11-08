@@ -14,20 +14,20 @@ msgstr ""
 msgid "Payment method"
 msgstr "Zahlungsmethode"
 
-#: src/Bunq/ApiClient.php:385
+#: src/Bunq/ApiClient.php:386
 msgid "Connect your bunq account first"
 msgstr "Verbinden Sie zuerst Ihr bunq-Konto"
 
-#: src/Bunq/ApiClient.php:389
+#: src/Bunq/ApiClient.php:390
 msgid "Select a bank account"
 msgstr "Bankkonto auswählen"
 
-#: src/Bunq/ApiClient.php:392
+#: src/Bunq/ApiClient.php:393
 msgid "(Joint)"
 msgstr "(Gemeinschaftskonto)"
 
 #. translators: %s: error message from bunq
-#: src/Bunq/ApiClient.php:417
+#: src/Bunq/ApiClient.php:418
 msgid "Error: %s"
 msgstr "Fehler: %s"
 
@@ -51,131 +51,131 @@ msgstr "Ihr Zahlungslink für Bestellung #{order_number}"
 msgid "Questions about your order? Just reply to this email."
 msgstr "Fragen zu Ihrer Bestellung? Antworten Sie einfach auf diese E-Mail."
 
-#: src/Gateway/ConnectionHealth.php:180 src/Gateway/Gateway.php:555
+#: src/Gateway/ConnectionHealth.php:171 src/Gateway/Gateway.php:555
 msgid "You are not allowed to do this."
 msgstr "Sie dürfen diese Aktion nicht ausführen."
 
-#: src/Gateway/ConnectionHealth.php:312
+#: src/Gateway/ConnectionHealth.php:303
 msgid "The connection with bunq works."
 msgstr "Die Verbindung mit bunq funktioniert."
 
 #. translators: %s: how long, for example "3 hours"
-#: src/Gateway/ConnectionHealth.php:345
+#: src/Gateway/ConnectionHealth.php:336
 msgid "The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached."
 msgstr "Die bunq-Sandbox ist seit %s nicht erreichbar. Zahlungen mit bunq schlagen fehl, solange sie nicht erreichbar ist."
 
 #. translators: %s: how long, for example "3 hours"
-#: src/Gateway/ConnectionHealth.php:347
+#: src/Gateway/ConnectionHealth.php:338
 msgid "bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached."
 msgstr "bunq ist seit %s nicht erreichbar. Zahlungen mit bunq schlagen fehl, solange bunq nicht erreichbar ist."
 
-#: src/Gateway/ConnectionHealth.php:352
+#: src/Gateway/ConnectionHealth.php:343
 msgid "The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
 msgstr "Die Verbindung mit der bunq-Sandbox funktioniert nicht mehr, daher schlagen Zahlungen mit bunq fehl. Verbinden Sie sich auf der bunq-Einstellungsseite erneut. Das passiert, wenn der Zugriff in der bunq-App entfernt wurde oder der Shop sich jetzt von einer anderen IP-Adresse aus verbindet."
 
-#: src/Gateway/ConnectionHealth.php:353
+#: src/Gateway/ConnectionHealth.php:344
 msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
 msgstr "Die Verbindung mit bunq funktioniert nicht mehr, daher schlagen Zahlungen mit bunq fehl. Verbinden Sie sich auf der bunq-Einstellungsseite erneut. Das passiert, wenn der Zugriff in der bunq-App entfernt wurde oder der Shop sich jetzt von einer anderen IP-Adresse aus verbindet."
 
-#: src/Gateway/ConnectionHealth.php:361 src/Gateway/ConnectionHealth.php:451
+#: src/Gateway/ConnectionHealth.php:352 src/Gateway/ConnectionHealth.php:442
 msgid "bunq for WooCommerce"
 msgstr "bunq for WooCommerce"
 
 #. translators: %s: error message from bunq
-#: src/Gateway/ConnectionHealth.php:366 src/Gateway/SettingsPage.php:206
+#: src/Gateway/ConnectionHealth.php:357 src/Gateway/SettingsPage.php:206
 msgid "bunq's answer: %s"
 msgstr "Antwort von bunq: %s"
 
-#: src/Gateway/ConnectionHealth.php:371
+#: src/Gateway/ConnectionHealth.php:362
 msgid "Go to the bunq settings"
 msgstr "Zu den bunq-Einstellungen"
 
-#: src/Gateway/ConnectionHealth.php:372 src/Gateway/ConnectionHealth.php:431
+#: src/Gateway/ConnectionHealth.php:363 src/Gateway/ConnectionHealth.php:422
 msgid "Check again"
 msgstr "Erneut prüfen"
 
-#: src/Gateway/ConnectionHealth.php:399
+#: src/Gateway/ConnectionHealth.php:390
 msgid "Version"
 msgstr "Version"
 
-#: src/Gateway/ConnectionHealth.php:407
+#: src/Gateway/ConnectionHealth.php:398
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: src/Gateway/ConnectionHealth.php:407
+#: src/Gateway/ConnectionHealth.php:398
 msgid "Yes"
 msgstr "Ja"
 
-#: src/Gateway/ConnectionHealth.php:407
+#: src/Gateway/ConnectionHealth.php:398
 msgid "No"
 msgstr "Nein"
 
-#: src/Gateway/ConnectionHealth.php:408
+#: src/Gateway/ConnectionHealth.php:399
 msgid "Mode"
 msgstr "Modus"
 
-#: src/Gateway/ConnectionHealth.php:408
+#: src/Gateway/ConnectionHealth.php:399
 msgid "Sandbox"
 msgstr "Sandbox"
 
-#: src/Gateway/ConnectionHealth.php:408
+#: src/Gateway/ConnectionHealth.php:399
 msgid "Live"
 msgstr "Live"
 
-#: src/Gateway/ConnectionHealth.php:411
+#: src/Gateway/ConnectionHealth.php:402
 msgid "Not connected"
 msgstr "Nicht verbunden"
 
 #. translators: %s: name of the bunq user that granted access
-#: src/Gateway/ConnectionHealth.php:414
+#: src/Gateway/ConnectionHealth.php:405
 msgid "Connected as %s"
 msgstr "Verbunden als %s"
 
-#: src/Gateway/ConnectionHealth.php:416
+#: src/Gateway/ConnectionHealth.php:407
 msgid "Connected"
 msgstr "Verbunden"
 
-#: src/Gateway/ConnectionHealth.php:418 src/Gateway/SettingsPage.php:170
+#: src/Gateway/ConnectionHealth.php:409 src/Gateway/SettingsPage.php:170
 msgid "Connection"
 msgstr "Verbindung"
 
-#: src/Gateway/ConnectionHealth.php:422
+#: src/Gateway/ConnectionHealth.php:413
 msgid "Not checked yet"
 msgstr "Noch nicht geprüft"
 
-#: src/Gateway/ConnectionHealth.php:424
+#: src/Gateway/ConnectionHealth.php:415
 msgid "Works"
 msgstr "Funktioniert"
 
-#: src/Gateway/ConnectionHealth.php:426
+#: src/Gateway/ConnectionHealth.php:417
 msgid "Broken"
 msgstr "Gestört"
 
-#: src/Gateway/ConnectionHealth.php:426
+#: src/Gateway/ConnectionHealth.php:417
 msgid "bunq could not be reached"
 msgstr "bunq ist nicht erreichbar"
 
-#: src/Gateway/ConnectionHealth.php:433
+#: src/Gateway/ConnectionHealth.php:424
 msgid "Connection check"
 msgstr "Verbindungsprüfung"
 
-#: src/Gateway/ConnectionHealth.php:436
+#: src/Gateway/ConnectionHealth.php:427
 msgid "Failing since"
 msgstr "Gestört seit"
 
-#: src/Gateway/ConnectionHealth.php:439
+#: src/Gateway/ConnectionHealth.php:430
 msgid "Last check"
 msgstr "Letzte Prüfung"
 
-#: src/Gateway/ConnectionHealth.php:440
+#: src/Gateway/ConnectionHealth.php:431
 msgid "Next check"
 msgstr "Nächste Prüfung"
 
-#: src/Gateway/ConnectionHealth.php:440
+#: src/Gateway/ConnectionHealth.php:431
 msgid "Not scheduled"
 msgstr "Nicht geplant"
 
-#: src/Gateway/ConnectionHealth.php:443
+#: src/Gateway/ConnectionHealth.php:434
 msgid "Callback URL"
 msgstr "Callback-URL"
 
@@ -203,73 +203,78 @@ msgstr "Von bunq getrennt. Um den Zugriff auch bei bunq zu widerrufen, entfernen
 msgid "Enter the Client ID and Client Secret of your bunq OAuth client, then click \"Connect to bunq\"."
 msgstr "Geben Sie die Client ID und das Client Secret Ihres bunq-OAuth-Clients ein und klicken Sie dann auf „Mit bunq verbinden“."
 
-#: src/Gateway/Gateway.php:798
+#: src/Gateway/Gateway.php:814
 msgid "Saved. Leave empty to keep it, or paste a new secret to replace it."
 msgstr "Gespeichert. Leer lassen, um es zu behalten, oder ein neues Secret einfügen, um es zu ersetzen."
 
-#: src/Gateway/Gateway.php:911
+#: src/Gateway/Gateway.php:940
 msgid "Refresh bank accounts"
 msgstr "Bankkonten aktualisieren"
 
-#: src/Gateway/Gateway.php:921
+#: src/Gateway/Gateway.php:950
 msgid "bunq rejected the saved connection. Connect again."
 msgstr "bunq hat die gespeicherte Verbindung abgelehnt. Verbinden Sie sich erneut."
 
-#: src/Gateway/Gateway.php:1037
+#: src/Gateway/Gateway.php:1074
 msgid "The payment could not be started with bunq. Please try again or choose another payment method."
 msgstr "Die Zahlung konnte bei bunq nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsmethode."
 
 #. translators: %s: bunq payment request id
-#: src/Gateway/Gateway.php:1071
+#: src/Gateway/Gateway.php:1106
 msgid "bunq payment request %s created"
 msgstr "bunq-Zahlungsanfrage %s erstellt"
 
 #. translators: %s: bunq payment request id
-#: src/Gateway/Gateway.php:1136 src/Orders/PaymentMonitor.php:298
+#: src/Gateway/Gateway.php:1177 src/Orders/PaymentMonitor.php:291
 msgid "bunq payment request %s cancelled"
 msgstr "bunq-Zahlungsanfrage %s storniert"
 
-#: src/Gateway/Gateway.php:1164
+#: src/Gateway/Gateway.php:1205
 msgid "This order has no bunq payment that can be refunded."
 msgstr "Diese Bestellung hat keine bunq-Zahlung, die erstattet werden kann."
 
-#: src/Gateway/Gateway.php:1168
+#: src/Gateway/Gateway.php:1209
 msgid "The refund amount must be greater than zero."
 msgstr "Der Erstattungsbetrag muss größer als null sein."
 
-#: src/Gateway/Gateway.php:1185
+#: src/Gateway/Gateway.php:1221
 msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
 msgstr "Die bunq-Zahlung dieser Bestellung hat keine IBAN für die Erstattung (zum Beispiel eine Kartenzahlung). Erstatten Sie sie stattdessen über die bunq-App."
 
 #. translators: 1: order number, 2: shop name
-#: src/Gateway/Gateway.php:1190
+#: src/Gateway/Gateway.php:1226
 msgid "Refund order %1$s %2$s"
 msgstr "Erstattung Bestellung %1$s %2$s"
 
 #. translators: 1: refunded amount, 2: bunq draft payment id
-#: src/Gateway/Gateway.php:1212
+#: src/Gateway/Gateway.php:1246
 msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
 msgstr "bunq-Erstattung von %1$s als Zahlungsentwurf %2$s angelegt. Bestätigen Sie ihn in der bunq-App, um das Geld zu senden."
 
 #. translators: %s: error message from bunq
-#: src/Gateway/Gateway.php:1227
+#: src/Gateway/Gateway.php:1261
 msgid "bunq refund failed: %s"
 msgstr "bunq-Erstattung fehlgeschlagen: %s"
 
 #. translators: %s: bunq payment id
-#: src/Gateway/Gateway.php:1325
+#: src/Gateway/Gateway.php:1358
 msgid "bunq payment %s received"
 msgstr "bunq-Zahlung %s erhalten"
 
 #. translators: 1: bunq payment id, 2: amount received, 3: order total
-#: src/Gateway/Gateway.php:1350
+#: src/Gateway/Gateway.php:1387
 msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
 msgstr "bunq-Zahlung %1$s über %2$s erhalten, aber der Bestellwert beträgt %3$s. Prüfen Sie die Zahlung, bevor Sie die Bestellung bearbeiten."
 
 #. translators: 1: bunq payment request id, 2: status reported by bunq
-#: src/Gateway/Gateway.php:1372
+#: src/Gateway/Gateway.php:1409
 msgid "bunq payment request %1$s is %2$s"
 msgstr "bunq-Zahlungsanfrage %1$s ist %2$s"
+
+#. translators: 1: bunq payment id, 2: amount received
+#: src/Gateway/Gateway.php:1524
+msgid "bunq payment %1$s of %2$s came in, but the order was cancelled. Restore the order or refund the payment."
+msgstr "bunq-Zahlung %1$s über %2$s erhalten, aber die Bestellung wurde storniert. Stellen Sie die Bestellung wieder her oder erstatten Sie die Zahlung."
 
 #. translators: %s: payment method, such as "Bancontact"
 #: src/Gateway/MethodGateway.php:57
@@ -301,7 +306,7 @@ msgstr "Bancontact"
 msgid "From a bunq account"
 msgstr "Von einem bunq-Konto"
 
-#: src/Gateway/PaymentMethods.php:187
+#: src/Gateway/PaymentMethods.php:185
 msgid "Bank transfer"
 msgstr "Banküberweisung"
 
@@ -550,90 +555,92 @@ msgstr "Klicken Sie unten auf „Mit bunq verbinden“ und scannen Sie den QR-Co
 msgid "Register the redirect URL in the bunq app and enter the Client ID and Client Secret of your OAuth client below."
 msgstr "Registrieren Sie die Weiterleitungs-URL in der bunq-App und geben Sie unten die Client ID und das Client Secret Ihres OAuth-Clients ein."
 
-#: src/Orders/PaymentDetails.php:90
+#: src/Orders/PaymentDetails.php:81
 msgid "bunq payment"
 msgstr "bunq-Zahlung"
 
-#: src/Orders/PaymentDetails.php:122
+#: src/Orders/PaymentDetails.php:113
 msgid "Payer"
 msgstr "Zahler"
 
-#: src/Orders/PaymentDetails.php:123
+#: src/Orders/PaymentDetails.php:114
 msgid "IBAN"
 msgstr "IBAN"
 
-#: src/Orders/PaymentDetails.php:124
+#: src/Orders/PaymentDetails.php:115
 msgid "Method"
 msgstr "Methode"
 
-#: src/Orders/PaymentDetails.php:125
+#: src/Orders/PaymentDetails.php:116
 msgid "Payment ID"
 msgstr "Zahlungs-ID"
 
-#: src/Orders/PaymentDetails.php:138
+#: src/Orders/PaymentDetails.php:127
 msgid "No bunq payment has been received for this order yet."
 msgstr "Für diese Bestellung ist noch keine bunq-Zahlung eingegangen."
 
-#: src/Orders/PaymentDetails.php:150
+#: src/Orders/PaymentDetails.php:139
 msgid "View the payment request on bunq.me"
 msgstr "Zahlungsanforderung auf bunq.me ansehen"
 
-#: src/Orders/PaymentDetails.php:212
+#: src/Orders/PaymentDetails.php:201
 msgid "bunq payer name"
 msgstr "Name des bunq-Zahlers"
 
-#: src/Orders/PaymentDetails.php:213
+#: src/Orders/PaymentDetails.php:202
 msgid "bunq payer IBAN"
 msgstr "IBAN des bunq-Zahlers"
 
-#: src/Orders/PaymentLink.php:86
+#: src/Orders/PaymentLink.php:77
 msgid "Send bunq payment link to customer"
 msgstr "bunq-Zahlungslink an Kunden senden"
 
-#: src/Orders/PaymentLink.php:114
+#: src/Orders/PaymentLink.php:105
 msgid "The bunq payment link was not sent: connect your bunq account in the bunq payment settings first."
 msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Verbinden Sie zuerst Ihr bunq-Konto in den bunq-Zahlungseinstellungen."
 
-#: src/Orders/PaymentLink.php:120
+#: src/Orders/PaymentLink.php:111
 msgid "The bunq payment link was not sent: only unpaid orders in euros can be paid with a bunq payment link."
 msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Nur unbezahlte Bestellungen in Euro können mit einem bunq-Zahlungslink bezahlt werden."
 
-#: src/Orders/PaymentLink.php:126
+#: src/Orders/PaymentLink.php:117
 msgid "The bunq payment link was not sent: the order has no billing email address."
 msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Die Bestellung hat keine Rechnungs-E-Mail-Adresse."
 
-#: src/Orders/PaymentLink.php:134
+#: src/Orders/PaymentLink.php:125
 msgid "The bunq payment link was not sent: the \"bunq payment link\" email is disabled in WooCommerce > Settings > Emails."
 msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Die E-Mail „bunq-Zahlungslink“ ist unter WooCommerce > Einstellungen > E-Mails deaktiviert."
 
-#: src/Orders/PaymentLink.php:143
+#: src/Orders/PaymentLink.php:134
 msgid "The bunq payment link could not be created. The WooCommerce logs (source: bunq) have the details."
 msgstr "Der bunq-Zahlungslink konnte nicht erstellt werden. Details finden Sie in den WooCommerce-Protokollen (Quelle: bunq)."
 
-#: src/Orders/PaymentLink.php:149
+#: src/Orders/PaymentLink.php:140
 msgid "The bunq payment link was not sent: a payment for this order already came in through bunq. Check the order notes."
 msgstr "Der bunq-Zahlungslink wurde nicht gesendet: Für diese Bestellung ist bereits eine Zahlung über bunq eingegangen. Prüfen Sie die Bestellnotizen."
 
-#: src/Orders/PaymentLink.php:161
+#: src/Orders/PaymentLink.php:152
 msgid "The bunq payment link could not be emailed to the customer. Check that your site can send email."
 msgstr "Der bunq-Zahlungslink konnte dem Kunden nicht per E-Mail gesendet werden. Prüfen Sie, ob Ihre Website E-Mails versenden kann."
 
 #. translators: %s: customer's email address
-#: src/Orders/PaymentLink.php:169
+#: src/Orders/PaymentLink.php:160
 msgid "bunq payment link sent to %s"
 msgstr "bunq-Zahlungslink an %s gesendet"
 
-#: src/Requirements.php:122
+#: src/Requirements.php:113
 msgid "cannot be activated due to incompatible environment."
 msgstr "kann nicht aktiviert werden, da die Umgebung nicht kompatibel ist."
 
 #. translators: %s: customer's first name
-#: templates/emails/customer-bunq-payment-link.php:31 templates/emails/plain/customer-bunq-payment-link.php:27
+#: templates/emails/customer-bunq-payment-link.php:31
+#: templates/emails/plain/customer-bunq-payment-link.php:27
 msgid "Hi %s,"
 msgstr "Hallo %s,"
 
 #. translators: 1: order number, 2: order total
-#: templates/emails/customer-bunq-payment-link.php:38 templates/emails/plain/customer-bunq-payment-link.php:31
+#: templates/emails/customer-bunq-payment-link.php:38
+#: templates/emails/plain/customer-bunq-payment-link.php:31
 msgid "You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact."
 msgstr "Sie können Bestellung #%1$s über %2$s mit dem Link unten bezahlen. Auf bunq.me wählen Sie selbst, wie Sie bezahlen, zum Beispiel mit iDEAL | Wero, Karte oder Bancontact."
 

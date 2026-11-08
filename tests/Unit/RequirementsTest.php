@@ -19,11 +19,11 @@ final class RequirementsTest extends TestCase
 
     public function testFailsOnAnOldWordPress()
     {
-        Environment::$blogInfo['version'] = '4.6.1';
+        Environment::$blogInfo['version'] = '5.8.3';
         $this->assertFalse($this->requirements()->check());
 
-        Environment::$blogInfo['version'] = '4.7';
-        $this->assertTrue($this->requirements()->check(), 'wp_generate_uuid4() and wp_parse_url() with a component exist since 4.7');
+        Environment::$blogInfo['version'] = '5.9';
+        $this->assertTrue($this->requirements()->check(), 'WordPress supports PHP 8.1, the minimum, since 5.9');
     }
 
     public function testFailsWithoutWooCommerce()

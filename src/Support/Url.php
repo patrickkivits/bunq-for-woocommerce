@@ -20,7 +20,7 @@ final class Url {
 	 * @param string $url URL to check.
 	 * @return bool
 	 */
-	public static function is_local( $url ) {
+	public static function is_local( string $url ): bool {
 		$host = strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) );
 
 		if ( '' === $host || in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true ) ) {

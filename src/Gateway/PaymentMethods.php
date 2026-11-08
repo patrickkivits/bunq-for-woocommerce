@@ -33,7 +33,7 @@ final class PaymentMethods {
 	 *
 	 * @return array[] Keys: id, bunqme, description, icon, min, max (null for no maximum).
 	 */
-	public static function all() {
+	public static function all(): array {
 		return array(
 			array(
 				'id'          => 'card',
@@ -77,7 +77,7 @@ final class PaymentMethods {
 	 * @param float|null $total       Cart or order total; null allows every enabled method.
 	 * @return array[] As all(), with their original keys.
 	 */
-	public static function allowed( $enabled_ids, $total = null ) {
+	public static function allowed( $enabled_ids, ?float $total = null ): array {
 		$methods = self::all();
 
 		if ( is_array( $enabled_ids ) && ! empty( $enabled_ids ) ) {
@@ -95,9 +95,7 @@ final class PaymentMethods {
 
 		return array_filter(
 			$methods,
-			function ( $method ) use ( $total ) {
-				return $method['min'] <= $total && ( null === $method['max'] || $method['max'] >= $total );
-			}
+			fn( $method ) => $method['min'] <= $total && ( null === $method['max'] || $method['max'] >= $total )
 		);
 	}
 
@@ -107,10 +105,10 @@ final class PaymentMethods {
 	 * @param string $id Method id.
 	 * @return string|null bunq.me's name for it, null for an unknown method.
 	 */
-	public static function bunqme_name( $id ) {
+	public static function bunqme_name( string $id ): ?string {
 		$names = array_column( self::all(), 'bunqme', 'id' );
 
-		return isset( $names[ $id ] ) ? $names[ $id ] : null;
+		return $names[ $id ] ?? null;
 	}
 
 	/**
@@ -119,7 +117,7 @@ final class PaymentMethods {
 	 * @param string $id Method id.
 	 * @return bool
 	 */
-	public static function exists( $id ) {
+	public static function exists( $id ): bool {
 		return in_array( $id, array_column( self::all(), 'id' ) ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict -- Kept loose as before.
 	}
 
@@ -129,7 +127,7 @@ final class PaymentMethods {
 	 * @param array[] $methods Methods as returned by all() or allowed().
 	 * @return string[]
 	 */
-	public static function options( array $methods ) {
+	public static function options( array $methods ): array {
 		return array_column( $methods, 'description', 'id' );
 	}
 
@@ -139,7 +137,7 @@ final class PaymentMethods {
 	 * @param string $id Method id.
 	 * @return array|null See all(); null for an unknown method.
 	 */
-	public static function get( $id ) {
+	public static function get( string $id ): ?array {
 		foreach ( self::all() as $method ) {
 			if ( $method['id'] === $id ) {
 				return $method;
@@ -156,7 +154,7 @@ final class PaymentMethods {
 	 * @param string $type The payment type as bunq reports it.
 	 * @return string The name, or the type itself for a type the plugin does not know; empty when there is none.
 	 */
-	public static function payment_type_label( $type ) {
+	public static function payment_type_label( string $type ): string {
 		$type = strtoupper( trim( (string) $type ) );
 
 		if ( '' === $type || 'UNKNOWN' === $type ) {
@@ -176,7 +174,7 @@ final class PaymentMethods {
 		);
 
 		foreach ( $labels as $needle => $method_id ) {
-			if ( $type === $needle || false !== strpos( $type, $needle ) ) {
+			if ( str_contains( $type, $needle ) ) {
 				$method = self::get( $method_id );
 
 				return $method['description'];
@@ -196,7 +194,7 @@ final class PaymentMethods {
 	 * @param array[] $methods Methods as returned by all() or allowed().
 	 * @return array[] Keys: id, src (URL), alt.
 	 */
-	public static function icons( array $methods ) {
+	public static function icons( array $methods ): array {
 		$icons = array();
 		$base  = plugin_dir_url( Plugin::instance()->file() ) . self::ICON_PATH;
 
@@ -221,14 +219,14 @@ final class PaymentMethods {
 	 * @param array[] $methods Methods as returned by all() or allowed().
 	 * @return array[]
 	 */
-	public static function in_checkout_order( array $methods ) {
+	public static function in_checkout_order( array $methods ): array {
 		$position = array_flip( self::SEPARATE );
 
 		usort(
 			$methods,
 			function ( $a, $b ) use ( $position ) {
-				$a = isset( $position[ $a['id'] ] ) ? $position[ $a['id'] ] : PHP_INT_MAX;
-				$b = isset( $position[ $b['id'] ] ) ? $position[ $b['id'] ] : PHP_INT_MAX;
+				$a = $position[ $a['id'] ] ?? PHP_INT_MAX;
+				$b = $position[ $b['id'] ] ?? PHP_INT_MAX;
 
 				return $a === $b ? 0 : ( $a < $b ? -1 : 1 );
 			}

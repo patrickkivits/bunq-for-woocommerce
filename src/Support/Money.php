@@ -22,7 +22,7 @@ final class Money {
 	 * @param string|float $b Second amount.
 	 * @return bool
 	 */
-	public static function amounts_match( $a, $b ) {
+	public static function amounts_match( string|int|float $a, string|int|float $b ): bool {
 		return abs( (float) $a - (float) $b ) < 0.005;
 	}
 }

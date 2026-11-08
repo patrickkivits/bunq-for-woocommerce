@@ -38,7 +38,7 @@ final class RequestThrottlerConfiguration {
 	 *
 	 * @var array
 	 */
-	private $limitations;
+	private readonly array $limitations;
 
 	/**
 	 * Constructor.
@@ -71,6 +71,6 @@ final class RequestThrottlerConfiguration {
 			return $this->limitations[ $endpoint_key ][ $request_method ];
 		}
 
-		return isset( $this->limitations[ $request_method ] ) ? $this->limitations[ $request_method ] : null;
+		return $this->limitations[ $request_method ] ?? null;
 	}
 }

@@ -17,20 +17,6 @@ defined( 'ABSPATH' ) || exit;
 class ApiException extends RuntimeException {
 
 	/**
-	 * The id bunq asks for when its support investigates a request.
-	 *
-	 * @var string
-	 */
-	private $response_id;
-
-	/**
-	 * Whether bunq refused a new session for the API context, see is_context_rejected().
-	 *
-	 * @var bool
-	 */
-	private $context_rejected;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $message          bunq's error descriptions.
@@ -38,10 +24,13 @@ class ApiException extends RuntimeException {
 	 * @param string $response_id      The X-Bunq-Client-Response-Id header.
 	 * @param bool   $context_rejected Whether bunq refused a new session for the API context.
 	 */
-	public function __construct( $message, $status, $response_id = '', $context_rejected = false ) {
+	public function __construct(
+		$message,
+		$status,
+		private readonly string $response_id = '',
+		private readonly bool $context_rejected = false
+	) {
 		parent::__construct( $message, $status );
-		$this->response_id      = (string) $response_id;
-		$this->context_rejected = (bool) $context_rejected;
 	}
 
 	/**

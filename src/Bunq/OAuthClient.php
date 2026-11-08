@@ -27,20 +27,11 @@ class OAuthClient {
 	const STATE_TRANSIENT = 'wc_bunq_gateway.oauth2state';
 
 	/**
-	 * The HTTP client for the token request; the OAuth library's own by default.
-	 *
-	 * @var ClientInterface|null
-	 */
-	private $http_client;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param ClientInterface|null $http_client The HTTP client for the token request.
 	 */
-	public function __construct( ?ClientInterface $http_client = null ) {
-		$this->http_client = $http_client;
-	}
+	public function __construct( private readonly ?ClientInterface $http_client = null ) {}
 
 	/**
 	 * The OAuth provider.
@@ -176,7 +167,7 @@ class OAuthClient {
 	 * @param string $body Response body.
 	 * @return string
 	 */
-	private static function error_descriptions( $body ) {
+	private static function error_descriptions( string $body ): string {
 		$decoded      = json_decode( $body, true );
 		$descriptions = array();
 

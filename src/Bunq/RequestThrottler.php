@@ -17,27 +17,18 @@ defined( 'ABSPATH' ) || exit;
 final class RequestThrottler {
 
 	/**
-	 * The rate limits.
-	 *
-	 * @var RequestThrottlerConfiguration
-	 */
-	private $configuration;
-
-	/**
 	 * The timestamps of the requests sent per endpoint key and request method.
 	 *
 	 * @var array
 	 */
-	private $submitted_request_timestamps = array();
+	private array $submitted_request_timestamps = array();
 
 	/**
 	 * Constructor.
 	 *
 	 * @param RequestThrottlerConfiguration $configuration The rate limits.
 	 */
-	public function __construct( RequestThrottlerConfiguration $configuration ) {
-		$this->configuration = $configuration;
-	}
+	public function __construct( private readonly RequestThrottlerConfiguration $configuration ) {}
 
 	/**
 	 * Wait until a request to the endpoint stays within bunq's rate limit, and register it.
@@ -71,7 +62,7 @@ final class RequestThrottler {
 	 * @param string $endpoint Endpoint URL.
 	 * @return string
 	 */
-	private function get_endpoint_key( $endpoint ) {
+	private function get_endpoint_key( string $endpoint ): string {
 		return current( explode( '/', $endpoint ) );
 	}
 
@@ -83,15 +74,13 @@ final class RequestThrottler {
 	 * @param int    $sample_size    Seconds to consider.
 	 * @return int
 	 */
-	private function get_number_of_submitted_requests( $endpoint_key, $request_method, $sample_size ) {
+	private function get_number_of_submitted_requests( string $endpoint_key, string $request_method, int $sample_size ): int {
 		$threshold = microtime( true ) - $sample_size;
 
 		$this->submitted_request_timestamps[ $endpoint_key ][ $request_method ] = array_values(
 			array_filter(
 				$this->submitted_request_timestamps[ $endpoint_key ][ $request_method ],
-				function ( $timestamp ) use ( $threshold ) {
-					return $timestamp >= $threshold;
-				}
+				fn( $timestamp ) => $timestamp >= $threshold
 			)
 		);
 
@@ -106,7 +95,7 @@ final class RequestThrottler {
 	 * @param int    $sample_size    Seconds to consider.
 	 * @return int
 	 */
-	private function get_number_of_seconds_to_sleep( $endpoint_key, $request_method, $sample_size ) {
+	private function get_number_of_seconds_to_sleep( string $endpoint_key, string $request_method, int $sample_size ): int {
 		$available_again = min( $this->submitted_request_timestamps[ $endpoint_key ][ $request_method ] ) + $sample_size;
 		$now             = microtime( true );
 
