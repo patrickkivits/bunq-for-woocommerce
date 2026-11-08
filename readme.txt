@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 2.0.1 =
+* Updated the bundled libraries: Guzzle 8 for the connection with bunq. No change in behavior.
+
 = 2.0.0 =
 * Requires PHP 8.1 and WordPress 5.9 or newer. Shops on older versions stay on 1.11.0, which has the same features and fixes.
 * The code uses PHP 8.1: typed properties, native parameter and return types and newer syntax. No change in behavior.
@@ -223,6 +226,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+Updates the bundled libraries. Requires PHP 8.1 and WordPress 5.9 or newer, like 2.0.0; no need to connect again.
 
 = 2.0.0 =
 Requires PHP 8.1 and WordPress 5.9 or newer: check your versions before updating. On older versions, keep 1.11.0. No other changes; no need to connect again.

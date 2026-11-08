@@ -24,7 +24,7 @@
         "phpunit/phpunit": "^9.6",
         "yoast/phpunit-polyfills": "^4.0",
         "wp-phpunit/wp-phpunit": "^7.1",
-        "roots/wordpress-no-content": "^6.8",
+        "roots/wordpress-no-content": "^7.1",
         "wpackagist-plugin/woocommerce": "^11.1",
         "composer/installers": "^2.3",
         "roots/wordpress-core-installer": "^4.0",
