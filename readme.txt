@@ -20,6 +20,7 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * The iDEAL | Wero, card and Bancontact logos at checkout, and optionally each of them as a payment option of its own.
 * Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 * Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
+* Send an unpaid order's bunq.me payment link to the customer by email from the order screen, for orders taken by phone or sent as an invoice.
 * Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
 * A bunq payment box on the order screen (also with High-Performance Order Storage) shows the payer's name and IBAN, the payment method and a link to the bunq.me payment request.
 * An hourly check of the connection with bunq warns on every admin page when bunq stops accepting it, before checkouts fail. The outcome is in WooCommerce > Status.
@@ -49,7 +50,7 @@ With the API key the plugin registers the shop's server with bunq (a generated p
 
 * lists the merchant's bank accounts on the settings page;
 * registers the shop's callback URL for payment request notifications;
-* creates a bunq.me payment request when a customer places an order, with the order total, the currency, the order number and the URL of the order confirmation page;
+* creates a bunq.me payment request when a customer places an order, or when the merchant sends a payment link for an order, with the order total, the currency, the order number and the URL of the order confirmation page;
 * reads the payment request and the payments made through it when bunq calls the callback URL, when the customer returns to the shop and in background checks for up to two days, and stores the payer's name, IBAN and payment method on the order (for older orders, once when the order is opened in the admin);
 * cancels the payment request when the order is cancelled in WooCommerce;
 * reads the payment and creates a draft payment back to the customer's IBAN when the merchant refunds an order, with the refund amount, the customer's IBAN and name as bunq reported them, and a description with the order number, the shop name and the refund reason.
@@ -90,6 +91,10 @@ Live mode and the sandbox each have their own OAuth client and connection; the *
 The bank account list is cached for an hour. Click **Refresh bank accounts** below the bank account select after adding an account in the bunq app.
 
 == Frequently Asked Questions ==
+
+= How do I send a payment link for an order taken by phone or sent as an invoice? =
+
+Open an unpaid order in WooCommerce, choose **Send bunq payment link to customer** under **Order actions** and click **Update**. The plugin creates a bunq.me payment request for the order total and emails the link to the billing email address. When the customer pays, the order is confirmed the same way as a checkout payment. Sending the link again reuses the open payment request, unless the order total changed; then the old link is cancelled and a new one is sent. The order's payment method becomes bunq. The action is offered for orders that need payment (pending or failed) in euros while bunq is connected. Edit the email's subject, heading and text in **WooCommerce** > **Settings** > **Emails** > **bunq payment link**.
 
 = How do refunds work? =
 

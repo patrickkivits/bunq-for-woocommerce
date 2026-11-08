@@ -17,6 +17,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 - Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 - A bunq payment box on the order screen (also with High-Performance Order Storage) shows the payer's name and IBAN, the payment method and a link to the bunq.me payment request.
+- Send an unpaid order's bunq.me payment link to the customer by email from the order screen, for orders taken by phone or sent as an invoice.
 - Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
 - An hourly check of the connection with bunq: when bunq stops accepting it (access removed in the bunq app, a new IP address, a closed bank account), every admin page shows a warning before checkouts fail. The outcome is in **WooCommerce** > **Status**.
 - Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
@@ -87,6 +88,10 @@ Every hour the plugin checks that bunq still accepts the connection of the activ
 
 The bank account list is cached for an hour. Click **Refresh bank accounts** below the bank account select after adding an account in the bunq app.
 
+## Payment links
+
+Open an unpaid order in WooCommerce, choose **Send bunq payment link to customer** under **Order actions** and click **Update**. The plugin creates a bunq.me payment request for the order total and emails the link to the billing email address. When the customer pays, the order is confirmed the same way as a checkout payment. Sending the link again reuses the open payment request, unless the order total changed; then the old link is cancelled and a new one is sent. The order's payment method becomes bunq. The action is offered for orders that need payment (pending or failed) in euros while bunq is connected. Edit the email's subject, heading and text in **WooCommerce** > **Settings** > **Emails** > **bunq payment link**. The email templates can be overridden in a theme like WooCommerce's own: copy `templates/emails/customer-bunq-payment-link.php` (and `plain/customer-bunq-payment-link.php`) to `yourtheme/woocommerce/emails/`.
+
 ## Refunds
 
 Open the order in WooCommerce, click **Refund**, enter the amount and choose **Refund via bunq**. The plugin creates a **draft payment** at bunq back to the IBAN the payment came from and adds a note with the draft payment id to the order. Approve the draft in the bunq app (it appears as a pending payment on the account) to actually send the money; bunq does not let an OAuth-connected app pay an external IBAN without that approval.
@@ -146,6 +151,7 @@ The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForW
 | `Gateway\ConnectionHealth` | The hourly connection check (Action Scheduler), the admin notice when it fails and the **WooCommerce** > **Status** section |
 | `Orders\PaymentMonitor` | Payment checks on return and from Action Scheduler; cancels the bunq payment request of cancelled orders |
 | `Orders\PaymentDetails` | The bunq payment box on the order screen (payer, IBAN, method, link to bunq.me) and the payer in the personal data export and erasure |
+| `Orders\PaymentLink`, `Emails\PaymentLinkEmail` | The **Send bunq payment link to customer** order action and its WooCommerce email (templates in `templates/emails/`) |
 | `Orders\OrderLock` | Lets one payment check per order run at a time (callback, return and scheduled checks can coincide) |
 | `Blocks\CheckoutIntegration` | The block checkout payment method (script in `assets/js/block-checkout.js`) |
 | `Bunq\ApiClient`, `Bunq\ApiException`, `Bunq\OAuthClient` | Every call to bunq (signed, verified, rate limited and retried; no bunq SDK) and its errors, and the OAuth authorization |

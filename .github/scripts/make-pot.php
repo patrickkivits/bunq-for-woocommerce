@@ -1,6 +1,7 @@
 <?php
 /**
- * Regenerate languages/bunq-for-woocommerce.pot from the plugin's own PHP files (vendor/ is skipped).
+ * Regenerate languages/bunq-for-woocommerce.pot from the plugin's own PHP files and email templates (vendor/ is
+ * skipped).
  *
  *   php .github/scripts/make-pot.php
  *
@@ -14,15 +15,17 @@ $domain = 'bunq-for-woocommerce';
 $functions = ['__', '_e', 'esc_html__', 'esc_html_e', 'esc_attr__', 'esc_attr_e'];
 
 $files = [$root.'/bunq-for-woocommerce.php', $root.'/uninstall.php'];
-$sources = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/src', FilesystemIterator::SKIP_DOTS));
-$src_files = [];
-foreach ($sources as $source) {
-    if ($source->getExtension() === 'php') {
-        $src_files[] = $source->getPathname();
+foreach (['src', 'templates'] as $directory) {
+    $sources = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/'.$directory, FilesystemIterator::SKIP_DOTS));
+    $src_files = [];
+    foreach ($sources as $source) {
+        if ($source->getExtension() === 'php') {
+            $src_files[] = $source->getPathname();
+        }
     }
+    sort($src_files);
+    $files = array_merge($files, $src_files);
 }
-sort($src_files);
-$files = array_merge($files, $src_files);
 
 $entries = [];
 

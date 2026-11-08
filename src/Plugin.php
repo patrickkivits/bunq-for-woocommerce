@@ -17,6 +17,7 @@ use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\PaymentMethods;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentDetails;
+use PatrickKivits\BunqForWooCommerce\Orders\PaymentLink;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
 
 defined( 'ABSPATH' ) || exit;
@@ -139,6 +140,7 @@ final class Plugin {
 		}
 		add_action( 'woocommerce_blocks_loaded', array( $this, 'register_block_checkout' ) );
 		$this->payment_monitor()->register_hooks();
+		( new PaymentLink( $this ) )->register_hooks();
 		$this->connection_health()->register_hooks();
 		$this->payment_details()->register_hooks();
 		register_deactivation_hook( $this->file, array( ConnectionHealth::class, 'unschedule' ) );
