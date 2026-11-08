@@ -289,7 +289,9 @@ final class PaymentMonitor {
 		}
 
 		try {
-			$gateway->cancel_payment_request( $payment_request_id );
+			// Recorded before the request is cancelled, so a payment that came in anyway is not lost.
+			$gateway->record_late_payment( $order );
+			$gateway->cancel_payment_request( $payment_request_id, $gateway->get_order_monetary_account_id( $order ) );
 			$order->update_meta_data( Gateway::META_PAYMENT_REQUEST_STATUS, 'CANCELLED' );
 			$order->save();
 			$order->add_order_note(

@@ -112,6 +112,7 @@ final class BunqPaymentFlowTest extends TestCase
     public function testCancellingAnOrderCancelsItsPaymentRequestAtBunqInTheBackground()
     {
         $order = $this->createOrder();
+        $this->bunqReports('ACTIVE');
 
         $order->update_status('cancelled');
         $this->assertTrue(as_has_scheduled_action('wc_bunq_cancel_payment_request', array($order->get_id()), 'bunq'));

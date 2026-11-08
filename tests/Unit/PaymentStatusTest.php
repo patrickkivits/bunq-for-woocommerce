@@ -33,7 +33,15 @@ final class RecordingGateway extends Gateway
         return $this->outcome;
     }
 
-    public function cancel_payment_request($payment_request_id)
+    /** @var bool What record_late_payment() reports. */
+    public $late_payment = false;
+
+    public function record_late_payment($order)
+    {
+        return $this->late_payment;
+    }
+
+    public function cancel_payment_request($payment_request_id, $monetary_account_id = null)
     {
         if ($this->cancel_exception) {
             throw $this->cancel_exception;
