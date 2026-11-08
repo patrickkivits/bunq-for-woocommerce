@@ -130,6 +130,12 @@ Yes. Check **Use the bunq sandbox** under **Test mode** and connect the OAuth cl
 
 The bunq.me payment page is hosted by bunq and follows the language of the customer's browser.
 
+== Screenshots ==
+
+1. The payment method at the block checkout.
+2. Connecting the shop to bunq on the settings page.
+3. Once connected: choose the bunq bank account payments are paid into.
+
 == Changelog ==
 
 = 2.0.1 =
