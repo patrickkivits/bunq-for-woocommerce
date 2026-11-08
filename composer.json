@@ -12,11 +12,14 @@
         "ext-curl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "guzzlehttp/guzzle": "^7.4"
+        "guzzlehttp/guzzle": "^8.3"
     },
     "autoload": {
         "psr-4": {
             "PatrickKivits\\BunqForWooCommerce\\": "src/"
         }
+    },
+    "replace": {
+        "symfony/polyfill-php80": "*"
     }
 }
