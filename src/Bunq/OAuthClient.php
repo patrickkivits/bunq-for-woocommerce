@@ -10,7 +10,7 @@ namespace PatrickKivits\BunqForWooCommerce\Bunq;
 use Exception;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\ResponseException;
+use GuzzleHttp\Exception\RequestException;
 use League\OAuth2\Client\Provider\GenericProvider;
 use PatrickKivits\BunqForWooCommerce\Logger;
 
@@ -140,7 +140,7 @@ class OAuthClient {
 			);
 		} catch ( GuzzleException $exception ) {
 			// Never rethrow the HTTP client's exception: its message contains the request URL with the client secret.
-			$response = $exception instanceof ResponseException ? $exception->getResponse() : null;
+			$response = $exception instanceof RequestException ? $exception->getResponse() : null;
 			$details  = $response
 				? 'HTTP ' . $response->getStatusCode() . ': ' . self::error_descriptions( (string) $response->getBody() )
 				: preg_replace( '#(https?://[^\s?]+)\?\S*#', '$1', $exception->getMessage() );
