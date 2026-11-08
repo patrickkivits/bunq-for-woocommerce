@@ -30,6 +30,10 @@ final class Environment
     public static $deactivatedPlugins = array();
     public static $loadedTextdomains = array();
     public static $redirects = array();
+    /** @var array[] Meta boxes added through add_meta_box(). */
+    public static $metaBoxes = array();
+    /** @var string What wc_get_page_screen_id('shop-order') returns: "woocommerce_page_wc-orders" with HPOS. */
+    public static $orderScreenId = 'shop_order';
     /** What wp_get_referer() returns. */
     public static $referer = false;
     public static $isAdmin = false;
@@ -64,6 +68,8 @@ final class Environment
         self::$deactivatedPlugins = array();
         self::$loadedTextdomains = array();
         self::$redirects = array();
+        self::$metaBoxes = array();
+        self::$orderScreenId = 'shop_order';
         self::$referer = false;
         self::$isAdmin = false;
         self::$doingAjax = false;

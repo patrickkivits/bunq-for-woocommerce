@@ -28,7 +28,8 @@ if ( function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'bunq_for_woocommerce_connection_check' );
 }
 
-// The OAuth state per user, the payment check lock per order and the callback throttle per payment request.
+// The OAuth state per user, the payment check lock per order, the callback throttle per payment request and the
+// hold-off after payment details could not be fetched per order.
 global $wpdb;
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Options and transients with variable names cannot be deleted otherwise.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_bunq_gateway.oauth2state.%' OR option_name LIKE '_transient_timeout_wc_bunq_gateway.oauth2state.%' OR option_name LIKE 'wc_bunq_gateway.lock.%' OR option_name LIKE '_transient_wc_bunq_gateway.lock.%' OR option_name LIKE '_transient_timeout_wc_bunq_gateway.lock.%' OR option_name LIKE '_transient_bunq_for_woocommerce_callback_%' OR option_name LIKE '_transient_timeout_bunq_for_woocommerce_callback_%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_bunq_gateway.oauth2state.%' OR option_name LIKE '_transient_timeout_wc_bunq_gateway.oauth2state.%' OR option_name LIKE 'wc_bunq_gateway.lock.%' OR option_name LIKE '_transient_wc_bunq_gateway.lock.%' OR option_name LIKE '_transient_timeout_wc_bunq_gateway.lock.%' OR option_name LIKE '_transient_bunq_for_woocommerce_callback_%' OR option_name LIKE '_transient_timeout_bunq_for_woocommerce_callback_%' OR option_name LIKE '_transient_bunq_for_woocommerce_details_failed_%' OR option_name LIKE '_transient_timeout_bunq_for_woocommerce_details_failed_%'" );

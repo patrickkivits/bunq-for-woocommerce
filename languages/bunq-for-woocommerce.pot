@@ -10,7 +10,7 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Domain: bunq-for-woocommerce\n"
 
-#: src/Blocks/CheckoutIntegration.php:120
+#: src/Blocks/CheckoutIntegration.php:129
 msgid "Payment method"
 msgstr ""
 
@@ -31,94 +31,218 @@ msgstr ""
 msgid "Error: %s"
 msgstr ""
 
-#: src/Gateway/Gateway.php:155
-msgid "bunq payment gateway for WooCommerce"
-msgstr ""
-
-#: src/Gateway/Gateway.php:309
-msgid "bunq authorization completed. Select your bank account and save the settings."
-msgstr ""
-
-#: src/Gateway/Gateway.php:433
-msgid "Payment method invalid"
-msgstr ""
-
-#: src/Gateway/Gateway.php:548
+#: src/Gateway/ConnectionHealth.php:180 src/Gateway/Gateway.php:555
 msgid "You are not allowed to do this."
 msgstr ""
 
-#: src/Gateway/Gateway.php:579
+#: src/Gateway/ConnectionHealth.php:312
+msgid "The connection with bunq works."
+msgstr ""
+
+#. translators: %s: how long, for example "3 hours"
+#: src/Gateway/ConnectionHealth.php:345
+msgid "The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached."
+msgstr ""
+
+#. translators: %s: how long, for example "3 hours"
+#: src/Gateway/ConnectionHealth.php:347
+msgid "bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached."
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:352
+msgid "The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:353
+msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:361 src/Gateway/ConnectionHealth.php:451
+msgid "bunq for WooCommerce"
+msgstr ""
+
+#. translators: %s: error message from bunq
+#: src/Gateway/ConnectionHealth.php:366 src/Gateway/SettingsPage.php:206
+msgid "bunq's answer: %s"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:371
+msgid "Go to the bunq settings"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:372 src/Gateway/ConnectionHealth.php:431
+msgid "Check again"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:399
+msgid "Version"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:407
+msgid "Enabled"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:407
+msgid "Yes"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:407
+msgid "No"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:408
+msgid "Mode"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:408
+msgid "Sandbox"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:408
+msgid "Live"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:411
+msgid "Not connected"
+msgstr ""
+
+#. translators: %s: name of the bunq user that granted access
+#: src/Gateway/ConnectionHealth.php:414
+msgid "Connected as %s"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:416
+msgid "Connected"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:418 src/Gateway/SettingsPage.php:170
+msgid "Connection"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:422
+msgid "Not checked yet"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:424
+msgid "Works"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:426
+msgid "Broken"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:426
+msgid "bunq could not be reached"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:433
+msgid "Connection check"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:436
+msgid "Failing since"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:439
+msgid "Last check"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:440
+msgid "Next check"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:440
+msgid "Not scheduled"
+msgstr ""
+
+#: src/Gateway/ConnectionHealth.php:443
+msgid "Callback URL"
+msgstr ""
+
+#: src/Gateway/Gateway.php:159
+msgid "bunq payment gateway for WooCommerce"
+msgstr ""
+
+#: src/Gateway/Gateway.php:313
+msgid "bunq authorization completed. Select your bank account and save the settings."
+msgstr ""
+
+#: src/Gateway/Gateway.php:437
+msgid "Payment method invalid"
+msgstr ""
+
+#: src/Gateway/Gateway.php:587
 msgid "Disconnected from the bunq sandbox. To also revoke the access at bunq, remove the connection in the bunq app."
 msgstr ""
 
-#: src/Gateway/Gateway.php:580
+#: src/Gateway/Gateway.php:588
 msgid "Disconnected from bunq. To also revoke the access at bunq, remove the connection in the bunq app."
 msgstr ""
 
-#: src/Gateway/Gateway.php:598
+#: src/Gateway/Gateway.php:606
 msgid "Enter the Client ID and Client Secret of your bunq OAuth client, then click \"Connect to bunq\"."
 msgstr ""
 
-#: src/Gateway/Gateway.php:787
+#: src/Gateway/Gateway.php:798
 msgid "Saved. Leave empty to keep it, or paste a new secret to replace it."
 msgstr ""
 
-#: src/Gateway/Gateway.php:900
+#: src/Gateway/Gateway.php:911
 msgid "Refresh bank accounts"
 msgstr ""
 
-#: src/Gateway/Gateway.php:910
+#: src/Gateway/Gateway.php:921
 msgid "bunq rejected the saved connection. Connect again."
 msgstr ""
 
 #. translators: %s: bunq payment request id
-#: src/Gateway/Gateway.php:1009
+#: src/Gateway/Gateway.php:1041
 msgid "bunq payment request %s created"
 msgstr ""
 
-#: src/Gateway/Gateway.php:1032
+#: src/Gateway/Gateway.php:1065
 msgid "The payment could not be started with bunq. Please try again or choose another payment method."
 msgstr ""
 
-#: src/Gateway/Gateway.php:1051
+#: src/Gateway/Gateway.php:1084
 msgid "This order has no bunq payment that can be refunded."
 msgstr ""
 
-#: src/Gateway/Gateway.php:1055
+#: src/Gateway/Gateway.php:1088
 msgid "The refund amount must be greater than zero."
 msgstr ""
 
-#: src/Gateway/Gateway.php:1072
+#: src/Gateway/Gateway.php:1105
 msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
 msgstr ""
 
 #. translators: 1: order number, 2: shop name
-#: src/Gateway/Gateway.php:1077
+#: src/Gateway/Gateway.php:1110
 msgid "Refund order %1$s %2$s"
 msgstr ""
 
 #. translators: 1: refunded amount, 2: bunq draft payment id
-#: src/Gateway/Gateway.php:1099
+#: src/Gateway/Gateway.php:1132
 msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
 msgstr ""
 
 #. translators: %s: error message from bunq
-#: src/Gateway/Gateway.php:1114
+#: src/Gateway/Gateway.php:1147
 msgid "bunq refund failed: %s"
 msgstr ""
 
 #. translators: %s: bunq payment id
-#: src/Gateway/Gateway.php:1212
+#: src/Gateway/Gateway.php:1245
 msgid "bunq payment %s received"
 msgstr ""
 
 #. translators: 1: bunq payment id, 2: amount received, 3: order total
-#: src/Gateway/Gateway.php:1235
+#: src/Gateway/Gateway.php:1270
 msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
 msgstr ""
 
 #. translators: 1: bunq payment request id, 2: status reported by bunq
-#: src/Gateway/Gateway.php:1257
+#: src/Gateway/Gateway.php:1292
 msgid "bunq payment request %1$s is %2$s"
 msgstr ""
 
@@ -150,6 +274,10 @@ msgstr ""
 
 #: src/Gateway/PaymentMethods.php:65
 msgid "From a bunq account"
+msgstr ""
+
+#: src/Gateway/PaymentMethods.php:187
+msgid "Bank transfer"
 msgstr ""
 
 #: src/Gateway/SettingsFields.php:37
@@ -343,10 +471,6 @@ msgstr ""
 msgid "Saves your settings and opens bunq, which shows a QR code. Scan it with the bunq app, choose the bank accounts the shop may use and approve. bunq then sends you back here."
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:170
-msgid "Connection"
-msgstr ""
-
 #. translators: %s: name of the bunq user that granted access
 #: src/Gateway/SettingsPage.php:183
 msgid "Connected to the bunq sandbox as %s."
@@ -365,36 +489,76 @@ msgstr ""
 msgid "Connected to bunq."
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:201
+#: src/Gateway/SettingsPage.php:203
+msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it."
+msgstr ""
+
+#: src/Gateway/SettingsPage.php:210
 msgid "bunq recently rejected the connection, so bunq is not offered at checkout. Connect again to restore it."
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:204
+#: src/Gateway/SettingsPage.php:214
 msgid "Connect again"
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:205
+#: src/Gateway/SettingsPage.php:215
 msgid "Change OAuth client"
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:206
+#: src/Gateway/SettingsPage.php:216
 msgid "Disconnect"
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:209
+#: src/Gateway/SettingsPage.php:219
 msgid "Not connected to the bunq sandbox."
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:209
+#: src/Gateway/SettingsPage.php:219
 msgid "Not connected to bunq."
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:213
+#: src/Gateway/SettingsPage.php:223
 msgid "Click \"Connect to bunq\" below and scan the QR code with the bunq app."
 msgstr ""
 
-#: src/Gateway/SettingsPage.php:214
+#: src/Gateway/SettingsPage.php:224
 msgid "Register the redirect URL in the bunq app and enter the Client ID and Client Secret of your OAuth client below."
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:90
+msgid "bunq payment"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:122
+msgid "Payer"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:123
+msgid "IBAN"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:124
+msgid "Method"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:125
+msgid "Payment ID"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:138
+msgid "No bunq payment has been received for this order yet."
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:150
+msgid "View the payment request on bunq.me"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:212
+msgid "bunq payer name"
+msgstr ""
+
+#: src/Orders/PaymentDetails.php:213
+msgid "bunq payer IBAN"
 msgstr ""
 
 #. translators: %s: bunq payment request id
@@ -406,126 +570,3 @@ msgstr ""
 msgid "cannot be activated due to incompatible environment."
 msgstr ""
 
-#: src/Gateway/ConnectionHealth.php:312
-msgid "The connection with bunq works."
-msgstr ""
-
-#. translators: %s: how long, for example "3 hours"
-#: src/Gateway/ConnectionHealth.php:345
-msgid "The bunq sandbox could not be reached for %s. Payments with bunq fail while it cannot be reached."
-msgstr ""
-
-#. translators: %s: how long, for example "3 hours"
-#: src/Gateway/ConnectionHealth.php:347
-msgid "bunq could not be reached for %s. Payments with bunq fail while bunq cannot be reached."
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:352
-msgid "The connection with the bunq sandbox stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:353
-msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again on the bunq settings page. This happens when the access was removed in the bunq app or the shop now connects from another IP address."
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:361
-msgid "bunq for WooCommerce"
-msgstr ""
-
-#. translators: %s: error message from bunq
-#: src/Gateway/ConnectionHealth.php:366
-msgid "bunq's answer: %s"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:371
-msgid "Go to the bunq settings"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:372
-msgid "Check again"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:399
-msgid "Version"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:407
-msgid "Enabled"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:407
-msgid "Yes"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:407
-msgid "No"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:408
-msgid "Mode"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:408
-msgid "Sandbox"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:408
-msgid "Live"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:411
-msgid "Not connected"
-msgstr ""
-
-#. translators: %s: name of the bunq user that granted access
-#: src/Gateway/ConnectionHealth.php:414
-msgid "Connected as %s"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:416
-msgid "Connected"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:422
-msgid "Not checked yet"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:424
-msgid "Works"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:426
-msgid "Broken"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:426
-msgid "bunq could not be reached"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:433
-msgid "Connection check"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:436
-msgid "Failing since"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:439
-msgid "Last check"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:440
-msgid "Next check"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:440
-msgid "Not scheduled"
-msgstr ""
-
-#: src/Gateway/ConnectionHealth.php:443
-msgid "Callback URL"
-msgstr ""
-
-#: src/Gateway/SettingsPage.php:203
-msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it."
-msgstr ""

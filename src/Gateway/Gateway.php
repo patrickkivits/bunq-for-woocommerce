@@ -68,6 +68,10 @@ class Gateway extends WC_Payment_Gateway {
 	const META_PAYMENT_REQUEST_STATUS = 'bunq_payment_request_status';
 	const META_PAYMENT_ID             = 'bunq_payment_id';
 	const META_MONETARY_ACCOUNT_ID    = 'bunq_monetary_account_id';
+	const META_PAYMENT_REQUEST_URL    = 'bunq_payment_request_url';
+	const META_PAYER_NAME             = 'bunq_payer_name';
+	const META_PAYER_IBAN             = 'bunq_payer_iban';
+	const META_PAYMENT_TYPE           = 'bunq_payment_type';
 
 	/**
 	 * The API key of the active mode.
@@ -1039,6 +1043,7 @@ class Gateway extends WC_Payment_Gateway {
 				)
 			);
 			$order->update_meta_data( self::META_PAYMENT_REQUEST_ID, $payment_request['id'] );
+			$order->update_meta_data( self::META_PAYMENT_REQUEST_URL, $payment_request['url'] );
 			$order->save();
 
 			// Fallback for a callback that never arrives: re-check the payment request in the background.
@@ -1244,6 +1249,7 @@ class Gateway extends WC_Payment_Gateway {
 			$order->update_meta_data( self::META_PAYMENT_ID, $payment['id'] );
 			// The account the money landed on, so a refund still works after the merchant changes the setting.
 			$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, isset( $payment['monetary_account_id'] ) ? $payment['monetary_account_id'] : null );
+			self::record_payment_details( $order, $payment, $payment_request );
 			$order->save();
 			$order->payment_complete( (string) $payment['id'] );
 
@@ -1255,6 +1261,7 @@ class Gateway extends WC_Payment_Gateway {
 			$unmatched_amount = $unmatched_payment['amount'];
 			$order->update_meta_data( self::META_PAYMENT_ID, $unmatched_payment['id'] );
 			$order->update_meta_data( self::META_MONETARY_ACCOUNT_ID, isset( $unmatched_payment['monetary_account_id'] ) ? $unmatched_payment['monetary_account_id'] : null );
+			self::record_payment_details( $order, $unmatched_payment, $payment_request );
 			$order->save();
 			$order->update_status(
 				'on-hold',
@@ -1292,6 +1299,66 @@ class Gateway extends WC_Payment_Gateway {
 		}
 
 		return 'pending';
+	}
+
+	/**
+	 * Remember who paid the order and how, for the bunq box on the order screen (PaymentDetails). The caller saves
+	 * the order.
+	 *
+	 * @param WC_Order $order           The order.
+	 * @param array    $payment         The bunq payment (ApiClient::get_payment()).
+	 * @param array    $payment_request The bunq.me payment request the payment was made through.
+	 */
+	public static function record_payment_details( $order, array $payment, array $payment_request = array() ) {
+		$counterparty = isset( $payment['counterparty_alias'] ) && is_array( $payment['counterparty_alias'] ) ? $payment['counterparty_alias'] : array();
+
+		$order->update_meta_data( self::META_PAYER_NAME, isset( $counterparty['display_name'] ) ? sanitize_text_field( (string) $counterparty['display_name'] ) : '' );
+		$order->update_meta_data( self::META_PAYER_IBAN, isset( $counterparty['iban'] ) ? sanitize_text_field( (string) $counterparty['iban'] ) : '' );
+		// "UNKNOWN" rather than empty, so PaymentDetails does not ask bunq again for an order whose details are known.
+		$order->update_meta_data( self::META_PAYMENT_TYPE, ! empty( $payment['type'] ) ? sanitize_text_field( (string) $payment['type'] ) : 'UNKNOWN' );
+
+		if ( ! empty( $payment_request['bunqme_tab_share_url'] ) ) {
+			$order->update_meta_data( self::META_PAYMENT_REQUEST_URL, esc_url_raw( (string) $payment_request['bunqme_tab_share_url'] ) );
+		}
+	}
+
+	/**
+	 * Fetch the payer and payment method of an order paid before the plugin stored them, and store them.
+	 *
+	 * @param WC_Order $order The order; it has a bunq payment.
+	 * @return bool Whether bunq returned the payment.
+	 * @throws Throwable When bunq could not be reached.
+	 */
+	public function fetch_payment_details( $order ) {
+		$payment_request_id  = intval( $order->get_meta( self::META_PAYMENT_REQUEST_ID ) );
+		$payment_id          = intval( $order->get_meta( self::META_PAYMENT_ID ) );
+		$monetary_account_id = intval( $order->get_meta( self::META_MONETARY_ACCOUNT_ID ) );
+
+		if ( ! $payment_request_id || ! $payment_id ) {
+			return false;
+		}
+
+		if ( ! $monetary_account_id ) {
+			$monetary_account_id = $this->get_monetary_account_bank_id();
+		}
+
+		// The payment request holds the payment as well as its share URL, so one call is enough.
+		$payment_request = $this->call_bunq(
+			function () use ( $payment_request_id, $monetary_account_id ) {
+				return $this->api->get_payment_request( $payment_request_id, $monetary_account_id );
+			}
+		);
+
+		foreach ( isset( $payment_request['result_inquiries'] ) ? (array) $payment_request['result_inquiries'] : array() as $result_inquiry ) {
+			if ( isset( $result_inquiry['payment']['id'] ) && intval( $result_inquiry['payment']['id'] ) === $payment_id ) {
+				self::record_payment_details( $order, $result_inquiry['payment'], $payment_request );
+				$order->save();
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

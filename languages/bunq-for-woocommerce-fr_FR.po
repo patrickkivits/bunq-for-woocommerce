@@ -529,3 +529,43 @@ msgstr "URL de callback"
 #: src/Gateway/SettingsPage.php:203
 msgid "The connection with bunq stopped working, so payments with bunq fail. Connect again to restore it."
 msgstr "La connexion avec bunq ne fonctionne plus : les paiements avec bunq échouent donc. Reconnectez-vous pour la rétablir."
+
+#: src/Gateway/PaymentMethods.php:187
+msgid "Bank transfer"
+msgstr "Virement bancaire"
+
+#: src/Orders/PaymentDetails.php:90
+msgid "bunq payment"
+msgstr "Paiement bunq"
+
+#: src/Orders/PaymentDetails.php:122
+msgid "Payer"
+msgstr "Payeur"
+
+#: src/Orders/PaymentDetails.php:123
+msgid "IBAN"
+msgstr "IBAN"
+
+#: src/Orders/PaymentDetails.php:124
+msgid "Method"
+msgstr "Méthode"
+
+#: src/Orders/PaymentDetails.php:125
+msgid "Payment ID"
+msgstr "ID du paiement"
+
+#: src/Orders/PaymentDetails.php:138
+msgid "No bunq payment has been received for this order yet."
+msgstr "Aucun paiement bunq n’a encore été reçu pour cette commande."
+
+#: src/Orders/PaymentDetails.php:150
+msgid "View the payment request on bunq.me"
+msgstr "Voir la demande de paiement sur bunq.me"
+
+#: src/Orders/PaymentDetails.php:212
+msgid "bunq payer name"
+msgstr "Nom du payeur bunq"
+
+#: src/Orders/PaymentDetails.php:213
+msgid "bunq payer IBAN"
+msgstr "IBAN du payeur bunq"

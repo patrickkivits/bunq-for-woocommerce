@@ -21,6 +21,7 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 * Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
 * Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
+* A bunq payment box on the order screen (also with High-Performance Order Storage) shows the payer's name and IBAN, the payment method and a link to the bunq.me payment request.
 * An hourly check of the connection with bunq warns on every admin page when bunq stops accepting it, before checkouts fail. The outcome is in WooCommerce > Status.
 * Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
 * Translated into Dutch, French and German.
@@ -49,7 +50,7 @@ With the API key the plugin registers the shop's server with bunq (a generated p
 * lists the merchant's bank accounts on the settings page;
 * registers the shop's callback URL for payment request notifications;
 * creates a bunq.me payment request when a customer places an order, with the order total, the currency, the order number and the URL of the order confirmation page;
-* reads the payment request and the payments made through it when bunq calls the callback URL, when the customer returns to the shop and in background checks for up to two days;
+* reads the payment request and the payments made through it when bunq calls the callback URL, when the customer returns to the shop and in background checks for up to two days, and stores the payer's name, IBAN and payment method on the order (for older orders, once when the order is opened in the admin);
 * cancels the payment request when the order is cancelled in WooCommerce;
 * reads the payment and creates a draft payment back to the customer's IBAN when the merchant refunds an order, with the refund amount, the customer's IBAN and name as bunq reported them, and a description with the order number, the shop name and the refund reason.
 

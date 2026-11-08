@@ -67,6 +67,7 @@ final class PluginLoadingTest extends TestCase
         $this->freshPlugin()->boot();
 
         $this->assertSame(array(
+            'add_meta_boxes',
             'admin_init',
             'admin_notices',
             'admin_post_bunq_check_connection',
@@ -86,6 +87,9 @@ final class PluginLoadingTest extends TestCase
             'woocommerce_gateway_bunq_settings_values',
             'woocommerce_order_status_cancelled',
             'woocommerce_payment_gateways',
+            'woocommerce_privacy_export_order_personal_data_prop',
+            'woocommerce_privacy_export_order_personal_data_props',
+            'woocommerce_privacy_remove_order_personal_data_meta',
             'woocommerce_rest_prepare_payment_gateway',
             'woocommerce_system_status_report',
         ), $this->sortedHookNames());
