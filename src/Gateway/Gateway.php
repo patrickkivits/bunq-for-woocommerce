@@ -1019,35 +1019,7 @@ class Gateway extends WC_Payment_Gateway {
 			// The block checkout does not call validate_fields(); bunqme_name() only knows the valid methods.
 			$bunqme_payment_method = $this->get_requested_bunqme_payment_method();
 
-			$payment_request = $this->call_bunq(
-				function () use ( $order ) {
-					return $this->api->create_payment_request(
-						$order->get_total(),
-						$order->get_currency(),
-						'#' . $order->get_order_number(),
-						$this->get_return_url( $order ),
-						$this->get_monetary_account_bank_id()
-					);
-				}
-			);
-
-			if ( ! $payment_request || empty( $payment_request['id'] ) || empty( $payment_request['url'] ) ) {
-				throw new Exception( 'bunq did not return a payment request for order #' . $order->get_order_number() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Only logged.
-			}
-
-			$order->add_order_note(
-				sprintf(
-					/* translators: %s: bunq payment request id */
-					__( 'bunq payment request %s created', 'bunq-for-woocommerce' ),
-					$payment_request['id']
-				)
-			);
-			$order->update_meta_data( self::META_PAYMENT_REQUEST_ID, $payment_request['id'] );
-			$order->update_meta_data( self::META_PAYMENT_REQUEST_URL, $payment_request['url'] );
-			$order->save();
-
-			// Fallback for a callback that never arrives: re-check the payment request in the background.
-			PaymentMonitor::schedule_check( $order->get_id() );
+			$payment_request = $this->create_order_payment_request( $order );
 
 			// Direct gateway: bunq.me opens the chosen method straight away when it is passed as ?paymentMethod= (it
 			// used to be a path segment, which bunq.me now ignores).
@@ -1066,6 +1038,114 @@ class Gateway extends WC_Payment_Gateway {
 
 			return array( 'result' => 'failure' );
 		}
+	}
+
+	/**
+	 * Create a bunq.me payment request for the order and remember it on the order: the payment request id for the
+	 * callback and the checks, and a background check as fallback for a callback that never arrives.
+	 *
+	 * @param WC_Order $order The order.
+	 * @return array The share URL ("url") and the id ("id") of the request.
+	 * @throws Throwable When bunq could not be reached or did not return a payment request.
+	 */
+	private function create_order_payment_request( $order ) {
+		$payment_request = $this->call_bunq(
+			function () use ( $order ) {
+				return $this->api->create_payment_request(
+					$order->get_total(),
+					$order->get_currency(),
+					'#' . $order->get_order_number(),
+					$this->get_return_url( $order ),
+					$this->get_monetary_account_bank_id()
+				);
+			}
+		);
+
+		if ( ! $payment_request || empty( $payment_request['id'] ) || empty( $payment_request['url'] ) ) {
+			throw new Exception( 'bunq did not return a payment request for order #' . $order->get_order_number() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Only logged.
+		}
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: bunq payment request id */
+				__( 'bunq payment request %s created', 'bunq-for-woocommerce' ),
+				$payment_request['id']
+			)
+		);
+		$order->update_meta_data( self::META_PAYMENT_REQUEST_ID, $payment_request['id'] );
+		$order->update_meta_data( self::META_PAYMENT_REQUEST_URL, $payment_request['url'] );
+		// The final state of an earlier payment request of the order does not apply to this one.
+		$order->delete_meta_data( self::META_PAYMENT_REQUEST_STATUS );
+		$order->save();
+
+		// Fallback for a callback that never arrives: re-check the payment request in the background.
+		PaymentMonitor::schedule_check( $order->get_id() );
+
+		return $payment_request;
+	}
+
+	/**
+	 * A bunq.me link the customer can pay the order with, for a payment link the merchant sends (see
+	 * Orders\PaymentLink). The order's payment request is reused while it can still be paid and asks for the order
+	 * total; otherwise it is cancelled and a new one is created.
+	 *
+	 * @param WC_Order $order An order that needs payment.
+	 * @return array Keys: "url" (the bunq.me link; null when a payment already came in) and "outcome": "created",
+	 *               "reused", or the outcome of check_payment_status() when a payment already came in.
+	 * @throws Throwable When bunq could not be reached or did not return a payment request.
+	 */
+	public function get_payment_link( $order ) {
+		$payment_request_id = intval( $order->get_meta( self::META_PAYMENT_REQUEST_ID ) );
+
+		// bunq reported the earlier request as cancelled or expired: it can no longer be paid.
+		if ( $payment_request_id && ! $order->get_meta( self::META_PAYMENT_REQUEST_STATUS ) ) {
+			$payment_request = $this->call_bunq(
+				function () use ( $payment_request_id ) {
+					return $this->api->get_payment_request( $payment_request_id, $this->get_monetary_account_bank_id() );
+				}
+			);
+
+			// The customer paid the earlier request: record that instead of asking for the money again.
+			if ( ! empty( $payment_request['result_inquiries'] ) ) {
+				return array(
+					'url'     => null,
+					'outcome' => $this->check_payment_status( $order ),
+				);
+			}
+
+			$status = isset( $payment_request['status'] ) ? (string) $payment_request['status'] : '';
+
+			// Still open (bunq reports open requests as ACTIVE or WAITING_FOR_PAYMENT).
+			if ( ! in_array( $status, array( 'CANCELLED', 'EXPIRED' ), true ) ) {
+				$amount = isset( $payment_request['bunqme_tab_entry']['amount_inquired'] ) ? $payment_request['bunqme_tab_entry']['amount_inquired'] : null;
+
+				if ( ! empty( $payment_request['bunqme_tab_share_url'] ) && isset( $amount['value'], $amount['currency'] )
+					&& $amount['currency'] === $order->get_currency() && Money::amounts_match( $amount['value'], $order->get_total() )
+				) {
+					return array(
+						'url'     => (string) $payment_request['bunqme_tab_share_url'],
+						'outcome' => 'reused',
+					);
+				}
+
+				// The order total changed since: the old link must not be paid any more.
+				$this->cancel_payment_request( $payment_request_id );
+				$order->add_order_note(
+					sprintf(
+						/* translators: %s: bunq payment request id */
+						__( 'bunq payment request %s cancelled', 'bunq-for-woocommerce' ),
+						$payment_request_id
+					)
+				);
+			}
+		}
+
+		$payment_request = $this->create_order_payment_request( $order );
+
+		return array(
+			'url'     => $payment_request['url'],
+			'outcome' => 'created',
+		);
 	}
 
 	/**

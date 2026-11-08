@@ -24,6 +24,8 @@ function esc_attr_e($text, $domain = 'default') { echo esc_attr($text); }
 function esc_html_e($text, $domain = 'default') { echo esc_html($text); }
 function wp_kses_post($text) { return $text; }
 function wpautop($text) { return '<p>' . $text . '</p>' . "\n"; }
+function wptexturize($text) { return $text; }
+function wp_strip_all_tags($text) { return trim(strip_tags((string) $text)); }
 function sanitize_text_field($value) { return trim(strip_tags((string) $value)); }
 function sanitize_key($key) { return preg_replace('/[^a-z0-9_\-]/', '', strtolower((string) $key)); }
 function wp_unslash($value) { return is_string($value) ? stripslashes($value) : $value; }
@@ -516,6 +518,11 @@ class WooCommerce
         return $this->payment_gateways ?: ($this->payment_gateways = new WC_Payment_Gateways());
     }
 
+    public function mailer()
+    {
+        return Environment::$mailer;
+    }
+
     public function api_request_url($request)
     {
         return $this->home_url . '/wc-api/' . $request . '/';
@@ -535,6 +542,8 @@ class WC_Order
     private $billing_name;
     private $meta;
     private $transaction_id = '';
+    private $billing_email;
+    private $payment_method_title = '';
 
     /** @var string[] Order notes in the order they were added. */
     public $notes = array();
@@ -556,6 +565,7 @@ class WC_Order
         $this->order_key = isset($data['order_key']) ? $data['order_key'] : 'wc_order_key' . $this->id;
         $this->billing_name = isset($data['billing_name']) ? $data['billing_name'] : 'Jane Doe';
         $this->meta = isset($data['meta']) ? $data['meta'] : array();
+        $this->billing_email = isset($data['billing_email']) ? $data['billing_email'] : 'jane@example.com';
     }
 
     public function get_id() { return $this->id; }
@@ -567,6 +577,24 @@ class WC_Order
     public function get_order_key() { return $this->order_key; }
     public function get_transaction_id() { return $this->transaction_id; }
     public function get_formatted_billing_full_name() { return $this->billing_name; }
+    public function get_billing_email() { return $this->billing_email; }
+    public function get_billing_first_name() { return strtok($this->billing_name, ' '); }
+    public function get_formatted_order_total() { return '<span class="amount">&euro;' . $this->total . '</span>'; }
+    public function get_payment_method_title() { return $this->payment_method_title; }
+    public function get_date_created() { return null; }
+
+    /**
+     * @param string|\WC_Payment_Gateway $payment_method
+     */
+    public function set_payment_method($payment_method = '')
+    {
+        if (is_object($payment_method)) {
+            $this->payment_method = $payment_method->id;
+            $this->payment_method_title = $payment_method->title;
+        } else {
+            $this->payment_method = $payment_method;
+        }
+    }
 
     public function get_meta($key = '', $single = true, $context = 'view')
     {
@@ -736,4 +764,87 @@ class WC_Payment_Gateway
     {
         return 'https://shop.example/checkout/order-received/' . $order->get_id() . '/?key=' . $order->get_order_key();
     }
+}
+
+/**
+ * The parts of WooCommerce's mailer the plugin uses: the emails, including the ones added through
+ * woocommerce_email_classes.
+ */
+class WC_Emails
+{
+    private $emails = null;
+
+    public function get_emails()
+    {
+        if ($this->emails === null) {
+            $this->emails = apply_filters('woocommerce_email_classes', array());
+        }
+
+        return $this->emails;
+    }
+}
+
+/**
+ * The parts of WooCommerce's email base class the plugin builds on. send() records the email instead of mailing it.
+ */
+class WC_Email
+{
+    public $id;
+    public $title;
+    public $description;
+    public $customer_email = false;
+    public $template_html;
+    public $template_plain;
+    public $template_base;
+    public $placeholders = array();
+    public $object;
+    public $recipient;
+    public $enabled = 'yes';
+
+    public function __construct()
+    {
+        $settings = get_option('woocommerce_' . $this->id . '_settings', array());
+        $this->enabled = isset($settings['enabled']) ? $settings['enabled'] : 'yes';
+    }
+
+    public function is_enabled() { return 'yes' === $this->enabled; }
+    public function setup_locale() {}
+    public function restore_locale() {}
+    public function get_recipient() { return $this->recipient; }
+    public function format_string($string) { return str_replace(array_keys($this->placeholders), array_values($this->placeholders), str_replace('{site_title}', get_bloginfo('name'), $string)); }
+    public function get_subject() { return $this->format_string($this->get_default_subject()); }
+    public function get_heading() { return $this->format_string($this->get_default_heading()); }
+    public function get_additional_content() { return $this->format_string($this->get_default_additional_content()); }
+    public function get_content() { return $this->get_content_html(); }
+    public function get_headers() { return 'Content-Type: text/html'; }
+    public function get_attachments() { return array(); }
+
+    public function send($to, $subject, $message, $headers, $attachments)
+    {
+        Environment::$sentEmails[] = array('to' => $to, 'subject' => $subject, 'message' => $message);
+
+        return Environment::$mailWorks;
+    }
+}
+
+class WC_Admin_Meta_Boxes
+{
+    public static function add_error($text)
+    {
+        Environment::$adminErrors[] = $text;
+    }
+}
+
+function wc_format_datetime($date = null, $format = '') { return $date ? (string) $date : ''; }
+
+/**
+ * Renders a template with its variables extracted, like wc_get_template_html() does for a template in $default_path.
+ */
+function wc_get_template_html($template_name, $args = array(), $template_path = '', $default_path = '')
+{
+    extract($args); // phpcs:ignore
+    ob_start();
+    include $default_path . $template_name;
+
+    return ob_get_clean();
 }

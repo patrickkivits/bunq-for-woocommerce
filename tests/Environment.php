@@ -47,6 +47,14 @@ final class Environment
     public static $wcEndpoint = null;
     public static $queryVars = array();
     public static $blogInfo = array();
+    /** Emails sent through WC_Email::send(), as array(to, subject, message). */
+    public static $sentEmails = array();
+    /** Whether WC_Email::send() succeeds. */
+    public static $mailWorks = true;
+    /** Errors shown on the edit order screen (WC_Admin_Meta_Boxes::add_error()). */
+    public static $adminErrors = array();
+    /** @var \WC_Emails */
+    public static $mailer = null;
     /** @var \WooCommerce|null */
     public static $woocommerce = null;
 
@@ -90,6 +98,10 @@ final class Environment
         self::$queryVars = array();
         self::$blogInfo = array('version' => '6.8', 'name' => 'Test Shop');
         self::$woocommerce = new \WooCommerce();
+        self::$sentEmails = array();
+        self::$mailWorks = true;
+        self::$adminErrors = array();
+        self::$mailer = new \WC_Emails();
 
         \Automattic\WooCommerce\Utilities\FeaturesUtil::$declared = array();
 

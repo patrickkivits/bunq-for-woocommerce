@@ -31,6 +31,26 @@ msgstr ""
 msgid "Error: %s"
 msgstr ""
 
+#: src/Emails/PaymentLinkEmail.php:42
+msgid "bunq payment link"
+msgstr ""
+
+#: src/Emails/PaymentLinkEmail.php:43
+msgid "Sent to the customer when you choose \"Send bunq payment link to customer\" on an unpaid order. Holds the bunq.me link to pay the order with."
+msgstr ""
+
+#: src/Emails/PaymentLinkEmail.php:61
+msgid "Pay for your {site_title} order #{order_number}"
+msgstr ""
+
+#: src/Emails/PaymentLinkEmail.php:70
+msgid "Your payment link for order #{order_number}"
+msgstr ""
+
+#: src/Emails/PaymentLinkEmail.php:79
+msgid "Questions about your order? Just reply to this email."
+msgstr ""
+
 #: src/Gateway/ConnectionHealth.php:180 src/Gateway/Gateway.php:555
 msgid "You are not allowed to do this."
 msgstr ""
@@ -195,54 +215,59 @@ msgstr ""
 msgid "bunq rejected the saved connection. Connect again."
 msgstr ""
 
-#. translators: %s: bunq payment request id
-#: src/Gateway/Gateway.php:1041
-msgid "bunq payment request %s created"
-msgstr ""
-
-#: src/Gateway/Gateway.php:1065
+#: src/Gateway/Gateway.php:1037
 msgid "The payment could not be started with bunq. Please try again or choose another payment method."
 msgstr ""
 
-#: src/Gateway/Gateway.php:1084
+#. translators: %s: bunq payment request id
+#: src/Gateway/Gateway.php:1071
+msgid "bunq payment request %s created"
+msgstr ""
+
+#. translators: %s: bunq payment request id
+#: src/Gateway/Gateway.php:1136 src/Orders/PaymentMonitor.php:298
+msgid "bunq payment request %s cancelled"
+msgstr ""
+
+#: src/Gateway/Gateway.php:1164
 msgid "This order has no bunq payment that can be refunded."
 msgstr ""
 
-#: src/Gateway/Gateway.php:1088
+#: src/Gateway/Gateway.php:1168
 msgid "The refund amount must be greater than zero."
 msgstr ""
 
-#: src/Gateway/Gateway.php:1105
+#: src/Gateway/Gateway.php:1185
 msgid "The bunq payment for this order has no IBAN to refund to (for example a card payment). Refund it from the bunq app instead."
 msgstr ""
 
 #. translators: 1: order number, 2: shop name
-#: src/Gateway/Gateway.php:1110
+#: src/Gateway/Gateway.php:1190
 msgid "Refund order %1$s %2$s"
 msgstr ""
 
 #. translators: 1: refunded amount, 2: bunq draft payment id
-#: src/Gateway/Gateway.php:1132
+#: src/Gateway/Gateway.php:1212
 msgid "bunq refund of %1$s created as draft payment %2$s. Approve it in the bunq app to send the money."
 msgstr ""
 
 #. translators: %s: error message from bunq
-#: src/Gateway/Gateway.php:1147
+#: src/Gateway/Gateway.php:1227
 msgid "bunq refund failed: %s"
 msgstr ""
 
 #. translators: %s: bunq payment id
-#: src/Gateway/Gateway.php:1245
+#: src/Gateway/Gateway.php:1325
 msgid "bunq payment %s received"
 msgstr ""
 
 #. translators: 1: bunq payment id, 2: amount received, 3: order total
-#: src/Gateway/Gateway.php:1270
+#: src/Gateway/Gateway.php:1350
 msgid "bunq payment %1$s of %2$s received, but the order total is %3$s. Check the payment before processing the order."
 msgstr ""
 
 #. translators: 1: bunq payment request id, 2: status reported by bunq
-#: src/Gateway/Gateway.php:1292
+#: src/Gateway/Gateway.php:1372
 msgid "bunq payment request %1$s is %2$s"
 msgstr ""
 
@@ -561,12 +586,62 @@ msgstr ""
 msgid "bunq payer IBAN"
 msgstr ""
 
-#. translators: %s: bunq payment request id
-#: src/Orders/PaymentMonitor.php:298
-msgid "bunq payment request %s cancelled"
+#: src/Orders/PaymentLink.php:86
+msgid "Send bunq payment link to customer"
+msgstr ""
+
+#: src/Orders/PaymentLink.php:114
+msgid "The bunq payment link was not sent: connect your bunq account in the bunq payment settings first."
+msgstr ""
+
+#: src/Orders/PaymentLink.php:120
+msgid "The bunq payment link was not sent: only unpaid orders in euros can be paid with a bunq payment link."
+msgstr ""
+
+#: src/Orders/PaymentLink.php:126
+msgid "The bunq payment link was not sent: the order has no billing email address."
+msgstr ""
+
+#: src/Orders/PaymentLink.php:134
+msgid "The bunq payment link was not sent: the \"bunq payment link\" email is disabled in WooCommerce > Settings > Emails."
+msgstr ""
+
+#: src/Orders/PaymentLink.php:143
+msgid "The bunq payment link could not be created. The WooCommerce logs (source: bunq) have the details."
+msgstr ""
+
+#: src/Orders/PaymentLink.php:149
+msgid "The bunq payment link was not sent: a payment for this order already came in through bunq. Check the order notes."
+msgstr ""
+
+#: src/Orders/PaymentLink.php:161
+msgid "The bunq payment link could not be emailed to the customer. Check that your site can send email."
+msgstr ""
+
+#. translators: %s: customer's email address
+#: src/Orders/PaymentLink.php:169
+msgid "bunq payment link sent to %s"
 msgstr ""
 
 #: src/Requirements.php:122
 msgid "cannot be activated due to incompatible environment."
+msgstr ""
+
+#. translators: %s: customer's first name
+#: templates/emails/customer-bunq-payment-link.php:31 templates/emails/plain/customer-bunq-payment-link.php:27
+msgid "Hi %s,"
+msgstr ""
+
+#. translators: 1: order number, 2: order total
+#: templates/emails/customer-bunq-payment-link.php:38 templates/emails/plain/customer-bunq-payment-link.php:31
+msgid "You can pay for order #%1$s of %2$s with the link below. bunq.me lets you choose how to pay, for example with iDEAL | Wero, a card or Bancontact."
+msgstr ""
+
+#: templates/emails/customer-bunq-payment-link.php:45
+msgid "Pay now"
+msgstr ""
+
+#: templates/emails/customer-bunq-payment-link.php:48
+msgid "Does the button not work? Copy this link into your browser:"
 msgstr ""
 
