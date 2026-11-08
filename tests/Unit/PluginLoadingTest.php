@@ -175,7 +175,9 @@ final class PluginLoadingTest extends TestCase
         $class = new \ReflectionClass(Plugin::class);
         $plugin = $class->newInstanceWithoutConstructor();
         $file = $class->getProperty('file');
-        $file->setAccessible(true);
+        if (PHP_VERSION_ID < 80100) { // Needed up to PHP 8.0; deprecated since PHP 8.5.
+            $file->setAccessible(true);
+        }
         $file->setValue($plugin, BUNQ_FOR_WOOCOMMERCE_PLUGIN_FILE);
 
         return $plugin;
