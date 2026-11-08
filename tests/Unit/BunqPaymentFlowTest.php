@@ -278,6 +278,7 @@ final class BunqPaymentFlowTest extends TestCase
         $gateway = $this->authorizedGateway();
         $this->registerGateway($gateway);
         $order = $this->unpaidOrder('10.00');
+        $this->bunqReports('ACTIVE');
 
         $order->update_status('cancelled', 'Unpaid order cancelled');
         $this->assertCount(1, Environment::$asyncActions);
@@ -285,6 +286,102 @@ final class BunqPaymentFlowTest extends TestCase
 
         $this->assertSame(array(array(55, 123)), $this->bunq->callsTo('cancel_payment_request'));
         $this->assertSame('CANCELLED', $order->get_meta('bunq_payment_request_status'));
+        $this->assertSame('', $order->get_meta('bunq_payment_id'));
+    }
+
+    public function testAPaymentThatCameInBeforeTheCancellationIsRecordedForTheMerchant()
+    {
+        $gateway = $this->authorizedGateway();
+        $this->registerGateway($gateway);
+        $order = $this->unpaidOrder('10.00');
+        $this->bunqReports('ACTIVE', array(FakeBunqApi::payment(777, '10.00', 'EUR', 456)));
+
+        $order->update_status('cancelled', 'Unpaid order cancelled');
+        do_action(Environment::$asyncActions[0]['hook'], ...Environment::$asyncActions[0]['args']);
+
+        $this->assertSame(777, $order->get_meta('bunq_payment_id'), 'So the payment can be refunded');
+        $this->assertSame('NL12BUNQ0123456789', $order->get_meta('bunq_payer_iban'));
+        $this->assertContains('bunq payment 777 of EUR 10.00 came in, but the order was cancelled. Restore the order or refund the payment.', $order->notes);
+        $this->assertLogged('warning', 'bunqme-tab 55: payment 777 came in for cancelled order #' . $order->get_order_number());
+        $this->assertSame(array(array(55, 456)), $this->bunq->callsTo('cancel_payment_request'), 'No second payment through the request');
+        $this->assertSame('cancelled', $order->get_status());
+    }
+
+    // --- The bank account of a payment request ---------------------------------------------------------------
+
+    public function testAPaymentRequestIsCheckedOnTheAccountItWasCreatedOn()
+    {
+        $gateway = $this->authorizedGateway();
+        $this->bunq->createdPaymentRequest['monetary_account_id'] = 123;
+        $order = Environment::addOrder(array('total' => '24.95'));
+        $gateway->process_payment($order->get_id());
+
+        // The merchant selects another bank account afterwards.
+        $gateway = $this->authorizedGateway(array('monetary_account_bank_id' => '789'));
+        $this->bunqReports('ACTIVE');
+        $gateway->check_payment_status($order);
+
+        $this->assertSame(123, $order->get_meta('bunq_monetary_account_id'));
+        $this->assertSame(array(array(55, 123)), $this->bunq->callsTo('get_payment_request'));
+    }
+
+    public function testSelectingAnotherBankAccountRegistersTheCallbackForIt()
+    {
+        $gateway = $this->authorizedGateway(array('monetary_account_bank_id' => ''));
+        $_POST = array();
+        // The form as the browser posts it: unticked checkboxes are left out.
+        foreach (array_diff($this->liveSettings(array('monetary_account_bank_id' => '123')), array('no')) as $key => $value) {
+            $_POST['woocommerce_bunq_' . $key] = $value;
+        }
+
+        $gateway->process_admin_options();
+
+        $this->assertSame(array(array(123)), $this->bunq->callsTo('create_notification_filters'));
+
+        $gateway->process_admin_options();
+
+        $this->assertCount(1, $this->bunq->callsTo('create_notification_filters'), 'Saving the same account again does not');
+    }
+
+    // --- A second attempt for the same order -----------------------------------------------------------------
+
+    public function testASecondAttemptReusesTheOpenPaymentRequest()
+    {
+        $gateway = $this->authorizedGateway();
+        $order = Environment::addOrder(array('total' => '24.95', 'meta' => array('bunq_payment_request_id' => 55)));
+        $this->bunq->paymentRequests[55] = $this->openPaymentRequest('24.95');
+
+        $result = $gateway->process_payment($order->get_id());
+
+        $this->assertSame(array('result' => 'success', 'redirect' => 'https://bunq.me/t/55'), $result);
+        $this->assertSame(array(), $this->bunq->callsTo('create_payment_request'));
+        $this->assertSame(array(), $this->bunq->callsTo('cancel_payment_request'));
+    }
+
+    public function testASecondAttemptForAChangedTotalCancelsTheOldPaymentRequest()
+    {
+        $gateway = $this->authorizedGateway();
+        $order = Environment::addOrder(array('total' => '30.00', 'meta' => array('bunq_payment_request_id' => 54)));
+        $this->bunq->paymentRequests[54] = $this->openPaymentRequest('24.95', 54);
+
+        $result = $gateway->process_payment($order->get_id());
+
+        $this->assertSame('https://bunq.me/shop/24.95/1', $result['redirect']);
+        $this->assertSame(array(array(54, 123)), $this->bunq->callsTo('cancel_payment_request'));
+        $this->assertSame(55, $order->get_meta('bunq_payment_request_id'));
+    }
+
+    public function testASecondAttemptForAPaidRequestSendsTheCustomerToTheOrder()
+    {
+        $gateway = $this->authorizedGateway();
+        $order = Environment::addOrder(array('total' => '24.95', 'meta' => array('bunq_payment_request_id' => 55)));
+        $this->bunqReports('ACTIVE', array(FakeBunqApi::payment(777, '24.95')));
+
+        $result = $gateway->process_payment($order->get_id());
+
+        $this->assertSame(array('result' => 'success', 'redirect' => $gateway->get_return_url($order)), $result);
+        $this->assertSame(array(), $this->bunq->callsTo('create_payment_request'));
+        $this->assertSame('processing', $order->get_status());
     }
 
     // --- Refunds --------------------------------------------------------------------------------------------
@@ -607,6 +704,13 @@ final class BunqPaymentFlowTest extends TestCase
             'total' => '24.95',
             'meta' => array_merge(array('bunq_payment_request_id' => 55, 'bunq_payment_id' => 777), $meta),
         ));
+    }
+
+    private function openPaymentRequest($amount, $id = 55)
+    {
+        return FakeBunqApi::paymentRequest($id, 'ACTIVE') + array(
+            'bunqme_tab_entry' => array('amount_inquired' => array('value' => $amount, 'currency' => 'EUR')),
+        );
     }
 
     private function bunqReports($status, array $payments = array())
