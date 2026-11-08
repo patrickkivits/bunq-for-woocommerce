@@ -17,6 +17,7 @@ function __($text, $domain = 'default') { return $text; }
 function esc_html__($text, $domain = 'default') { return $text; }
 function esc_html($text) { return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8'); }
 function esc_url($url) { return $url; }
+function esc_url_raw($url) { return $url; }
 function esc_attr($text) { return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8'); }
 function esc_attr__($text, $domain = 'default') { return esc_attr($text); }
 function esc_attr_e($text, $domain = 'default') { echo esc_attr($text); }
@@ -390,6 +391,13 @@ function wc_get_orders($args)
     return isset($args['limit']) && $args['limit'] > 0 ? array_slice($orders, 0, $args['limit']) : $orders;
 }
 
+function wc_get_page_screen_id($for) { return $for === 'shop-order' ? Environment::$orderScreenId : $for; }
+
+function add_meta_box($id, $title, $callback, $screen = null, $context = 'advanced', $priority = 'default', $callback_args = null)
+{
+    Environment::$metaBoxes[$id] = compact('title', 'callback', 'screen', 'context', 'priority');
+}
+
 function wc_add_notice($message, $notice_type = 'success')
 {
     Environment::$notices[] = array('type' => $notice_type, 'message' => $message);
@@ -568,6 +576,11 @@ class WC_Order
     public function update_meta_data($key, $value, $meta_id = 0)
     {
         $this->meta[$key] = $value;
+    }
+
+    public function delete_meta_data($key)
+    {
+        unset($this->meta[$key]);
     }
 
     public function save()

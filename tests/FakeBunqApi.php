@@ -146,6 +146,7 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
         return array(
             'id' => $id,
             'status' => $status,
+            'bunqme_tab_share_url' => 'https://bunq.me/t/' . $id,
             'result_inquiries' => array_map(function ($payment) {
                 return array('payment' => $payment, 'bunq_me_tab_id' => 1);
             }, $payments),
@@ -156,15 +157,16 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
      * A payment received on a bunq account, as bunq returns it.
      *
      * @param string $value The amount as bunq formats it ("24.95").
+     * @param string|null $type How it was paid, as bunq names it ("IDEAL", "BUNQ", ...); null when bunq leaves it out.
      */
-    public static function payment($id, $value, $currency = 'EUR', $monetary_account_id = 123, $iban = 'NL12BUNQ0123456789', $name = 'J. Doe')
+    public static function payment($id, $value, $currency = 'EUR', $monetary_account_id = 123, $iban = 'NL12BUNQ0123456789', $name = 'J. Doe', $type = 'IDEAL')
     {
         return array(
             'id' => $id,
             'monetary_account_id' => $monetary_account_id,
             'amount' => array('currency' => $currency, 'value' => $value),
             'counterparty_alias' => array('iban' => $iban, 'display_name' => $name),
-        );
+        ) + ($type === null ? array() : array('type' => $type));
     }
 
     private function record($method, array $arguments)

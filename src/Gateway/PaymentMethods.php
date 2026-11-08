@@ -150,6 +150,47 @@ final class PaymentMethods {
 	}
 
 	/**
+	 * A readable name for the type of a payment bunq received ("type" of a bunq Payment), such as "IDEAL" or
+	 * "BUNQ". bunq names card payments after the card scheme, so those are matched loosely.
+	 *
+	 * @param string $type The payment type as bunq reports it.
+	 * @return string The name, or the type itself for a type the plugin does not know; empty when there is none.
+	 */
+	public static function payment_type_label( $type ) {
+		$type = strtoupper( trim( (string) $type ) );
+
+		if ( '' === $type || 'UNKNOWN' === $type ) {
+			return '';
+		}
+
+		$labels = array(
+			'BUNQ'       => 'bunq-transfer',
+			'IDEAL'      => 'ideal',
+			'WERO'       => 'ideal',
+			'BANCONTACT' => 'bancontact',
+			'MASTERCARD' => 'card',
+			'MAESTRO'    => 'card',
+			'VISA'       => 'card',
+			'AMEX'       => 'card',
+			'CARD'       => 'card',
+		);
+
+		foreach ( $labels as $needle => $method_id ) {
+			if ( $type === $needle || false !== strpos( $type, $needle ) ) {
+				$method = self::get( $method_id );
+
+				return $method['description'];
+			}
+		}
+
+		if ( in_array( $type, array( 'EBA_SCT', 'SWIFT' ), true ) ) {
+			return __( 'Bank transfer', 'bunq-for-woocommerce' );
+		}
+
+		return $type;
+	}
+
+	/**
 	 * The logos of payment methods, for the checkout. Methods without a logo are left out.
 	 *
 	 * @param array[] $methods Methods as returned by all() or allowed().

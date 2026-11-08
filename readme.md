@@ -16,6 +16,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 - The iDEAL | Wero, card and Bancontact logos at checkout, and optionally each of them as a payment option of its own.
 - Orders are confirmed by bunq's callback, again when the customer returns to the shop, and by background checks (WooCommerce's Action Scheduler) in case the callback never arrives.
 - Payment requests that bunq reports as expired or cancelled cancel the order; cancelling an order cancels its payment request at bunq.
+- A bunq payment box on the order screen (also with High-Performance Order Storage) shows the payer's name and IBAN, the payment method and a link to the bunq.me payment request.
 - Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
 - An hourly check of the connection with bunq: when bunq stops accepting it (access removed in the bunq app, a new IP address, a closed bank account), every admin page shows a warning before checkouts fail. The outcome is in **WooCommerce** > **Status**.
 - Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
@@ -144,6 +145,7 @@ The plugin's code lives in `src/` as namespaced classes (`PatrickKivits\BunqForW
 | `Gateway\PaymentMethods`, `Gateway\SettingsFields` | The bunq.me payment methods and the settings form |
 | `Gateway\ConnectionHealth` | The hourly connection check (Action Scheduler), the admin notice when it fails and the **WooCommerce** > **Status** section |
 | `Orders\PaymentMonitor` | Payment checks on return and from Action Scheduler; cancels the bunq payment request of cancelled orders |
+| `Orders\PaymentDetails` | The bunq payment box on the order screen (payer, IBAN, method, link to bunq.me) and the payer in the personal data export and erasure |
 | `Orders\OrderLock` | Lets one payment check per order run at a time (callback, return and scheduled checks can coincide) |
 | `Blocks\CheckoutIntegration` | The block checkout payment method (script in `assets/js/block-checkout.js`) |
 | `Bunq\ApiClient`, `Bunq\ApiException`, `Bunq\OAuthClient` | Every call to bunq (signed, verified, rate limited and retried; no bunq SDK) and its errors, and the OAuth authorization |

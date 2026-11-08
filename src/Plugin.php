@@ -16,6 +16,7 @@ use PatrickKivits\BunqForWooCommerce\Gateway\ConnectionHealth;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\MethodGateway;
 use PatrickKivits\BunqForWooCommerce\Gateway\PaymentMethods;
+use PatrickKivits\BunqForWooCommerce\Orders\PaymentDetails;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
 
 defined( 'ABSPATH' ) || exit;
@@ -80,6 +81,13 @@ final class Plugin {
 	private $connection_health = null;
 
 	/**
+	 * The bunq payment details on the order screen.
+	 *
+	 * @var PaymentDetails|null
+	 */
+	private $payment_details = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $file The main plugin file.
@@ -132,6 +140,7 @@ final class Plugin {
 		add_action( 'woocommerce_blocks_loaded', array( $this, 'register_block_checkout' ) );
 		$this->payment_monitor()->register_hooks();
 		$this->connection_health()->register_hooks();
+		$this->payment_details()->register_hooks();
 		register_deactivation_hook( $this->file, array( ConnectionHealth::class, 'unschedule' ) );
 	}
 
@@ -181,6 +190,19 @@ final class Plugin {
 		}
 
 		return $this->connection_health;
+	}
+
+	/**
+	 * The bunq payment details on the order screen.
+	 *
+	 * @return PaymentDetails
+	 */
+	public function payment_details() {
+		if ( null === $this->payment_details ) {
+			$this->payment_details = new PaymentDetails( $this );
+		}
+
+		return $this->payment_details;
 	}
 
 	/**
