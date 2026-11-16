@@ -8,10 +8,6 @@
 namespace PatrickKivits\BunqForWooCommerce\Bunq;
 
 use Exception;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
-use League\OAuth2\Client\Provider\GenericProvider;
 use PatrickKivits\BunqForWooCommerce\Logger;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,35 +22,10 @@ class OAuthClient {
 	 */
 	const STATE_TRANSIENT = 'wc_bunq_gateway.oauth2state';
 
-	/**
-	 * Constructor.
-	 *
-	 * @param ClientInterface|null $http_client The HTTP client for the token request.
-	 */
-	public function __construct( private readonly ?ClientInterface $http_client = null ) {}
-
-	/**
-	 * The OAuth provider.
-	 *
-	 * @param string $client_id     OAuth client id.
-	 * @param string $client_secret OAuth client secret.
-	 * @param string $redirect_uri  Where bunq sends the merchant back to, as registered in the bunq app.
-	 * @param bool   $testmode      Whether to use the sandbox.
-	 * @return GenericProvider
-	 */
-	public function get_provider( $client_id, $client_secret, $redirect_uri, $testmode ) {
-		return new GenericProvider(
-			array(
-				'clientId'                => $client_id,
-				'clientSecret'            => $client_secret,
-				'redirectUri'             => $redirect_uri,
-				'urlAuthorize'            => $testmode ? 'https://oauth.sandbox.bunq.com/auth' : 'https://oauth.bunq.com/auth',
-				'urlAccessToken'          => $testmode ? 'https://api-oauth.sandbox.bunq.com/v1/token' : 'https://api.oauth.bunq.com/v1/token',
-				'urlResourceOwnerDetails' => null,
-			),
-			$this->http_client ? array( 'httpClient' => $this->http_client ) : array()
-		);
-	}
+	const AUTHORIZE_URL_PRODUCTION = 'https://oauth.bunq.com/auth';
+	const AUTHORIZE_URL_SANDBOX    = 'https://oauth.sandbox.bunq.com/auth';
+	const TOKEN_URL_PRODUCTION     = 'https://api.oauth.bunq.com/v1/token';
+	const TOKEN_URL_SANDBOX        = 'https://api-oauth.sandbox.bunq.com/v1/token';
 
 	/**
 	 * The transient that keeps the OAuth state of the current user.
@@ -77,14 +48,22 @@ class OAuthClient {
 	 * @return string
 	 */
 	public function get_authorization_url( $client_id, $client_secret, $redirect_uri, $testmode ) {
-		$provider = $this->get_provider( $client_id, $client_secret, $redirect_uri, $testmode );
-
-		$authorization_url = $provider->getAuthorizationUrl();
+		$state = bin2hex( random_bytes( 16 ) );
 
 		// WordPress does not start a PHP session, so keep the state in a transient to verify it on return.
-		set_transient( $this->get_state_transient_key(), $provider->getState(), HOUR_IN_SECONDS );
+		set_transient( $this->get_state_transient_key(), $state, HOUR_IN_SECONDS );
 
-		return $authorization_url;
+		return ( $testmode ? self::AUTHORIZE_URL_SANDBOX : self::AUTHORIZE_URL_PRODUCTION ) . '?' . http_build_query(
+			array(
+				'response_type' => 'code',
+				'client_id'     => $client_id,
+				'redirect_uri'  => $redirect_uri,
+				'state'         => $state,
+			),
+			'',
+			'&',
+			PHP_QUERY_RFC3986
+		);
 	}
 
 	/**
@@ -101,8 +80,6 @@ class OAuthClient {
 	 *                   contains the client secret, the client id or the code.
 	 */
 	public function get_access_token( $client_id, $client_secret, $redirect_uri, $testmode, $code, $state ) {
-		$provider = $this->get_provider( $client_id, $client_secret, $redirect_uri, $testmode );
-
 		$transient_key  = $this->get_state_transient_key();
 		$expected_state = get_transient( $transient_key );
 		delete_transient( $transient_key );
@@ -127,28 +104,28 @@ class OAuthClient {
 			'client_secret' => $client_secret,
 		);
 
-		try {
-			$token_response = $provider->getHttpClient()->request(
-				'POST',
-				$provider->getBaseAccessTokenUrl( $data ),
-				array(
-					'query'   => $data,
-					'headers' => array(
-						'X-Bunq-Client-Request-Id' => wp_generate_uuid4(),
-					),
-				)
-			);
-		} catch ( GuzzleException $exception ) {
-			// Never rethrow the HTTP client's exception: its message contains the request URL with the client secret.
-			$response = $exception instanceof RequestException ? $exception->getResponse() : null;
-			$details  = $response
-				? 'HTTP ' . $response->getStatusCode() . ': ' . self::error_descriptions( (string) $response->getBody() )
-				: preg_replace( '#(https?://[^\s?]+)\?\S*#', '$1', $exception->getMessage() );
+		// bunq takes the parameters of the token request in the query string.
+		$response = wp_remote_post(
+			( $testmode ? self::TOKEN_URL_SANDBOX : self::TOKEN_URL_PRODUCTION ) . '?' . http_build_query( $data, '', '&', PHP_QUERY_RFC3986 ),
+			array(
+				'timeout' => 30,
+				'headers' => array(
+					'X-Bunq-Client-Request-Id' => wp_generate_uuid4(),
+				),
+			)
+		);
+		$status   = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
+
+		if ( $status < 200 || $status >= 300 ) {
+			// Error messages of the HTTP API can contain the request URL, which carries the client secret.
+			$details = is_wp_error( $response )
+				? preg_replace( '#(https?://[^\s?]+)\?\S*#', '$1', $response->get_error_message() )
+				: 'HTTP ' . $status . ': ' . self::error_descriptions( wp_remote_retrieve_body( $response ) );
 
 			throw new Exception( Logger::redact( 'bunq token request failed (' . $details . ')' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
 		}
 
-		$body         = (string) $token_response->getBody();
+		$body         = wp_remote_retrieve_body( $response );
 		$body_decoded = json_decode( $body );
 
 		if ( ! is_object( $body_decoded ) || empty( $body_decoded->access_token ) || ! is_string( $body_decoded->access_token ) ) {

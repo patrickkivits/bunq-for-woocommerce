@@ -7,8 +7,8 @@
 
 namespace PatrickKivits\BunqForWooCommerce\Gateway;
 
-use GuzzleHttp\Exception\GuzzleException;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiException;
+use PatrickKivits\BunqForWooCommerce\Bunq\TransportException;
 use PatrickKivits\BunqForWooCommerce\Logger;
 use PatrickKivits\BunqForWooCommerce\Orders\PaymentMonitor;
 use PatrickKivits\BunqForWooCommerce\Plugin;
@@ -481,7 +481,7 @@ final class ConnectionHealth {
 	 */
 	private static function classify( Throwable $exception ): string {
 		// No answer at all: a timeout, DNS or TLS failure.
-		if ( $exception instanceof GuzzleException ) {
+		if ( $exception instanceof TransportException ) {
 			return self::UNREACHABLE;
 		}
 

@@ -2,12 +2,6 @@
 
 namespace BunqTest;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
 use PatrickKivits\BunqForWooCommerce\Bunq\OAuthClient;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
 use PatrickKivits\BunqForWooCommerce\Logger;
@@ -102,7 +96,7 @@ final class OAuthSecurityTest extends TestCase
     public function testTheStateIsRequiredEvenWhenNoneWasStored()
     {
         // Nobody started an authorization: any state used to be accepted then.
-        $oauth = new OAuthClient($this->http(new Response(200, array(), '{"access_token":"attacker-token"}')));
+        $oauth = $this->oauth(bunqtest_http_response(200, '{"access_token":"attacker-token"}'));
 
         $this->expectExceptionMessage('OAuth state mismatch');
 
@@ -111,7 +105,7 @@ final class OAuthSecurityTest extends TestCase
 
     public function testTheStoredStateIsAcceptedOnce()
     {
-        $oauth = new OAuthClient($this->http(new Response(200, array(), '{"access_token":"fresh-token"}')));
+        $oauth = $this->oauth(bunqtest_http_response(200, '{"access_token":"fresh-token"}'));
         set_transient($oauth->get_state_transient_key(), 'stored-state', HOUR_IN_SECONDS);
 
         $this->assertSame('fresh-token', $oauth->get_access_token('client-id', 'client-secret', self::SETTINGS_URL, false, 'authorization-code', 'stored-state'));
@@ -123,7 +117,7 @@ final class OAuthSecurityTest extends TestCase
         // bunq echoes what it was sent.
         $body = '{"Error":[{"error_description":"Invalid hash \"authorization-code-1234\"."},{"error_description":"Invalid hash \"my-client-id\"."},{"error_description":"Invalid hash \"my-client-secret\"."}]}';
 
-        $message = $this->failedExchange(new Response(400, array(), $body));
+        $message = $this->failedExchange(bunqtest_http_response(400, $body));
 
         // Only the error descriptions, not the JSON around them.
         $this->assertSame('bunq token request failed (HTTP 400: Invalid hash "[authorization code]".; Invalid hash "[client ID]".; Invalid hash "[client secret]".)', $message);
@@ -134,7 +128,7 @@ final class OAuthSecurityTest extends TestCase
     {
         $url = 'https://api.oauth.bunq.com/v1/token?grant_type=authorization_code&code=authorization-code-1234&client_id=my-client-id&client_secret=my-client-secret';
 
-        $message = $this->failedExchange(new ConnectException('cURL error 7: Failed to connect for ' . $url, new Request('POST', $url)));
+        $message = $this->failedExchange(new \WP_Error('http_request_failed', 'cURL error 7: Failed to connect for ' . $url));
 
         $this->assertSame('bunq token request failed (cURL error 7: Failed to connect for https://api.oauth.bunq.com/v1/token)', $message);
     }
@@ -143,7 +137,7 @@ final class OAuthSecurityTest extends TestCase
     {
         set_transient((new OAuthClient())->get_state_transient_key(), 'returned-state', HOUR_IN_SECONDS);
         update_option('woocommerce_bunq_settings', $this->liveSettings(array('oauth_client_id' => 'my-client-id', 'oauth_client_secret' => 'my-client-secret')));
-        $oauth = new OAuthClient($this->http(new Response(400, array(), '{"Error":[{"error_description":"Invalid hash \"my-client-secret\"."}]}')));
+        $oauth = $this->oauth(bunqtest_http_response(400, '{"Error":[{"error_description":"Invalid hash \"my-client-secret\"."}]}'));
         $gateway = new Gateway(new FakeBunqApi(), $oauth);
 
         $gateway->complete_oauth_authorization();
@@ -168,15 +162,15 @@ final class OAuthSecurityTest extends TestCase
     {
         update_option('woocommerce_bunq_settings', $this->liveSettings($settings));
 
-        return new Gateway(new FakeBunqApi(), new OAuthClient($this->http(new Response(200, array(), '{"access_token":"attacker-token"}'))));
+        return new Gateway(new FakeBunqApi(), $this->oauth(bunqtest_http_response(200, '{"access_token":"attacker-token"}')));
     }
 
     /**
-     * @param Response|\Throwable $answer What bunq's token endpoint answers.
+     * @param array|\WP_Error $answer What bunq's token endpoint answers.
      */
     private function failedExchange($answer)
     {
-        $oauth = new OAuthClient($this->http($answer));
+        $oauth = $this->oauth($answer);
         set_transient($oauth->get_state_transient_key(), 'stored-state', HOUR_IN_SECONDS);
 
         try {
@@ -191,8 +185,17 @@ final class OAuthSecurityTest extends TestCase
         $this->fail('The token exchange should have failed');
     }
 
-    private function http($answer)
+    /**
+     * An OAuth client whose token request bunq answers with the given response.
+     *
+     * @param array|\WP_Error $answer
+     */
+    private function oauth($answer)
     {
-        return new Client(array('handler' => HandlerStack::create(new MockHandler(array($answer)))));
+        add_filter('pre_http_request', function () use ($answer) {
+            return $answer;
+        });
+
+        return new OAuthClient();
     }
 }

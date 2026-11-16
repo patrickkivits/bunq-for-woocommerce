@@ -4,6 +4,7 @@ namespace BunqTest;
 
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiException;
+use PatrickKivits\BunqForWooCommerce\Bunq\TransportException;
 
 /**
  * How the API client talks to bunq: the API context, signing and verification, errors and rate limits.
@@ -39,7 +40,7 @@ final class ApiClientTest extends TestCase
         $this->assertSame('application/json', $request['headers']['Content-Type']);
         $this->assertSame(array('description' => 'Café / #1'), $this->server->body(0));
         $this->assertTrue($this->server->isSignedBy(0, FakeBunqServer::keys()['client']['public']), 'The exact body sent is signed');
-        $this->assertArrayNotHasKey('curl', $request['options'], 'The sandbox certificate is not pinned');
+        $this->assertFalse($request['pinned'], 'The sandbox certificate is not pinned');
     }
 
     public function testProductionCallsGoToBunqWithItsCertificatePinned()
@@ -52,29 +53,39 @@ final class ApiClientTest extends TestCase
         $request = $this->server->requests[0];
         $this->assertSame('https://api.bunq.com/v1/user/7/monetary-account-bank', $request['url']);
         $this->assertSame('', $request['body']);
-        $this->assertSame(array(CURLOPT_PINNEDPUBLICKEY => ApiClient::PINNED_PUBLIC_KEY_FILE), $request['options']['curl']);
+        $this->assertTrue($request['pinned'], 'The key is pinned on the cURL handle');
+        $this->assertFalse(has_action('http_api_curl'), 'Only for this request');
         $this->assertStringContainsString('BEGIN PUBLIC KEY', file_get_contents(ApiClient::PINNED_PUBLIC_KEY_FILE));
     }
 
     /**
-     * Guzzle 8 only accepts an allow-list of raw cURL options and throws on CURLOPT_PINNEDPUBLICKEY before
-     * connecting, which broke every production call in 2.0.1 and 2.1.0. The fake server above never reaches
-     * Guzzle's cURL handler, so the production options go through the real one here: to a closed local port,
-     * where getting as far as the connection proves the options were accepted.
+     * The key can only be pinned on WordPress' cURL transport. When the request went out another way, its answer
+     * is refused.
      */
-    public function testTheBundledGuzzleAcceptsTheProductionRequestOptions()
+    public function testAProductionAnswerThatDidNotComeThroughCurlIsRefused()
     {
         $this->api->load_api_context_from_json(FakeBunqServer::context(array('environment_type' => 'PRODUCTION')));
-        $this->server->respond(array());
+        add_filter('pre_http_request', function () {
+            return bunqtest_http_response(200, '{"Response":[]}');
+        }, 5);
+
+        $this->expectException(TransportException::class);
+        $this->expectExceptionMessage('could not be pinned');
+
         $this->api->request('GET', 'user/7/monetary-account-bank');
-        // The recorded options also hold the fake server's own client config (its handler); keep the request's.
-        $options = array_intersect_key($this->server->requests[0]['options'], array_flip(array('headers', 'http_errors', 'allow_redirects', 'timeout', 'body', 'curl')));
-        $this->assertArrayHasKey('curl', $options);
+    }
 
-        $client = new \GuzzleHttp\Client(array('handler' => \GuzzleHttp\HandlerStack::create(new \GuzzleHttp\Handler\CurlHandler())));
+    public function testNoAnswerAtAllIsATransportError()
+    {
+        $this->api->load_api_context_from_json(FakeBunqServer::context());
+        add_filter('pre_http_request', function () {
+            return new \WP_Error('http_request_failed', 'cURL error 28: Operation timed out');
+        }, 5);
 
-        $this->expectException(\GuzzleHttp\Exception\ConnectException::class);
-        $client->request('GET', 'http://127.0.0.1:1/', $options + array('connect_timeout' => 2));
+        $this->expectException(TransportException::class);
+        $this->expectExceptionMessage('bunq could not be reached: cURL error 28: Operation timed out');
+
+        $this->api->request('GET', 'user/7/monetary-account-bank');
     }
 
     public function testAnAnswerNotSignedByBunqIsRejected()

@@ -2,21 +2,18 @@
 
 namespace BunqTest;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Create;
-use GuzzleHttp\Psr7\Response;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiClient;
 use PatrickKivits\BunqForWooCommerce\Bunq\RequestThrottler;
 use PatrickKivits\BunqForWooCommerce\Bunq\RequestThrottlerConfiguration;
-use Psr\Http\Message\RequestInterface;
 
 /**
- * Stands in for bunq's HTTP API below the ApiClient: answers its requests from a queue, signed with bunq's server key
- * the way bunq signs them, and records every request.
+ * Stands in for bunq's HTTP API below the ApiClient: answers its requests (through pre_http_request) from a queue,
+ * signed with bunq's server key the way bunq signs them, and records every request. Like WordPress' cURL transport
+ * it first runs http_api_curl on a cURL handle, so the key pinning of production calls takes part.
  */
 final class FakeBunqServer
 {
-    /** @var array[] Every request: method, url, path (below /v1/, with the query), headers (name => line), body, options. */
+    /** @var array[] Every request: method, url, path (below /v1/, with the query), headers (name => value), body, args, pinned. */
     public $requests = array();
 
     /** @var array[] The queued answers as array(status, body, signing key). */
@@ -61,33 +58,38 @@ final class FakeBunqServer
      */
     public function apiClient()
     {
-        $http = new Client(array('handler' => function (RequestInterface $request, array $options) {
-            $uri = $request->getUri();
-            $headers = array();
-            foreach ($request->getHeaders() as $name => $values) {
-                $headers[$name] = implode(', ', $values);
+        add_filter('pre_http_request', function ($response, $args, $url) {
+            if (false !== $response || !preg_match('#^https://(api\.bunq\.com|public-api\.sandbox\.bunq\.com)/v1/#', $url)) {
+                return $response;
             }
 
+            // What WordPress' cURL transport does before sending; the handle is not used further.
+            $handle = curl_init();
+            $pinnedBefore = has_action('http_api_curl');
+            do_action_ref_array('http_api_curl', array(&$handle, $args, $url));
+
+            $uri = parse_url($url);
             $this->requests[] = array(
-                'method' => $request->getMethod(),
-                'url' => (string) $uri,
-                'path' => substr($uri->getPath(), strlen('/v1/')) . ($uri->getQuery() !== '' ? '?' . $uri->getQuery() : ''),
-                'headers' => $headers,
-                'body' => (string) $request->getBody(),
-                'options' => $options,
+                'method' => $args['method'],
+                'url' => $url,
+                'path' => substr($uri['path'], strlen('/v1/')) . (isset($uri['query']) ? '?' . $uri['query'] : ''),
+                'headers' => $args['headers'],
+                'body' => isset($args['body']) ? $args['body'] : '',
+                'args' => $args,
+                'pinned' => false !== $pinnedBefore,
             );
 
             if (!$this->answers) {
-                throw new \LogicException('Unexpected request: ' . $request->getMethod() . ' ' . $uri);
+                throw new \LogicException('Unexpected request: ' . $args['method'] . ' ' . $url);
             }
 
             list($status, $body, $signingKey) = array_shift($this->answers);
             openssl_sign($body, $signature, $signingKey, OPENSSL_ALGO_SHA256);
 
-            return Create::promiseFor(new Response($status, array('X-Bunq-Server-Signature' => base64_encode($signature), 'X-Bunq-Client-Response-Id' => 'response-id'), $body));
-        }));
+            return bunqtest_http_response($status, $body, array('X-Bunq-Server-Signature' => base64_encode($signature), 'X-Bunq-Client-Response-Id' => 'response-id'));
+        }, 10, 3);
 
-        return new ApiClient(new RequestThrottler(new RequestThrottlerConfiguration(-100)), $http);
+        return new ApiClient(new RequestThrottler(new RequestThrottlerConfiguration(-100)));
     }
 
     /**

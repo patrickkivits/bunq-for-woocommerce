@@ -6,20 +6,15 @@
         }
     },
     "require": {
-        "league/oauth2-client": "^2.6",
         "php": "^8.1",
         "ext-openssl": "*",
         "ext-curl": "*",
         "ext-json": "*",
-        "ext-mbstring": "*",
-        "guzzlehttp/guzzle": "^7.4"
+        "ext-mbstring": "*"
     },
     "autoload": {
         "psr-4": {
             "PatrickKivits\\BunqForWooCommerce\\": "src/"
         }
-    },
-    "replace": {
-        "symfony/polyfill-php80": "*"
     }
 }
