@@ -30,7 +30,7 @@ final class Plugin {
 	/**
 	 * The plugin version; matches the Version header of the main plugin file.
 	 */
-	const VERSION = '2.1.1';
+	const VERSION = '2.1.2';
 
 	/**
 	 * The text domain.
@@ -108,7 +108,6 @@ final class Plugin {
 		spl_autoload_register( array( $this, 'load_legacy_class' ) );
 
 		add_action( 'before_woocommerce_init', array( $this, 'declare_compatibility' ) );
-		add_action( 'init', array( $this, 'load_textdomain' ), 1 );
 
 		$requirements = new Requirements( $this->file );
 
@@ -256,15 +255,6 @@ final class Plugin {
 		}
 	}
 
-	/**
-	 * Register the translations bundled in /languages (init). WordPress prefers the language packs from
-	 * translate.wordpress.org in wp-content/languages/plugins and falls back to these, so the bundled Dutch, French
-	 * and German translations also work for installs from the GitHub release zip and before the language packs exist.
-	 */
-	public function load_textdomain() {
-		// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Fallback for the bundled translations, see above.
-		load_plugin_textdomain( self::TEXT_DOMAIN, false, dirname( plugin_basename( $this->file ) ) . '/languages' );
-	}
 
 	/**
 	 * Add the gateway and the separate payment method gateways to WooCommerce (woocommerce_payment_gateways). The

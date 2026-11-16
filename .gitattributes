@@ -21,5 +21,8 @@
 /phpunit-integration.xml.dist  export-ignore
 /phpcs.xml.dist                export-ignore
 /readme.md                     export-ignore
+# translate.wordpress.org delivers the translations; the .po files stay here to import them there.
+/languages/*.po                export-ignore
+/languages/*.mo                export-ignore
 /.wordpress-org                export-ignore
 /.wordpress-org/**             export-ignore

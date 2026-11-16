@@ -84,21 +84,6 @@ $check( false !== has_action( 'woocommerce_order_status_cancelled', array( $moni
 $check( false !== has_action( PaymentMonitor::CANCEL_ACTION, array( $monitor, 'cancel_payment_request' ) ), 'queued cancellations are hooked' );
 $check( function_exists( 'as_schedule_single_action' ), 'Action Scheduler is available' );
 
-// Translations ship with the plugin and load from its languages/ folder. Since WordPress 6.7
-// load_plugin_textdomain() only registers the path and defers loading, so check the registration
-// and load the Dutch file directly (switch_to_locale() would need nl_NL installed site-wide).
-global $wp_textdomain_registry;
-if ( $wp_textdomain_registry instanceof WP_Textdomain_Registry ) {
-    $check( false !== $wp_textdomain_registry->get( 'pay-with-bunq-for-woocommerce', 'nl_NL' ), 'plugin registered languages/ for just-in-time translation loading' );
-}
-$dutch_mo = WP_PLUGIN_DIR . '/pay-with-bunq-for-woocommerce/languages/pay-with-bunq-for-woocommerce-nl_NL.mo';
-$loaded   = load_textdomain( 'pay-with-bunq-for-woocommerce', $dutch_mo, 'nl_NL' );
-$check( $loaded && 'Bankrekening' === __( 'Bank account', 'pay-with-bunq-for-woocommerce' ), 'Dutch translation file loads' );
-unload_textdomain( 'pay-with-bunq-for-woocommerce' );
-if ( class_exists( 'WP_Translation_Controller' ) ) {
-    WP_Translation_Controller::get_instance()->set_locale( determine_locale() );
-}
-
 // Compatibility declarations (HPOS since WooCommerce 7.1, block checkout since 8.3).
 if ( class_exists( 'Automattic\WooCommerce\Utilities\FeaturesUtil' )
     && class_exists( 'Automattic\WooCommerce\Internal\Features\FeaturesController' )
