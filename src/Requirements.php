@@ -51,7 +51,14 @@ final class Requirements {
 			return false;
 		}
 
-		if ( ! in_array( 'woocommerce/woocommerce.php', (array) apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter.
+		$active_plugins = (array) apply_filters( 'active_plugins', get_option( 'active_plugins' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter.
+
+		// On multisite WooCommerce can also be network activated, which lists it in the network's option instead.
+		if ( is_multisite() ) {
+			$active_plugins = array_merge( $active_plugins, array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		}
+
+		if ( ! in_array( 'woocommerce/woocommerce.php', $active_plugins, true ) ) {
 			return false;
 		}
 

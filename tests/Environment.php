@@ -10,6 +10,9 @@ namespace BunqTest;
 final class Environment
 {
     public static $options = array();
+
+    /** @var array|null The network's options on multisite, null on a single site. */
+    public static $siteOptions = null;
     public static $transients = array();
     public static $transientTtls = array();
     public static $hooks = array();
@@ -61,6 +64,7 @@ final class Environment
     public static function reset()
     {
         self::$options = array('active_plugins' => array('woocommerce/woocommerce.php'));
+        self::$siteOptions = null;
         self::$transients = array();
         self::$transientTtls = array();
         self::$hooks = self::$bootHooks;

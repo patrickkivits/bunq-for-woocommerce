@@ -33,6 +33,14 @@ final class RequirementsTest extends TestCase
         $this->assertFalse($this->requirements()->check());
     }
 
+    public function testANetworkActivatedWooCommerceCountsOnMultisite()
+    {
+        Environment::$options['active_plugins'] = array();
+        Environment::$siteOptions = array('active_sitewide_plugins' => array('woocommerce/woocommerce.php' => 1700000000));
+
+        $this->assertTrue($this->requirements()->check());
+    }
+
     public function testActivePluginsCanBeFiltered()
     {
         Environment::$options['active_plugins'] = array();

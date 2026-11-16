@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,7 @@ Your customers pay through a bunq.me payment request on your own bunq account. T
 * A bunq payment box on the order screen (also with High-Performance Order Storage) shows the payer's name and IBAN, the payment method and a link to the bunq.me payment request.
 * An hourly check of the connection with bunq warns on every admin page when bunq stops accepting it, before checkouts fail. The outcome is in WooCommerce > Status.
 * Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
-* Translated into Dutch, French and German.
+* Translatable through translate.wordpress.org.
 
 The payment method logos are from [Pronamic's wp-pay-logos](https://github.com/pronamic/wp-pay-logos) (GPL-2.0-or-later).
 
@@ -138,6 +138,10 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 2.1.2 =
+* Fixed: on multisite, a network-activated WooCommerce was treated as missing, so the plugin deactivated itself.
+* Translations now come from translate.wordpress.org as language packs; the plugin no longer bundles its own translation files.
+
 = 2.1.1 =
 * Fixed: since 2.0.1 every call to bunq's production environment failed with "Passing CURLOPT_PINNEDPUBLICKEY (10230) in the "curl" request option is not supported", so payments could not be created. Guzzle 8 no longer allows the pinned public key of api.bunq.com, so the plugin is back on Guzzle 7. The sandbox was not affected.
 
@@ -241,6 +245,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 2.1.2 =
+Works with a network-activated WooCommerce on multisite. Translations now come from translate.wordpress.org.
 
 = 2.1.1 =
 Fixes payments in production, which failed since 2.0.1. Update as soon as possible; no need to connect again.

@@ -66,7 +66,7 @@ final class PluginLoadingTest extends TestCase
 
         $this->freshPlugin()->boot();
 
-        $this->assertSame(array('admin_init', 'admin_notices', 'before_woocommerce_init', 'init'), $this->sortedHookNames());
+        $this->assertSame(array('admin_init', 'admin_notices', 'before_woocommerce_init'), $this->sortedHookNames());
 
         do_action('admin_init');
         $this->assertSame(array('pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php'), Environment::$deactivatedPlugins);
@@ -87,7 +87,6 @@ final class PluginLoadingTest extends TestCase
             'bunq_for_woocommerce_connection_check',
             'bunq_for_woocommerce_follow_up_check',
             'deactivate_pay-with-bunq-for-woocommerce/pay-with-bunq-for-woocommerce.php',
-            'init',
             'plugins_loaded',
             'template_redirect',
             'wc_bunq_cancel_payment_request',
@@ -120,12 +119,6 @@ final class PluginLoadingTest extends TestCase
         ), FeaturesUtil::$declared);
     }
 
-    public function testTranslationsAreLoadedFromTheLanguagesFolder()
-    {
-        do_action('init');
-
-        $this->assertSame(array('pay-with-bunq-for-woocommerce' => 'pay-with-bunq-for-woocommerce/languages'), Environment::$loadedTextdomains);
-    }
 
     public function testThePluginFileIsKnownToTheIncludes()
     {

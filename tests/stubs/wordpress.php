@@ -104,6 +104,16 @@ function get_option($name, $default = false)
     return array_key_exists($name, Environment::$options) ? Environment::$options[$name] : $default;
 }
 
+function is_multisite()
+{
+    return null !== Environment::$siteOptions;
+}
+
+function get_site_option($name, $default = false)
+{
+    return null !== Environment::$siteOptions && array_key_exists($name, Environment::$siteOptions) ? Environment::$siteOptions[$name] : $default;
+}
+
 function update_option($name, $value, $autoload = null)
 {
     Environment::$options[$name] = $value;

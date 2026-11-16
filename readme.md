@@ -21,7 +21,7 @@ Accept payments in your WooCommerce shop with just your bunq account.
 - Refunds from the WooCommerce order screen, created as a bunq draft payment back to the IBAN the payment came from and approved in the bunq app.
 - An hourly check of the connection with bunq: when bunq stops accepting it (access removed in the bunq app, a new IP address, a closed bank account), every admin page shows a warning before checkouts fail. The outcome is in **WooCommerce** > **Status**.
 - Works with the classic checkout and the block checkout, and with High-Performance Order Storage.
-- Translated into Dutch, French and German; other languages can be added from the `languages/` template.
+- Translatable through [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/pay-with-bunq-for-woocommerce/).
 
 ## Demo
 
@@ -131,7 +131,7 @@ Some payment methods provided by bunq.me may take longer than that to complete. 
 
 ## Translations
 
-The plugin ships with Dutch (`nl_NL`), French (`fr_FR`) and German (`de_DE`) translations. To add a language, translate `languages/pay-with-bunq-for-woocommerce.pot` with a tool such as Poedit and save the `.po` and `.mo` files as `languages/pay-with-bunq-for-woocommerce-<locale>.po`. After changing strings in the code, regenerate the template with:
+Translations come from [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/pay-with-bunq-for-woocommerce/), which delivers them as language packs. The Dutch (`nl_NL`), French (`fr_FR`) and German (`de_DE`) `.po` files in `languages/` are the source for importing there; they are not in the release zip. After changing strings in the code, regenerate the template with:
 
 ```
 php .github/scripts/make-pot.php
