@@ -47,6 +47,19 @@ function add_filter($hook, $callback, $priority = 10, $accepted_args = 1)
     return add_action($hook, $callback, $priority, $accepted_args);
 }
 
+function remove_action($hook, $callback, $priority = 10)
+{
+    foreach (isset(Environment::$hooks[$hook]) ? Environment::$hooks[$hook] : array() as $index => $registered) {
+        if ($registered['callback'] === $callback && $registered['priority'] === $priority) {
+            unset(Environment::$hooks[$hook][$index]);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function has_action($hook, $callback = false)
 {
     if (empty(Environment::$hooks[$hook])) {
@@ -82,6 +95,13 @@ function bunqtest_hook_callbacks($hook)
 }
 
 function do_action($hook, ...$args)
+{
+    foreach (bunqtest_hook_callbacks($hook) as $registered) {
+        call_user_func_array($registered['callback'], array_slice($args, 0, $registered['accepted_args']));
+    }
+}
+
+function do_action_ref_array($hook, array $args)
 {
     foreach (bunqtest_hook_callbacks($hook) as $registered) {
         call_user_func_array($registered['callback'], array_slice($args, 0, $registered['accepted_args']));
@@ -479,6 +499,39 @@ function as_enqueue_async_action($hook, $args = array(), $group = '')
 function as_unschedule_all_actions($hook, $args = array(), $group = '')
 {
     Environment::$unscheduledHooks[] = $hook;
+}
+
+// --- HTTP API: nothing leaves the test run; a pre_http_request filter (see FakeBunqServer) answers ---------------
+
+function wp_remote_request($url, $args = array())
+{
+    $response = apply_filters('pre_http_request', false, $args, $url);
+
+    return false === $response ? new WP_Error('http_request_failed', 'No HTTP in the unit tests: ' . $url) : $response;
+}
+
+function wp_remote_post($url, $args = array())
+{
+    return wp_remote_request($url, array_merge($args, array('method' => 'POST')));
+}
+
+function is_wp_error($thing) { return $thing instanceof WP_Error; }
+function wp_remote_retrieve_response_code($response) { return is_wp_error($response) ? '' : $response['response']['code']; }
+function wp_remote_retrieve_body($response) { return is_wp_error($response) ? '' : $response['body']; }
+
+function wp_remote_retrieve_header($response, $header)
+{
+    $header = strtolower($header);
+
+    return !is_wp_error($response) && isset($response['headers'][$header]) ? $response['headers'][$header] : '';
+}
+
+/**
+ * A response as wp_remote_request() returns it; header names are case-insensitive in WordPress, lowercase here.
+ */
+function bunqtest_http_response($status, $body, array $headers = array())
+{
+    return array('headers' => array_change_key_case($headers), 'body' => $body, 'response' => array('code' => $status, 'message' => ''));
 }
 
 // --- Classes ------------------------------------------------------------------------------------------------

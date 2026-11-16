@@ -8,8 +8,6 @@
 namespace PatrickKivits\BunqForWooCommerce\Bunq;
 
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use PatrickKivits\BunqForWooCommerce\Gateway\CallbackHandler;
 use PatrickKivits\BunqForWooCommerce\Logger;
 use PatrickKivits\BunqForWooCommerce\Plugin;
@@ -72,13 +70,6 @@ class ApiClient {
 	private readonly RequestThrottler $throttler;
 
 	/**
-	 * Sends the HTTP requests.
-	 *
-	 * @var ClientInterface
-	 */
-	private readonly ClientInterface $http;
-
-	/**
 	 * The loaded API context, null until one is created or loaded.
 	 *
 	 * @var array|null
@@ -110,11 +101,9 @@ class ApiClient {
 	 * Constructor.
 	 *
 	 * @param RequestThrottler|null $throttler Paces the calls; one with bunq's limits by default.
-	 * @param ClientInterface|null  $http      Sends the HTTP requests; a Guzzle client by default.
 	 */
-	public function __construct( ?RequestThrottler $throttler = null, ?ClientInterface $http = null ) {
+	public function __construct( ?RequestThrottler $throttler = null ) {
 		$this->throttler = $throttler ? $throttler : new RequestThrottler( new RequestThrottlerConfiguration() );
-		$this->http      = $http ? $http : new Client();
 	}
 
 	/**
@@ -668,20 +657,16 @@ class ApiClient {
 			$headers['X-Bunq-Client-Signature'] = base64_encode( $signature ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- bunq's signature format.
 		}
 
-		$options = array(
-			'headers'         => $headers,
-			'http_errors'     => false,
-			'allow_redirects' => false,
-			'timeout'         => 30,
+		$args = array(
+			'method'      => $method,
+			'headers'     => $headers,
+			'timeout'     => 30,
+			'redirection' => 0,
 		);
 
 		if ( '' !== $body_string ) {
-			$options['headers']['Content-Type'] = 'application/json';
-			$options['body']                    = $body_string;
-		}
-
-		if ( $production ) {
-			$options['curl'] = array( ( defined( 'CURLOPT_PINNEDPUBLICKEY' ) ? CURLOPT_PINNEDPUBLICKEY : 10230 ) => self::PINNED_PUBLIC_KEY_FILE );
+			$args['headers']['Content-Type'] = 'application/json';
+			$args['body']                    = $body_string;
 		}
 
 		$url = ( $production ? self::BASE_URL_PRODUCTION : self::BASE_URL_SANDBOX ) . $path;
@@ -690,11 +675,11 @@ class ApiClient {
 			$this->throttler->ensure_api_limits_are_respected( $path, $method );
 
 			// bunq rejects a request id it saw before, so a retry gets a new one.
-			$options['headers']['X-Bunq-Client-Request-Id'] = bin2hex( random_bytes( 16 ) );
+			$args['headers']['X-Bunq-Client-Request-Id'] = bin2hex( random_bytes( 16 ) );
 
-			$response      = $this->http->request( $method, $url, $options );
-			$status        = $response->getStatusCode();
-			$response_body = (string) $response->getBody();
+			$response      = self::http_request( $url, $args, $production );
+			$status        = (int) wp_remote_retrieve_response_code( $response );
+			$response_body = wp_remote_retrieve_body( $response );
 
 			if ( 429 === $status && $attempt < self::ATTEMPTS ) {
 				Logger::log( 'bunq rate limit hit, retrying in ' . self::RETRY_DELAY . ' seconds (attempt ' . $attempt . ' of ' . self::ATTEMPTS . ')', 'warning' );
@@ -703,7 +688,7 @@ class ApiClient {
 			}
 
 			if ( 200 !== $status ) {
-				throw ApiException::from_response( $status, $response_body, $response->getHeaderLine( 'X-Bunq-Client-Response-Id' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
+				throw ApiException::from_response( $status, $response_body, self::header( $response, 'x-bunq-client-response-id' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
 			}
 
 			break;
@@ -711,7 +696,7 @@ class ApiClient {
 
 		// bunq signs the body of every answer once the installation exchanged keys.
 		if ( $installation ) {
-			$signature = base64_decode( $response->getHeaderLine( 'X-Bunq-Server-Signature' ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- bunq's signature format.
+			$signature = base64_decode( self::header( $response, 'x-bunq-server-signature' ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- bunq's signature format.
 
 			if ( 1 !== openssl_verify( $response_body, (string) $signature, $installation['public_key_server'], OPENSSL_ALGO_SHA256 ) ) {
 				throw new RuntimeException( 'The signature of bunq\'s answer to ' . $method . ' ' . $path . ' is invalid.' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
@@ -725,6 +710,62 @@ class ApiClient {
 		}
 
 		return $decoded['Response'];
+	}
+
+	/**
+	 * Send a request through the WordPress HTTP API. Production requests go out with the public key of api.bunq.com
+	 * pinned on the cURL handle (http_api_curl), so a certificate that is not bunq's is refused before anything is
+	 * sent.
+	 *
+	 * @param string $url        The URL.
+	 * @param array  $args       wp_remote_request() arguments.
+	 * @param bool   $production Whether to pin the public key of api.bunq.com.
+	 * @return array The response.
+	 * @throws TransportException When bunq could not be reached or the key could not be pinned.
+	 */
+	private static function http_request( string $url, array $args, bool $production ): array {
+		$pinned = false;
+		$pin    = static function ( $handle, $parsed_args, $request_url ) use ( $url, &$pinned ) {
+			if ( $request_url === $url ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_setopt -- The WordPress HTTP API has no option for key pinning.
+				$pinned = curl_setopt( $handle, defined( 'CURLOPT_PINNEDPUBLICKEY' ) ? CURLOPT_PINNEDPUBLICKEY : 10230, self::PINNED_PUBLIC_KEY_FILE );
+			}
+		};
+
+		if ( $production ) {
+			add_action( 'http_api_curl', $pin, 10, 3 );
+		}
+
+		try {
+			$response = wp_remote_request( $url, $args );
+		} finally {
+			remove_action( 'http_api_curl', $pin, 10 );
+		}
+
+		if ( is_wp_error( $response ) ) {
+			throw new TransportException( 'bunq could not be reached: ' . $response->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is shown.
+		}
+
+		// ponytail: fails closed after the fact when WordPress did not use cURL (ext-curl is required, and cURL is
+		// the first transport WordPress tries), refusing the answer of an unpinned request.
+		if ( $production && ! $pinned ) {
+			throw new TransportException( 'The request to bunq was not sent through cURL, so the public key of api.bunq.com could not be pinned.' );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * A response header as string.
+	 *
+	 * @param array  $response The response.
+	 * @param string $name     The header name, lowercase.
+	 * @return string
+	 */
+	private static function header( array $response, string $name ): string {
+		$value = wp_remote_retrieve_header( $response, $name );
+
+		return is_array( $value ) ? (string) reset( $value ) : (string) $value;
 	}
 
 	/**

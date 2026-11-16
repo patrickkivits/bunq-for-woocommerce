@@ -2,8 +2,6 @@
 
 namespace BunqTest;
 
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Psr7\Request;
 use PatrickKivits\BunqForWooCommerce\Bunq\ApiException;
 use PatrickKivits\BunqForWooCommerce\Gateway\ConnectionHealth;
 use PatrickKivits\BunqForWooCommerce\Gateway\Gateway;
@@ -133,7 +131,7 @@ final class ConnectionHealthTest extends TestCase
     public function testBunqBeingUnreachableIsOnlyShownAfterThreeChecksInARow()
     {
         $this->connectedGateway();
-        $unreachable = new ConnectException('cURL error 28: Operation timed out', new Request('GET', 'https://api.bunq.com/v1/user'));
+        $unreachable = new \PatrickKivits\BunqForWooCommerce\Bunq\TransportException('bunq could not be reached: cURL error 28: Operation timed out');
         $this->bunq->exceptions['check_connection'] = array($unreachable, $unreachable, $unreachable);
 
         $this->health->check();

@@ -25,18 +25,18 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      # The dependencies the release zip ships in vendor/.
-      - name: Install the dependencies
+      # The plugin has no third-party dependencies; vendor/ only holds the Composer autoloader the zip ships.
+      - name: Install the autoloader
         run: composer install --no-dev --no-interaction --no-progress
 
-      - name: Syntax check plugin and dependencies
+      - name: Syntax check the plugin
         run: |
           find . -name '*.php' -not -path './.git/*' -print0 \
             | xargs -0 -n1 -P4 php -l \
             | { ! grep -v 'No syntax errors'; }
 
       # Any notice, including deprecations, fails the step.
-      - name: Load the plugin's API client and the dependencies at runtime
+      - name: Load the plugin's API clients at runtime
         run: |
           php -d error_reporting=E_ALL -d display_errors=1 -r '
             set_error_handler(function ($level, $message, $file, $line) {
@@ -46,14 +46,7 @@ jobs:
             define("ABSPATH", __DIR__ . "/");
             require "vendor/autoload.php";
             \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient::generate_key_pair();
-            new \GuzzleHttp\Client();
-            new \League\OAuth2\Client\Provider\GenericProvider([
-                "clientId" => "id",
-                "clientSecret" => "secret",
-                "redirectUri" => "https://example.com/",
-                "urlAuthorize" => "https://oauth.bunq.com/auth",
-                "urlAccessToken" => "https://api.oauth.bunq.com/v1/token",
-                "urlResourceOwnerDetails" => null,
-            ]);
+            class_exists(\PatrickKivits\BunqForWooCommerce\Bunq\OAuthClient::class) || exit(1);
+            class_exists(\PatrickKivits\BunqForWooCommerce\Bunq\TransportException::class) || exit(1);
             echo "OK\n";
           '

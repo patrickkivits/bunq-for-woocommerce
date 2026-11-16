@@ -9,20 +9,28 @@ use PatrickKivits\BunqForWooCommerce\Bunq\OAuthClient;
  */
 final class OAuthClientTest extends TestCase
 {
-    public function testTheProviderUsesTheSandboxInTestMode()
+    public function testTheAuthorizationUsesTheSandboxInTestMode()
     {
-        $provider = (new OAuthClient())->get_provider('client-id', 'client-secret', 'https://shop.example/settings', true);
+        $url = (new OAuthClient())->get_authorization_url('client-id', 'client-secret', 'https://shop.example/settings', true);
 
-        $this->assertSame('https://oauth.sandbox.bunq.com/auth', $provider->getBaseAuthorizationUrl());
-        $this->assertSame('https://api-oauth.sandbox.bunq.com/v1/token', $provider->getBaseAccessTokenUrl(array()));
+        $this->assertStringStartsWith('https://oauth.sandbox.bunq.com/auth?', $url);
     }
 
-    public function testTheProviderUsesProductionOtherwise()
+    public function testTheTokenRequestGoesToTheSandboxInTestModeAndToProductionOtherwise()
     {
-        $provider = (new OAuthClient())->get_provider('client-id', 'client-secret', 'https://shop.example/settings', false);
+        $urls = array();
+        add_filter('pre_http_request', function ($response, $args, $url) use (&$urls) {
+            $urls[] = strtok($url, '?');
 
-        $this->assertSame('https://oauth.bunq.com/auth', $provider->getBaseAuthorizationUrl());
-        $this->assertSame('https://api.oauth.bunq.com/v1/token', $provider->getBaseAccessTokenUrl(array()));
+            return bunqtest_http_response(200, '{"access_token":"token"}');
+        }, 10, 3);
+
+        foreach (array(true, false) as $testmode) {
+            set_transient((new OAuthClient())->get_state_transient_key(), 'expected-state', HOUR_IN_SECONDS);
+            (new OAuthClient())->get_access_token('client-id', 'client-secret', 'https://shop.example/settings', $testmode, 'code', 'expected-state');
+        }
+
+        $this->assertSame(array('https://api-oauth.sandbox.bunq.com/v1/token', 'https://api.oauth.bunq.com/v1/token'), $urls);
     }
 
     public function testTheStateIsKeptPerUser()

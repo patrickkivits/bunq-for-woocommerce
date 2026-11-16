@@ -162,14 +162,14 @@ Secrets: the API keys and API contexts (which hold the private key and the sessi
 
 The class names of earlier versions (`WC_Bunq_Gateway`, `WC_Bunq_WooCommerce_Block_Checkout`) still resolve to these classes. After adding a class, nothing needs to be regenerated; after changing the `autoload` section of `composer.json`, run `composer dump-autoload` in the repository root.
 
-The `vendor/` directory is not committed. Install the plugin's own dependencies in the repository root, and the development dependencies from `tests/composer.json`, which stay apart so that nothing lands in the `vendor/` directory that ships in the plugin zip:
+The plugin has no third-party dependencies: it talks to bunq through the WordPress HTTP API, and `vendor/` (not committed) only holds the Composer autoloader. Install it in the repository root, and the development dependencies from `tests/composer.json`, which stay apart so that nothing lands in the `vendor/` directory that ships in the plugin zip:
 
 ```
 composer install --no-dev
 composer install --working-dir=tests
 ```
 
-The release workflow builds the zip with the dependencies included; `.github/scripts/build-plugin.sh HEAD build` builds the same plugin folder locally in `build/pay-with-bunq-for-woocommerce/`.
+The release workflow builds the zip with the autoloader included; `.github/scripts/build-plugin.sh HEAD build` builds the same plugin folder locally in `build/pay-with-bunq-for-woocommerce/`.
 
 There are two test suites:
 
