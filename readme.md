@@ -1,3 +1,5 @@
+![Pay with bunq for WooCommerce](.wordpress-org/banner-1544x500.png)
+
 # Pay with bunq for WooCommerce
 
 [![WordPress.org plugin version](https://img.shields.io/wordpress/plugin/v/pay-with-bunq-for-woocommerce)](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/)
