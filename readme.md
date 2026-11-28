@@ -1,5 +1,11 @@
 # Pay with bunq for WooCommerce
 
+[![WordPress.org plugin version](https://img.shields.io/wordpress/plugin/v/pay-with-bunq-for-woocommerce)](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/)
+[![Active installs](https://img.shields.io/wordpress/plugin/installs/pay-with-bunq-for-woocommerce)](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/)
+[![Rating](https://img.shields.io/wordpress/plugin/stars/pay-with-bunq-for-woocommerce)](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/#reviews)
+
+**Install it from the WordPress.org plugin directory: [wordpress.org/plugins/pay-with-bunq-for-woocommerce](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/)**
+
 > `readme.txt` is the readme for the WordPress.org plugin directory; keep its `Stable tag` equal to the plugin version and its changelog up to date with every release.
 
 Contributors: patrickkivits\
@@ -38,14 +44,17 @@ https://bunq-for-woocommerce.patrickkivits.com/
 
 ## Installation
 
-1. Download `pay-with-bunq-for-woocommerce.zip` from the [latest release](https://github.com/patrickkivits/bunq-for-woocommerce/releases/latest/download/pay-with-bunq-for-woocommerce.zip).
-2. In your WordPress admin panel, navigate to **Plugins** > **Add New**.
-3. Click Upload Plugin.
-4. Upload the zip file that you downloaded.
+Install the plugin from the [WordPress.org plugin directory](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/):
+
+1. In your WordPress admin panel, navigate to **Plugins** > **Add New**.
+2. Search for **Pay with bunq for WooCommerce**.
+3. Click **Install Now**, then **Activate**.
+
+Or install it by hand: download `pay-with-bunq-for-woocommerce.zip` from [wordpress.org](https://wordpress.org/plugins/pay-with-bunq-for-woocommerce/) or from the [latest GitHub release](https://github.com/patrickkivits/bunq-for-woocommerce/releases/latest/download/pay-with-bunq-for-woocommerce.zip), then go to **Plugins** > **Add New** > **Upload Plugin** and upload the zip.
 
 ### Updating
 
-Upload the new `pay-with-bunq-for-woocommerce.zip` the same way. WordPress recognises the installed plugin and offers **Replace current with uploaded**, which keeps your settings.
+Installed from wordpress.org, updates show up in WordPress like those of any other plugin. Installed from a zip, upload the new `pay-with-bunq-for-woocommerce.zip` the same way: WordPress recognises the installed plugin and offers **Replace current with uploaded**, which keeps your settings.
 
 Installed before the plugin was renamed (version 2.1.0)? Its folder was `bunq-for-woocommerce`, so WordPress installs the new zip next to it instead of replacing it. Install and activate the new one, then deactivate and delete the old *bunq for WooCommerce* copy. Your settings and the bunq connection are kept.
 
