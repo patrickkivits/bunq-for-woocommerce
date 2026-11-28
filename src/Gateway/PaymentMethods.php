@@ -27,9 +27,10 @@ final class PaymentMethods {
 	const ICON_PATH = 'assets/images/';
 
 	/**
-	 * Every payment method. "id" is what the setting and the checkout form store (keep stable); "bunqme" is the
-	 * value bunq.me expects in its paymentMethod query parameter to open that method directly; "icon" is the logo
-	 * in assets/images (null for none).
+	 * Every payment method. "id" is what the setting and the checkout form store (keep stable); "bunqme" is bunq's
+	 * name for it: the payment_method of a payment request that offers only this method, and the value bunq.me
+	 * expects in its paymentMethod query parameter to open it directly; "icon" is the logo in assets/images (null
+	 * for none).
 	 *
 	 * @return array[] Keys: id, bunqme, description, icon, min, max (null for no maximum).
 	 */

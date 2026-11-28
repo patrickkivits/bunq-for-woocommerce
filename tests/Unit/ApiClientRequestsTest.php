@@ -79,6 +79,24 @@ final class ApiClientRequestsTest extends TestCase
         )), $this->server->body(0));
     }
 
+    public function testAPaymentRequestForOneMethodSetsItOnTheTabItself()
+    {
+        $this->server
+            ->respond(array(array('Id' => array('id' => 55))))
+            ->respond(array(array('BunqMeTab' => array('id' => 55, 'status' => 'WAITING_FOR_PAYMENT', 'bunqme_tab_share_url' => 'https://bunq.me/t/abc', 'payment_method' => 'IDEAL', 'result_inquiries' => array()))));
+
+        $this->client->create_payment_request('24.95', 'EUR', '#1001', 'https://shop.example/return', 456, 'IDEAL');
+
+        $this->assertSame(array(
+            'bunqme_tab_entry' => array(
+                'amount_inquired' => array('value' => '24.95', 'currency' => 'EUR'),
+                'description' => '#1001',
+                'redirect_url' => 'https://shop.example/return',
+            ),
+            'payment_method' => 'IDEAL',
+        ), $this->server->body(0));
+    }
+
     public function testWithoutAnAccountTheFirstActiveBankAccountIsUsedAndRemembered()
     {
         $this->server

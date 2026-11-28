@@ -77,7 +77,7 @@ final class FakeBunqApi extends \PatrickKivits\BunqForWooCommerce\Bunq\ApiClient
         return $this->bankAccounts;
     }
 
-    public function create_payment_request($amount, $currency, $description, $return_url, $monetary_account_bank_id = null)
+    public function create_payment_request($amount, $currency, $description, $return_url, $monetary_account_bank_id = null, $payment_method = null)
     {
         $this->record(__FUNCTION__, func_get_args());
 

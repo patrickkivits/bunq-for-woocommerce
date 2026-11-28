@@ -101,6 +101,7 @@ final class PaymentLinkTest extends TestCase
             '#' . $order->get_order_number(),
             'https://shop.example/checkout/order-received/' . $order->get_id() . '/?key=' . $order->get_order_key(),
             123,
+            null,
         )), $this->bunq->callsTo('create_payment_request'));
         $this->assertSame(56, $order->get_meta('bunq_payment_request_id'));
         $this->assertCount(1, Environment::$sentEmails);
@@ -163,6 +164,19 @@ final class PaymentLinkTest extends TestCase
         $this->assertSame(56, $order->get_meta('bunq_payment_request_id'));
         $this->assertStringContainsString('https://bunq.me/shop/new', Environment::$sentEmails[0]['message']);
         $this->assertSame(array('bunq payment request 55 cancelled', 'bunq payment request 56 created', 'bunq payment link sent to jane@example.com'), $order->notes);
+    }
+
+    public function testAPaymentRequestLimitedToOneMethodIsReplacedByOneForAllMethods()
+    {
+        $this->connectedGateway();
+        $order = $this->orderWithPaymentRequest('24.95');
+        $this->bunq->paymentRequests[55] = $this->activePaymentRequest(55, '24.95') + array('payment_method' => 'IDEAL');
+
+        $this->paymentLink->send($order);
+
+        $this->assertSame(array(array(55, 123)), $this->bunq->callsTo('cancel_payment_request'));
+        $this->assertNull($this->bunq->callsTo('create_payment_request')[0][5]);
+        $this->assertStringContainsString('https://bunq.me/shop/new', Environment::$sentEmails[0]['message']);
     }
 
     public function testAnExpiredPaymentRequestIsReplacedWithoutCancellingTheOrder()
