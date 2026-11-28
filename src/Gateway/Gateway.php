@@ -1048,7 +1048,7 @@ class Gateway extends WC_Payment_Gateway {
 
 			// A second attempt for the same order (the customer came back from bunq.me) reuses the open payment request,
 			// or cancels it: a payment through a forgotten request would not be matched to the order any more.
-			$link = $this->get_payment_link( $order );
+			$link = $this->get_payment_link( $order, $bunqme_payment_method );
 
 			// The customer paid the earlier request already.
 			if ( null === $link['url'] ) {
@@ -1058,8 +1058,8 @@ class Gateway extends WC_Payment_Gateway {
 				);
 			}
 
-			// Direct gateway: bunq.me opens the chosen method straight away when it is passed as ?paymentMethod= (it
-			// used to be a path segment, which bunq.me now ignores).
+			// The payment request offers only the chosen method; ?paymentMethod= also makes bunq.me open it straight
+			// away (it used to be a path segment, which bunq.me now ignores).
 			$redirect = $bunqme_payment_method
 				? add_query_arg( 'paymentMethod', $bunqme_payment_method, $link['url'] )
 				: $link['url'];
@@ -1081,18 +1081,20 @@ class Gateway extends WC_Payment_Gateway {
 	 * Create a bunq.me payment request for the order and remember it on the order: the payment request id for the
 	 * callback and the checks, and a background check as fallback for a callback that never arrives.
 	 *
-	 * @param WC_Order $order The order.
+	 * @param WC_Order    $order          The order.
+	 * @param string|null $payment_method The only method bunq.me offers (bunq's name), null for all of them.
 	 * @return array The share URL ("url") and the id ("id") of the request.
 	 * @throws Throwable When bunq could not be reached or did not return a payment request.
 	 */
-	private function create_order_payment_request( WC_Order $order ): array {
+	private function create_order_payment_request( WC_Order $order, ?string $payment_method = null ): array {
 		$payment_request = $this->call_bunq(
 			fn() => $this->api->create_payment_request(
 				$order->get_total(),
 				$order->get_currency(),
 				'#' . $order->get_order_number(),
 				$this->get_return_url( $order ),
-				$this->get_monetary_account_bank_id()
+				$this->get_monetary_account_bank_id(),
+				$payment_method
 			)
 		);
 
@@ -1128,15 +1130,17 @@ class Gateway extends WC_Payment_Gateway {
 
 	/**
 	 * A bunq.me link the customer can pay the order with: at checkout, and for a payment link the merchant sends (see
-	 * Orders\PaymentLink). The order's payment request is reused while it can still be paid and asks for the order
-	 * total; otherwise it is cancelled and a new one is created.
+	 * Orders\PaymentLink). The order's payment request is reused while it can still be paid, asks for the order
+	 * total and offers the same payment methods; otherwise it is cancelled and a new one is created.
 	 *
-	 * @param WC_Order $order An order that needs payment.
+	 * @param WC_Order    $order          An order that needs payment.
+	 * @param string|null $payment_method The only method bunq.me should offer (bunq's name, such as "IDEAL"), null
+	 *                                    for all of them.
 	 * @return array Keys: "url" (the bunq.me link; null when a payment already came in) and "outcome": "created",
 	 *               "reused", or the outcome of check_payment_status() when a payment already came in.
 	 * @throws Throwable When bunq could not be reached or did not return a payment request.
 	 */
-	public function get_payment_link( $order ) {
+	public function get_payment_link( $order, $payment_method = null ) {
 		$payment_request_id = intval( $order->get_meta( self::META_PAYMENT_REQUEST_ID ) );
 
 		// bunq reported the earlier request as cancelled or expired: it can no longer be paid.
@@ -1160,8 +1164,12 @@ class Gateway extends WC_Payment_Gateway {
 			if ( ! in_array( $status, array( 'CANCELLED', 'EXPIRED' ), true ) ) {
 				$amount = $payment_request['bunqme_tab_entry']['amount_inquired'] ?? null;
 
+				// A request limited to another method (or to one method, where all are wanted now) can't be reused.
+				$offered = ! empty( $payment_request['payment_method'] ) ? (string) $payment_request['payment_method'] : null;
+
 				if ( ! empty( $payment_request['bunqme_tab_share_url'] ) && isset( $amount['value'], $amount['currency'] )
 					&& $amount['currency'] === $order->get_currency() && Money::amounts_match( $amount['value'], $order->get_total() )
+					&& ( $payment_method ? (string) $payment_method : null ) === $offered
 				) {
 					return array(
 						'url'     => (string) $payment_request['bunqme_tab_share_url'],
@@ -1169,7 +1177,7 @@ class Gateway extends WC_Payment_Gateway {
 					);
 				}
 
-				// The order total changed since: the old link must not be paid any more.
+				// The order total or the payment method changed since: the old link must not be paid any more.
 				$this->cancel_payment_request( $payment_request_id, $monetary_account_id );
 				$order->add_order_note(
 					sprintf(
@@ -1181,7 +1189,7 @@ class Gateway extends WC_Payment_Gateway {
 			}
 		}
 
-		$payment_request = $this->create_order_payment_request( $order );
+		$payment_request = $this->create_order_payment_request( $order, $payment_method ? (string) $payment_method : null );
 
 		return array(
 			'url'     => $payment_request['url'],

@@ -36,6 +36,7 @@ final class BunqPaymentFlowTest extends TestCase
             '#' . $order->get_order_number(),
             'https://shop.example/checkout/order-received/' . $order->get_id() . '/?key=' . $order->get_order_key(),
             123,
+            null,
         )), $this->bunq->callsTo('create_payment_request'));
         $this->assertSame(55, $order->get_meta('bunq_payment_request_id'));
         $this->assertSame(array('bunq payment request 55 created'), $order->notes);
@@ -69,7 +70,7 @@ final class BunqPaymentFlowTest extends TestCase
     /**
      * @dataProvider chosenPaymentMethods
      */
-    public function testTheChosenPaymentMethodIsOpenedDirectlyOnBunqMe($posted, $expected_redirect)
+    public function testTheChosenPaymentMethodIsOpenedDirectlyOnBunqMe($posted, $expected_redirect, $expected_method)
     {
         $gateway = $this->authorizedGateway(array('direct_gateway' => 'yes'));
         $_POST['wc_bunq_gateway_payment_method'] = $posted;
@@ -78,17 +79,18 @@ final class BunqPaymentFlowTest extends TestCase
 
         $this->assertSame('success', $result['result']);
         $this->assertSame($expected_redirect, $result['redirect']);
+        $this->assertSame($expected_method, $this->bunq->callsTo('create_payment_request')[0][5]);
     }
 
     public function chosenPaymentMethods()
     {
         return array(
-            'card' => array('card', 'https://bunq.me/shop/24.95/1?paymentMethod=CARD'),
-            'iDEAL' => array('ideal', 'https://bunq.me/shop/24.95/1?paymentMethod=IDEAL'),
-            'Bancontact' => array('bancontact', 'https://bunq.me/shop/24.95/1?paymentMethod=BANCONTACT'),
-            'bunq transfer' => array('bunq-transfer', 'https://bunq.me/shop/24.95/1?paymentMethod=BUNQ_TRANSFER'),
-            'unknown method: bunq.me offers all of them' => array('paypal', 'https://bunq.me/shop/24.95/1'),
-            'slashed input is unslashed first' => array('ide\\al', 'https://bunq.me/shop/24.95/1?paymentMethod=IDEAL'),
+            'card' => array('card', 'https://bunq.me/shop/24.95/1?paymentMethod=CARD', 'CARD'),
+            'iDEAL' => array('ideal', 'https://bunq.me/shop/24.95/1?paymentMethod=IDEAL', 'IDEAL'),
+            'Bancontact' => array('bancontact', 'https://bunq.me/shop/24.95/1?paymentMethod=BANCONTACT', 'BANCONTACT'),
+            'bunq transfer' => array('bunq-transfer', 'https://bunq.me/shop/24.95/1?paymentMethod=BUNQ_TRANSFER', 'BUNQ_TRANSFER'),
+            'unknown method: bunq.me offers all of them' => array('paypal', 'https://bunq.me/shop/24.95/1', null),
+            'slashed input is unslashed first' => array('ide\\al', 'https://bunq.me/shop/24.95/1?paymentMethod=IDEAL', 'IDEAL'),
         );
     }
 
@@ -356,6 +358,48 @@ final class BunqPaymentFlowTest extends TestCase
         $this->assertSame(array('result' => 'success', 'redirect' => 'https://bunq.me/t/55'), $result);
         $this->assertSame(array(), $this->bunq->callsTo('create_payment_request'));
         $this->assertSame(array(), $this->bunq->callsTo('cancel_payment_request'));
+    }
+
+    public function testASecondAttemptWithTheSameMethodReusesTheOpenPaymentRequest()
+    {
+        $gateway = $this->authorizedGateway();
+        $order = Environment::addOrder(array('total' => '24.95', 'meta' => array('bunq_payment_request_id' => 55)));
+        $this->bunq->paymentRequests[55] = $this->openPaymentRequest('24.95') + array('payment_method' => 'IDEAL');
+        $_POST['wc_bunq_gateway_payment_method'] = 'ideal';
+
+        $result = $gateway->process_payment($order->get_id());
+
+        $this->assertSame('https://bunq.me/t/55?paymentMethod=IDEAL', $result['redirect']);
+        $this->assertSame(array(), $this->bunq->callsTo('create_payment_request'));
+        $this->assertSame(array(), $this->bunq->callsTo('cancel_payment_request'));
+    }
+
+    /**
+     * @dataProvider changedPaymentMethods
+     */
+    public function testASecondAttemptWithAnotherMethodCancelsTheOldPaymentRequest($offered, $posted, $expected_method)
+    {
+        $gateway = $this->authorizedGateway();
+        $order = Environment::addOrder(array('total' => '24.95', 'meta' => array('bunq_payment_request_id' => 54)));
+        $this->bunq->paymentRequests[54] = $this->openPaymentRequest('24.95', 54) + array('payment_method' => $offered);
+        if ($posted !== null) {
+            $_POST['wc_bunq_gateway_payment_method'] = $posted;
+        }
+
+        $gateway->process_payment($order->get_id());
+
+        $this->assertSame(array(array(54, 123)), $this->bunq->callsTo('cancel_payment_request'));
+        $this->assertSame($expected_method, $this->bunq->callsTo('create_payment_request')[0][5]);
+        $this->assertSame(55, $order->get_meta('bunq_payment_request_id'));
+    }
+
+    public function changedPaymentMethods()
+    {
+        return array(
+            'iDEAL, now card' => array('IDEAL', 'card', 'CARD'),
+            'iDEAL, now any method' => array('IDEAL', null, null),
+            'any method, now iDEAL' => array(null, 'ideal', 'IDEAL'),
+        );
     }
 
     public function testASecondAttemptForAChangedTotalCancelsTheOldPaymentRequest()

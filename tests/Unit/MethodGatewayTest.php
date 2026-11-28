@@ -181,6 +181,7 @@ final class MethodGatewayTest extends TestCase
         $result = $gateway->process_payment(Environment::addOrder(array('total' => '24.95', 'payment_method' => 'bunq_bancontact'))->get_id());
 
         $this->assertSame(array('result' => 'success', 'redirect' => 'https://bunq.me/shop/24.95/1?paymentMethod=BANCONTACT'), $result);
+        $this->assertSame('BANCONTACT', $bunq->callsTo('create_payment_request')[0][5], 'The payment request offers only that method');
     }
 
     public function testOrdersOfMethodGatewaysAreCheckedLikeThoseOfTheBunqGateway()

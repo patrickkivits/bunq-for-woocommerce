@@ -225,28 +225,33 @@ class ApiClient {
 	/**
 	 * Create a bunq.me payment request.
 	 *
-	 * @param string   $amount              Amount.
-	 * @param string   $currency            Currency.
-	 * @param string   $description         Shown to the payer.
-	 * @param string   $return_url          Where bunq.me sends the payer after paying.
-	 * @param int|null $monetary_account_id The receiving account, null for the default account.
+	 * @param string      $amount              Amount.
+	 * @param string      $currency            Currency.
+	 * @param string      $description         Shown to the payer.
+	 * @param string      $return_url          Where bunq.me sends the payer after paying.
+	 * @param int|null    $monetary_account_id The receiving account, null for the default account.
+	 * @param string|null $payment_method      The only method bunq.me offers for it (bunq's name, such as "IDEAL"),
+	 *                                         null to offer all of them.
 	 * @return array The share URL ("url"), the id ("id") and the account ("monetary_account_id") of the request.
 	 */
-	public function create_payment_request( $amount, $currency, $description, $return_url, $monetary_account_id = null ) {
-		$response = $this->request(
-			'POST',
-			$this->account_path( $monetary_account_id, 'bunqme-tab' ),
-			array(
-				'bunqme_tab_entry' => array(
-					'amount_inquired' => array(
-						'value'    => (string) $amount,
-						'currency' => $currency,
-					),
-					'description'     => $description,
-					'redirect_url'    => $return_url,
+	public function create_payment_request( $amount, $currency, $description, $return_url, $monetary_account_id = null, $payment_method = null ) {
+		$body = array(
+			'bunqme_tab_entry' => array(
+				'amount_inquired' => array(
+					'value'    => (string) $amount,
+					'currency' => $currency,
 				),
-			)
+				'description'     => $description,
+				'redirect_url'    => $return_url,
+			),
 		);
+
+		// A field of the tab itself, not of its entry (bunq rejects it there as superfluous).
+		if ( $payment_method ) {
+			$body['payment_method'] = (string) $payment_method;
+		}
+
+		$response = $this->request( 'POST', $this->account_path( $monetary_account_id, 'bunqme-tab' ), $body );
 
 		// Only the id comes back; the share URL is in the payment request itself.
 		$payment_request = $this->get_payment_request( self::id( $response ), $monetary_account_id );

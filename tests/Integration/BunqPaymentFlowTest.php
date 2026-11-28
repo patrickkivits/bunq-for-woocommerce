@@ -33,7 +33,7 @@ final class BunqPaymentFlowTest extends TestCase
         $result = $this->gateway->process_payment($order->get_id());
 
         $this->assertSame(array('result' => 'success', 'redirect' => 'https://bunq.me/shop/24.95/1'), $result);
-        $this->assertSame(array(array('24.95', 'EUR', '#' . $order->get_order_number(), $this->gateway->get_return_url($order), 123)), $this->bunq->callsTo('create_payment_request'));
+        $this->assertSame(array(array('24.95', 'EUR', '#' . $order->get_order_number(), $this->gateway->get_return_url($order), 123, null)), $this->bunq->callsTo('create_payment_request'));
 
         $order = wc_get_order($order->get_id());
         $this->assertSame('55', (string) $order->get_meta('bunq_payment_request_id'));
