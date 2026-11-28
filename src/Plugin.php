@@ -30,7 +30,7 @@ final class Plugin {
 	/**
 	 * The plugin version; matches the Version header of the main plugin file.
 	 */
-	const VERSION = '2.2.0';
+	const VERSION = '2.3.0';
 
 	/**
 	 * The text domain.

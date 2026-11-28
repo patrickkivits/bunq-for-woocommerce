@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, bunq, ideal, bancontact
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.2.0
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -138,6 +138,10 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 
 == Changelog ==
 
+= 2.3.0 =
+* A payment request for a chosen payment method now offers only that method on bunq.me. A customer who comes back and picks another method gets a new payment request for it, and a payment link sent from the order screen still offers every method.
+* New banner and icon for the plugin page on wordpress.org.
+
 = 2.2.0 =
 * The plugin talks to bunq through the WordPress HTTP API and no longer bundles Guzzle or league/oauth2-client; it has no third-party libraries left. Production calls still pin the public key of api.bunq.com, now on WordPress' cURL transport.
 
@@ -248,6 +252,9 @@ The bunq.me payment page is hosted by bunq and follows the language of the custo
 * Errors from bunq during the OAuth setup are shown instead of silently ignored.
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+bunq.me now offers only the payment method the customer chose at checkout. No need to connect again.
 
 = 2.2.0 =
 Uses the WordPress HTTP API instead of bundled libraries. No change in behavior; no need to connect again.
